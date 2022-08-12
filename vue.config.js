@@ -2,7 +2,7 @@
 
 module.exports = {
   productionSourceMap: false,
-  publicPath: '/insdot-web/build/',
+  publicPath: '/insdot-web/dist/',
   devServer: {
     disableHostCheck: true,
     headers: {
