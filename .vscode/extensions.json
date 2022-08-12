@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "octref.vetur",
+    "dbeaumer.vscode-eslint",
+    "mrmlnc.vscode-scss",
+    "streetsidesoftware.code-spell-checker",
+    "steoates.autoimport",
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  // 控制字体,todo,精简
+  "editor.tabSize": 2,
+  // "editor.insertSpaces": true,
+  // "editor.cursorSmoothCaretAnimation": true,
+  "editor.detectIndentation": false, // 防止自动缩进
+  "editor.formatOnSave": true, // 自动fix
+  "editor.formatOnPaste": true, // 自动fix
+  "files.autoSave": "off", // 离开页面自动保存
+  // "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
+  // "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  // "javascript.format.insertSpaceAfterCommaDelimiter": false,
+  // "javascript.validate.enable": false, // standar
+  "javascript.format.enable": false, // standar
+  "files.associations": {
+    "*.vue": "vue"
+  },
+  // "html.format.endWithNewline": true,
+  // "vetur.validation.script": true,
+  // "vetur.validation.template": false,
+  // // ===========================================
+  // // ================ Vetur ====================
+  // // ===========================================
+  // "vetur.experimental.templateInterpolationService": true,
+  "vetur.format.options.tabSize": 2,
+  "vetur.format.defaultFormatter.html": "js-beautify-html", // 模版格式，必须
+  "vetur.format.defaultFormatter.scss": "prettier", // todo: 语法待定
+  "vetur.format.defaultFormatter.css": "prettier", // todo: 语法待定
+  "vetur.format.defaultFormatter.ts": "none", // 默认让eslint负责ts语法
+  "vetur.format.defaultFormatter.js": "none", // 默认让eslint负责js语法
+  // "vetur.languageFeatures.codeActions": false,
+  "vetur.format.defaultFormatterOptions": { // 排版细化规则
+    "js-beautify-html": {
+      "wrap_attributes": "force-aligned",
+      "wrap_attributes_indent_size": "2",
+      "brace_style": "end-expand",
+      "end_with_newline": true,
+      "indent_inner_html": true,
+    }
+  },
+  // "typescript.updateImportsOnFileMove.enabled": "always",
+  // "javascript.updateImportsOnFileMove.enabled": "always",
+  // "workbench.sideBar.location": "left",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  },
+  "[vue]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  },
+  "eslint.alwaysShowStatus": true, // 未知
+  "eslint.validate": [ // 未知
+    "javascript",
+    "typescript",
+    "reacttypescript",
+    "reactjavascript",
+    "html",
+    "vue"
+  ],
+  "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
+  "typescript.format.insertSpaceAfterConstructor": true,
+  "javascript.format.insertSpaceAfterConstructor": true,
+}
