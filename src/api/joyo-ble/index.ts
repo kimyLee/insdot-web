@@ -42,11 +42,42 @@ import { sendCommand } from '@/api/web-ble/web-ble-server'
 
 // 控制灯效
 export async function bleSetLight (data: { colors: number[], bright: number }) { // todo: params ide提示
+  data.colors = data.colors.map((e: any) => {
+    if (typeof (e) === 'string' && e.indexOf('#') >= 0) {
+      e = e.replace('#', '0x')
+    }
+    return Number(e)
+  })
+  console.log(data.colors, 'bleSetLight')
   const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, data)
   // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
   // handleSendCommandWithoutRsp(params)
   sendCommand(params)
 }
+// const clearAllLightFn = (str: string) => {
+//   const arr = JSON.parse(JSON.stringify(Array(12).fill(0x000000)))
+//   bleSetLight({
+//     colors: arr,
+//     bright: 1,
+//   })
+//   return bleSetLight(JSON.parse(str))
+// }
+export async function clearAllLight () { // todo: params ide提示
+  const arr = JSON.parse(JSON.stringify(Array(12).fill(0x000000)))
+  const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, {
+    colors: arr,
+    bright: 1,
+  })
+  sendCommand(params)
+}
+
+// 控制灯效动画
+// export async function bleSetLight (data: { colors: number[], bright: number }) { // todo: params ide提示
+//   const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, data)
+//   // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
+//   // handleSendCommandWithoutRsp(params)
+//   sendCommand(params)
+// }
 
 // 使能摇晃
 // export async function enableShake () { // todo: params ide提示

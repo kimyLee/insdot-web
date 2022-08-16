@@ -6,7 +6,7 @@
   "editor.detectIndentation": false, // 防止自动缩进
   "editor.formatOnSave": true, // 自动fix
   "editor.formatOnPaste": true, // 自动fix
-  "files.autoSave": "off", // 离开页面自动保存
+  "files.autoSave": "onFocusChange", // 离开页面自动保存
   // "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
   // "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   // "javascript.format.insertSpaceAfterCommaDelimiter": false,

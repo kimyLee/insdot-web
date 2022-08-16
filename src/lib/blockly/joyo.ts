@@ -26,6 +26,14 @@ export default {
       kind: 'block',
       type: 'set_all_light_color',
     },
+    {
+      kind: 'block',
+      type: 'set_light_animation',
+    },
+    {
+      kind: 'block',
+      type: 'clear_light',
+    },
     // {
     //   kind: 'block',
     //   type: 'colour_picker',

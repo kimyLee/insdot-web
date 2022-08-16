@@ -7,7 +7,7 @@
               @click="navigatorBack()">
           Back
         </span>
-        <span class="title"
+        <!-- <span class="title"
               style="margin-left: 20px;font-size: 14px"
               @click="preSaveCode">
           预览代码
@@ -16,10 +16,10 @@
               style="font-size: 14px"
               @click="generateCode">
           生成
-        </span>
+        </span> -->
         <span class="title"
               :class="{'active': currentState === 'spy'}"
-              style="font-size: 14px"
+              style="font-size: 14px;margin-left: 16px;"
               @click="switchCode('spy')">
           spy game
         </span>
@@ -45,6 +45,10 @@
               @click="openDocs">
           帮助文档
         </span>
+        <span class="title header-btn"
+              @click="openGameDocs">
+          游戏指南
+        </span>
 
         <span class="title header-btn delete"
               @click="clearCanvas">
@@ -66,6 +70,7 @@
     </div>
     <div id="blocklyDiv" />
     <BlocklyDoc v-model:visible="visible" />
+    <GameDoc v-model:visible="gameVisible" />
   </div>
 </template>
 
@@ -88,7 +93,8 @@ import {
   watch,
   computed,
 } from 'vue'
-import { blePlayMusic, bleSetLight, bleSetSingleLight } from '@/api/joyo-ble/index'
+import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/api/joyo-ble/index'
+import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
 import Blockly from 'blockly' // todo: 拆解
 import basicCategories from '@/lib/blockly/toolbox'
 import preDefine, { pureCanvas } from '@/lib/blocks/preBlock'
@@ -97,6 +103,7 @@ import testCode from '@/lib/blocks/testCode'
 import '@/lib/blocks/index'
 import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
 import BlocklyDoc from '@/components/BlocklyDoc.vue' // @ is an alias to /src
+import GameDoc from '@/components/GameDoc.vue' // @ is an alias to /src
 
 // import * as Blockly from 'blockly/core'
 // import 'blockly/blocks'
@@ -125,6 +132,7 @@ export default defineComponent({
   name: 'BleUsage',
   components: {
     BlocklyDoc,
+    GameDoc,
   },
   setup () {
     // @ts-ignore
@@ -136,6 +144,7 @@ export default defineComponent({
       runStatus: false,
       currentState: 'local',
       visible: false,
+      gameVisible: false,
     })
     let timer = null as any
     let workspace = null as any
@@ -162,6 +171,10 @@ export default defineComponent({
 
     const openDocs = () => {
       state.visible = true
+    }
+
+    const openGameDocs = () => {
+      state.gameVisible = true
     }
 
     const clearCanvas = () => {
@@ -220,6 +233,8 @@ export default defineComponent({
     // 暂停运行代码
     const stopRun = () => {
       // runCode
+      clearAnimation()
+      clearAllLight()
       clearInterval(timer)
       myInterpreter = null
       state.runStatus = false
@@ -232,9 +247,21 @@ export default defineComponent({
         while (new Date().getTime() < start + delay * 1000);
       }
       const bleSetLightFn = (str: string) => {
-        console.log(str)
         return bleSetLight(JSON.parse(str))
       }
+
+      // 执行内置灯光动画
+      const bleSetLightAnimationFn = (type: string, time: number, color: number) => {
+        // console.log(str)
+        bleSetLightAnimation(type, time, color)
+        // return
+      }
+
+      // 清除所有灯光事件
+      const clearAllLightFn = () => {
+        return clearAllLight()
+      }
+
       // var wrapper = function alert (text: string) {
       //   return window.alert(arguments.length ? text : '')
       // }
@@ -252,6 +279,12 @@ export default defineComponent({
 
       interpreter.setProperty(globalObject, 'bleSetLight',
         interpreter.createNativeFunction(bleSetLightFn))
+
+      interpreter.setProperty(globalObject, 'clearAllLight',
+        interpreter.createNativeFunction(clearAllLightFn))
+
+      interpreter.setProperty(globalObject, 'bleSetLightAnimation',
+        interpreter.createNativeFunction(bleSetLightAnimationFn))
     }
 
     function runButton () {
@@ -361,6 +394,7 @@ export default defineComponent({
       preSaveCode,
       clearCanvas,
       openDocs,
+      openGameDocs,
       connect,
       loadCode,
       navigatorBack,

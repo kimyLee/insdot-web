@@ -90,6 +90,63 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: '',
     helpUrl: '',
   },
+  {
+    type: 'set_light_animation',
+    message0: 'set light animation %1 last %2 seconds with color %3',
+    args0: [
+      {
+        type: 'field_dropdown',
+        name: 'animation',
+        options: [
+          [
+            '跑马灯',
+            'run',
+          ],
+          [
+            '呼吸',
+            'breath',
+          ],
+          [
+            '闪烁',
+            'star',
+          ],
+          [
+            '炸弹',
+            'boom',
+          ],
+          // [
+          //   '五彩斑斓',
+          //   'color',
+          // ],
+        ],
+      },
+      {
+        type: 'field_number',
+        name: 'NAME',
+        value: 0,
+        min: 0,
+      },
+      {
+        type: 'field_input',
+        name: 'color',
+        text: '0xffffff',
+      },
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
+  {
+    type: 'clear_light',
+    message0: 'clear all light',
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
 ])
 
 Blockly.Blocks.lists_create_with_row = {
@@ -239,6 +296,12 @@ Blockly.JavaScript.set_light = function (block: any) {
   const variable_light = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('light'), 'VARIABLE')
 
   return 'bleSetLight(JSON.stringify({colors:' + variable_light + ',bright:1}));\n'
+  // return 'bleSetLight(JSON.stringify({colors:' + variable_light + '.map(function (e) {' +
+  //   "if (typeof (e) === 'string') {" +
+  //   "e = e.replace('#', '')" +
+  //   '}' +
+  //   'return Number(e);' +
+  //   '}),bright:1}));\n'
 }
 
 Blockly.JavaScript.set_all_light = function (block: any) {
@@ -278,9 +341,15 @@ Blockly.JavaScript.set_all_light_color = function (block: any) {
   const arr = JSON.parse(JSON.stringify(Array(12).fill(number_r * 256 * 256 + number_g * 256 + number_b)))
 
   return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
+}
 
-  // var colour_name = block.getFieldValue('NAME')
-  // // TODO: Assemble JavaScript into code variable.
-  // const code = '...;\n'
-  // return code
+Blockly.JavaScript.set_light_animation = function (block: any) {
+  const dropdown_animation = block.getFieldValue('animation')
+  const number_name = block.getFieldValue('NAME')
+  const text_color = block.getFieldValue('color')
+  // TODO: Assemble JavaScript into code variable.
+  return `bleSetLightAnimation('${dropdown_animation}', ${number_name}, ${text_color});\n`
+}
+Blockly.JavaScript.clear_light = function (block: any) {
+  return 'clearAllLight();\n'
 }
