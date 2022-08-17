@@ -27,8 +27,8 @@ Blockly.defineBlocksWithJsonArray([
         name: 'NAME',
         value: 1,
         min: 0,
-        max: 10,
-        precision: 1,
+        max: 100,
+        precision: 0,
       },
     ],
     previousStatement: null,
@@ -53,6 +53,45 @@ Blockly.defineBlocksWithJsonArray([
     tooltip: '',
     helpUrl: '',
   },
+  {
+    type: 'printany',
+    message0: '显示 %1',
+    args0: [
+      {
+        type: 'input_value',
+        name: 'NAME',
+      },
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
+  {
+    type: 'consolelog',
+    message0: 'print value of  %1',
+    args0: [
+      {
+        type: 'field_variable',
+        name: 'NAME',
+        variable: 'item',
+      },
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
+  {
+    type: 'date_now',
+    message0: '当前时间（毫秒）',
+    output: 'Number',
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
 ])
 
 Blockly.JavaScript.setUp = function (block: any) {
@@ -70,6 +109,23 @@ Blockly.JavaScript.consolelog = function (block: any) {
   const variable_name = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
   return 'print("' + variable_name + '", JSON.stringify(' + variable_name + '));\n'
 }
+Blockly.JavaScript.printany = function (block: any) {
+  // const number_name = block.getFieldValue('NAME')
+  const value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC)
+  // TODO: Assemble JavaScript into code variable.
+  console.log(value_name)
+  const code = 'print(' + value_name + ');\n'
+  return code
+}
+Blockly.JavaScript.date_now = function (block: any) {
+  return ['getDateNow()', Blockly.JavaScript.ORDER_NONE]
+}
+
+// Blockly.JavaScript['date_now'] = function (block) {
+//   // TODO: Assemble JavaScript into code variable.
+//   var code = '...;\n';
+//   return code
+// }
 
 // Blockly.defineBlocksWithJsonArray([
 //   {

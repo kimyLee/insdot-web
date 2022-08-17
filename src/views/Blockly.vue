@@ -7,16 +7,16 @@
               @click="navigatorBack()">
           Back
         </span>
-        <!-- <span class="title"
+        <span class="title"
               style="margin-left: 20px;font-size: 14px"
               @click="preSaveCode">
-          预览代码
+          预览
         </span>
         <span class="title"
               style="font-size: 14px"
               @click="generateCode">
           生成
-        </span> -->
+        </span>
         <span class="title"
               :class="{'active': currentState === 'spy'}"
               style="font-size: 14px;margin-left: 16px;"
@@ -39,7 +39,7 @@
       <div>
         <span class="title header-btn"
               @click="connect">
-          {{ connectStatus ? 'Connected' : 'connect JOYO' }}
+          {{ connectStatus ? 'Connected' : 'connect' }}
         </span>
         <span class="title header-btn"
               @click="openDocs">
@@ -52,7 +52,7 @@
 
         <span class="title header-btn delete"
               @click="clearCanvas">
-          clear all
+          clear
         </span>
         <span class="title header-btn"
               @click="saveCode">
@@ -60,7 +60,7 @@
         </span>
         <span class="title header-btn"
               @click="loadCode">
-          Load Saved
+          Load
         </span>
         <span class="title header-btn run"
               @click="runCode">
@@ -268,8 +268,14 @@ export default defineComponent({
       var wrapper = function print () {
         return console.log(...arguments)
       }
+      var wrapperDate = function getDateNow () {
+        return Date.now()
+      }
       interpreter.setProperty(globalObject, 'print',
         interpreter.createNativeFunction(wrapper))
+
+      interpreter.setProperty(globalObject, 'getDateNow',
+        interpreter.createNativeFunction(wrapperDate))
 
       interpreter.setProperty(globalObject, 'sleepFn',
         interpreter.createNativeFunction(sleepFn))

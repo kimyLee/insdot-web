@@ -8,10 +8,6 @@ export default {
     },
     {
       kind: 'block',
-      type: 'wait_second',
-    },
-    {
-      kind: 'block',
       type: 'play_audio',
     },
     {
@@ -41,6 +37,18 @@ export default {
     {
       kind: 'block',
       type: 'consolelog',
+    },
+    {
+      kind: 'block',
+      type: 'printany',
+    },
+    {
+      kind: 'block',
+      type: 'wait_second',
+    },
+    {
+      kind: 'block',
+      type: 'date_now',
     },
   ],
 }
