@@ -1,6 +1,6 @@
 export default {
   kind: 'category',
-  name: 'variables',
+  name: '变量',
   custom: 'VARIABLE',
   contents: [
   ],

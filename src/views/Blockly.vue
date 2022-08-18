@@ -41,14 +41,14 @@
               @click="connect">
           {{ connectStatus ? 'Connected' : 'connect' }}
         </span>
-        <span class="title header-btn"
+        <!-- <span class="title header-btn"
               @click="openDocs">
           帮助文档
         </span>
         <span class="title header-btn"
               @click="openGameDocs">
           游戏指南
-        </span>
+        </span> -->
 
         <span class="title header-btn delete"
               @click="clearCanvas">
@@ -66,9 +66,43 @@
               @click="runCode">
           {{ !runStatus ? 'Run' : 'Stop' }}
         </span>
+        <a-dropdown overlay-class-name="dropdown">
+          <a class="title header-btn"
+             @click.prevent>
+            更多
+
+          </a>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item>
+                <a href="javascript:;"
+                   class="menu-item"
+                   @click="openDocs">帮助文档</a>
+              </a-menu-item>
+              <a-menu-item>
+                <a href="javascript:;"
+                   class="menu-item"
+                   @click="openGameDocs">游戏指南</a>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
       </div>
     </div>
-    <div id="blocklyDiv" />
+    <div class="block-box">
+      <div id="blocklyDiv" />
+      <div class="blockly-info">
+        <p>调试信息台：</p>
+        <p v-for="(item,index) in varInfo"
+           :key="index"
+           class="var-info">
+          {{ item }}
+        </p>
+        <br />
+        <span style="color: #888">{{ debugInfo }}</span>
+      </div>
+    </div>
+
     <BlocklyDoc v-model:visible="visible" />
     <GameDoc v-model:visible="gameVisible" />
   </div>
@@ -105,6 +139,13 @@ import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
 import BlocklyDoc from '@/components/BlocklyDoc.vue' // @ is an alias to /src
 import GameDoc from '@/components/GameDoc.vue' // @ is an alias to /src
 
+import * as Zh from 'blockly/msg/zh-hans'
+
+const CustomZh = {
+  PROCEDURES_DEFNORETURN_TITLE: '跳转到',
+  PROCEDURES_DEFRETURN_TITLE: '跳转到',
+}
+
 // import * as Blockly from 'blockly/core'
 // import 'blockly/blocks'
 
@@ -138,6 +179,7 @@ export default defineComponent({
     // @ts-ignore
     const { proxy } = getCurrentInstance()
     let myInterpreter: any = markRaw({})
+    const preserveVar = ['window', 'self', 'print', 'getDateNow', 'sleepFn', 'blePlayMusic', 'bleSetLight', 'clearAllLight', 'bleSetLightAnimation', 'value', 'OID_change', 'setUp']
     const state = reactive({
       workspace: null,
       connectStatus: false,
@@ -145,12 +187,21 @@ export default defineComponent({
       currentState: 'local',
       visible: false,
       gameVisible: false,
+      varInfo: [] as string[],
+      debugInfo: '',
+      sandBoxStepCount: 0,
+      sandBoxMaxStep: 2000,
     })
     let timer = null as any
     let workspace = null as any
 
     watch(() => bleState.connectStatus, (val) => {
       state.connectStatus = val
+      if (!val) {
+        debugLog('断开连接！', 'system')
+      } else {
+        debugLog('Joyo已连接', 'system')
+      }
     })
 
     const navigatorBack = () => {
@@ -158,6 +209,7 @@ export default defineComponent({
     }
 
     const connect = () => {
+      heartBeat()
       connectJoyo()
       // setTimeout(() => {
       //   state.connectStatus = true
@@ -187,6 +239,10 @@ export default defineComponent({
       const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
       localStorage.setItem('temp', xml)
       alert('save success')
+    }
+
+    function debugLog (str: string, type = 'info') {
+      state.debugInfo = `[${type}]: ` + state.debugInfo + '\n' + str
     }
 
     function switchCode (str: string) {
@@ -233,9 +289,10 @@ export default defineComponent({
     // 暂停运行代码
     const stopRun = () => {
       // runCode
+      state.sandBoxStepCount = 0
       clearAnimation()
       clearAllLight()
-      clearInterval(timer)
+      // clearInterval(timer)
       myInterpreter = null
       state.runStatus = false
     }
@@ -266,6 +323,7 @@ export default defineComponent({
       //   return window.alert(arguments.length ? text : '')
       // }
       var wrapper = function print () {
+        debugLog(arguments[0], 'log')
         return console.log(...arguments)
       }
       var wrapperDate = function getDateNow () {
@@ -299,11 +357,41 @@ export default defineComponent({
       }
     }
 
+    function getVariables (allkeys: string[], obj: any) { // 获取沙盒中的变量
+      return allkeys.filter((item: string) => {
+        return preserveVar.indexOf(item) === -1 && (typeof obj[item] !== 'object' || (obj[item] && obj[item].class === 'Array'))
+      })
+    }
+
     function nextStep () {
-      if (myInterpreter?.step()) {
-        console.log('nextStep')
-        window.setTimeout(nextStep, 0)
+      try {
+        if (myInterpreter?.step()) {
+          state.sandBoxStepCount++
+          if (state.sandBoxStepCount < state.sandBoxMaxStep) {
+            // const obj = myInterpreter.globalObject.properties
+            // const vars = getVariables(Object.keys(obj), obj)
+            // state.varInfo = vars.map(e => `${e}: ${obj[e] ?? '--'}`)
+            window.setTimeout(nextStep, 0)
+          } else {
+            stopRun()
+            debugLog('未终结的循环，超过最大可执行数', 'error')
+          }
+        }
+      } catch (err: any) {
+        debugLog(err.toString())
+        console.log(err)
       }
+    }
+
+    function heartBeat () {
+      clearInterval(timer)
+      timer = setInterval(() => { // 定时防止休眠
+        console.log('beat')
+        bleSetSingleLight(11, 0x000000)
+      }, 20000)
+    }
+    function clearHeartBeat () {
+      clearInterval(timer)
     }
 
     const runCode = async () => {
@@ -311,25 +399,36 @@ export default defineComponent({
         stopRun()
         return
       }
-      clearInterval(timer)
-      timer = setInterval(() => { // 定时防止休眠
-        bleSetSingleLight(11, 0x000000)
-      }, 20000)
-      // if (!bleState.connectStatus) {
-      //   alert('connect JOYO first pls')
-      //   return
-      // }
+      state.varInfo = []
+      state.debugInfo = ''
+      // clearInterval(timer)
+      // timer = setInterval(() => { // 定时防止休眠
+      //   bleSetSingleLight(11, 0x000000)
+      // }, 20000)
+      if (!bleState.connectStatus) {
+        debugLog('JOYO未连接', 'system')
+      }
       if (workspace) {
-        const code = Blockly.JavaScript.workspaceToCode(workspace)
-        // const code = testCode
-        // console.log(code)
+        let code = Blockly.JavaScript.workspaceToCode(workspace) as string
+        const codeArr = code.split('\n\n')
+        const newCodeArr = codeArr.filter((i) => {
+          const item = i.replace(/\n/g, '')
+          return item.indexOf('function') === 0 ||
+          item.indexOf('// ') === 0 ||
+          item.indexOf('var ') === 0
+        })
+        code = newCodeArr.join('\n')
+        // code = code + '\n print(a.b.c)' // test error
+        console.log(code)
         try {
           // 新建一个解释器
           myInterpreter = new Interpreter(code, initFunc)
           nextStep()
+          //  myInterpreter.run()
           state.runStatus = true
           // runButton()
-        } catch (err) {
+        } catch (err: any) {
+          debugLog(err.toString())
           console.log(err)
         }
       }
@@ -340,6 +439,8 @@ export default defineComponent({
     })
 
     onMounted(() => {
+      (Blockly as any).setLocale(Zh);
+      (Blockly as any).setLocale(CustomZh)
       Blockly.zelos.ConstantProvider.prototype.FIELD_COLOUR_FULL_BLOCK = false
       workspace = Blockly.inject('blocklyDiv', {
         grid: {
@@ -382,8 +483,21 @@ export default defineComponent({
           if (myInterpreter && myInterpreter.appendCode) {
             const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
             console.log('appendCode', val)
-            myInterpreter.appendCode(`OID_change(${val})`)
-            myInterpreter.run()
+            // 限定 1 到 54
+            if (val > 0 && val < 55) {
+              myInterpreter.appendCode(`OID_change(${val})`)
+              myInterpreter.run()
+              // 获取状态更新
+              const obj = myInterpreter.globalObject.properties
+              const vars = getVariables(Object.keys(obj), obj)
+              state.varInfo = vars.map(e => {
+                if (typeof obj[e] === 'object') {
+                  return e + ':' + JSON.stringify(obj[e]?.properties)
+                } else {
+                  return e + ':' + obj[e] ?? '--'
+                }
+              })
+            }
           }
 
           // window.OID_change && window.OID_change(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
@@ -466,7 +580,10 @@ export default defineComponent({
     background-color: #497cff;
     border-radius: 5px;
     padding: 0 10px;
+    height: 65px;
+    display: inline-block;
     box-sizing: border-box;
+
     &.delete {
       background-color: red;
     }
@@ -475,6 +592,37 @@ export default defineComponent({
     }
     &:active {
       opacity: 0.7;
+    }
+  }
+}
+.dropdown {
+  .menu-item {
+    font-size: 20px;
+    padding: 15px 10px;
+  }
+}
+.block-box {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  display: flex;
+  .blockly-info {
+    width: 300px;
+    text-align: left;
+    color: #444;
+    font-size: 20px;
+    background: #fff;
+    padding: 20px;
+    box-sizing: border-box;
+    border-left: 1px solid #ccc;
+    .var-info {
+      width: 100%;
+      overflow: auto;
+      padding: 0;
+      margin: 0;
+      &:not(:last-child) {
+        border-bottom: 1px solid #ccc;
+      }
     }
   }
 }

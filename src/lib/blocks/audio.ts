@@ -5,7 +5,8 @@ import Blockly from 'blockly'
 Blockly.defineBlocksWithJsonArray([
   {
     type: 'play_audio',
-    message0: 'play audio %1',
+    // message0: 'play audio %1',
+    message0: '播放 %1 音效',
     args0: [
       {
         type: 'field_dropdown',

@@ -40,6 +40,10 @@ import { sendCommand } from '@/api/web-ble/web-ble-server'
 //   return handleSendCommandWithoutRsp(params)
 // }
 
+function sleep (ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 // 控制灯效
 export async function bleSetLight (data: { colors: number[], bright: number }) { // todo: params ide提示
   data.colors = data.colors.map((e: any) => {
@@ -48,20 +52,13 @@ export async function bleSetLight (data: { colors: number[], bright: number }) {
     }
     return Number(e)
   })
-  console.log(data.colors, 'bleSetLight')
   const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, data)
   // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
   // handleSendCommandWithoutRsp(params)
   sendCommand(params)
+  // await sleep(50)
 }
-// const clearAllLightFn = (str: string) => {
-//   const arr = JSON.parse(JSON.stringify(Array(12).fill(0x000000)))
-//   bleSetLight({
-//     colors: arr,
-//     bright: 1,
-//   })
-//   return bleSetLight(JSON.parse(str))
-// }
+
 export async function clearAllLight () { // todo: params ide提示
   const arr = JSON.parse(JSON.stringify(Array(12).fill(0x000000)))
   const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, {
@@ -69,6 +66,7 @@ export async function clearAllLight () { // todo: params ide提示
     bright: 1,
   })
   sendCommand(params)
+  // await sleep(50)
 }
 
 // 控制灯效动画
@@ -91,6 +89,7 @@ export async function bleSetSingleLight (num: number, color: number) { // todo: 
   // nativeApi.log(params)
   // handleSendCommandWithoutRsp(params)
   sendCommand(params)
+  // await sleep(50)
 }
 
 // 控制音效
@@ -100,6 +99,7 @@ export async function blePlayMusic (id: string) { // 长度小于4
   // nativeApi.log(params)
   // return handleSendCommandWithoutRsp(params)
   sendCommand(params)
+  // await sleep(50)
 }
 
 // // 准备mp3传输, todo: CommandType 两个参数合并

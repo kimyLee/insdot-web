@@ -21,6 +21,14 @@ const naviga: any = window.navigator
 // function toLowerCase (str: string) {
 //   return str.toLowerCase()
 // }
+function handleDisconnect () {
+  console.log('断开连接')
+  writeCharacteristic = null
+  notifyCharacteristic = null
+  gattServer = null
+  commandService = null
+  bleState.connectStatus = false
+}
 
 export function connectJoyo () {
   console.log('Connecting...')
@@ -35,6 +43,10 @@ export function connectJoyo () {
     })
       .then((device: any) => {
         console.log('Connecting to GATT Server...')
+        // 断连监听
+        device.addEventListener('gattserverdisconnected', () => {
+          handleDisconnect()
+        })
         return device.gatt.connect()
       })
       .then((server: any) => {
@@ -61,6 +73,8 @@ export function connectJoyo () {
         console.log('> Found notice characteristic')
         notifyCharacteristic = characteristic
         bleState.connectStatus = true
+        // 设置断连监听
+
         return notifyCharacteristic.startNotifications().then(() => {
           console.log('> Notifications started')
           notifyCharacteristic.addEventListener('characteristicvaluechanged',

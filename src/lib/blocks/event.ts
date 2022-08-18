@@ -4,7 +4,8 @@ import Blockly from 'blockly'
 Blockly.defineBlocksWithJsonArray([
   {
     type: 'setUp',
-    message0: 'setup %1 %2',
+    // message0: 'setup %1 %2',
+    message0: '程序开始时 %1 %2',
     args0: [
       {
         type: 'input_dummy',
@@ -20,7 +21,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'wait_second',
-    message0: 'wait %1 second',
+    // message0: 'wait %1 second',
+    message0: '等待 %1 秒',
     args0: [
       {
         type: 'field_number',
@@ -39,7 +41,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'consolelog',
-    message0: 'print value of  %1',
+    // message0: 'print value of  %1',
+    message0: '输出 %1 的值',
     args0: [
       {
         type: 'field_variable',
@@ -70,7 +73,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'consolelog',
-    message0: 'print value of  %1',
+    // message0: 'print value of  %1',
+    message0: '输出 %1 的值',
     args0: [
       {
         type: 'field_variable',

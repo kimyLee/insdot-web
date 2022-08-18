@@ -5,7 +5,8 @@ import Blockly from 'blockly'
 Blockly.defineBlocksWithJsonArray([
   {
     type: 'set_light',
-    message0: 'set lights with array %1',
+    // message0: 'set lights with array %1',
+    message0: '用数组 %1 设置灯光',
     args0: [
       {
         type: 'field_variable',
@@ -21,7 +22,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'set_all_light',
-    message0: 'set lights with color %1',
+    // message0: 'set lights with color %1',
+    message0: '用颜色 %1 设置所有灯光',
     args0: [
       {
         type: 'field_input',
@@ -37,7 +39,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'set_all_light_color',
-    message0: 'set lights with color R: %1 G: %2 B: %3',
+    // message0: 'set lights with color R: %1 G: %2 B: %3',
+    message0: '用颜色 R: %1 G: %2 B: %3 设置所有灯光',
     args0: [
       {
         type: 'field_number',
@@ -72,7 +75,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'list_include',
-    message0: 'list %1 including item %2',
+    // message0: 'list %1 including item %2',
+    message0: '数组 %1 是否包含 %2 子项',
     args0: [
       {
         type: 'field_variable',
@@ -92,7 +96,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'set_light_animation',
-    message0: 'set light animation %1 last %2 seconds with color %3',
+    // message0: 'set light animation %1 last %2 seconds with color %3',
+    message0: '播放动画 %1 持续 %2 秒，主题色为 %3',
     args0: [
       {
         type: 'field_dropdown',
@@ -140,7 +145,8 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'clear_light',
-    message0: 'clear all light',
+    // message0: 'clear all light',
+    message0: '清除所有灯光',
     previousStatement: null,
     nextStatement: null,
     colour: 230,
