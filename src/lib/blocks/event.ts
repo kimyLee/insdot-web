@@ -5,7 +5,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'setUp',
     // message0: 'setup %1 %2',
-    message0: '程序开始时 %1 %2',
+    message0: 'start game %1 %2',
     args0: [
       {
         type: 'input_dummy',
@@ -22,7 +22,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'wait_second',
     // message0: 'wait %1 second',
-    message0: '等待 %1 秒',
+    message0: 'wait %1 second',
     args0: [
       {
         type: 'field_number',
@@ -42,7 +42,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'consolelog',
     // message0: 'print value of  %1',
-    message0: '输出 %1 的值',
+    message0: 'print %1 ',
     args0: [
       {
         type: 'field_variable',
@@ -58,7 +58,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'printany',
-    message0: '显示 %1',
+    message0: 'print %1',
     args0: [
       {
         type: 'input_value',
@@ -74,7 +74,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'consolelog',
     // message0: 'print value of  %1',
-    message0: '输出 %1 的值',
+    message0: 'print %1 的值',
     args0: [
       {
         type: 'field_variable',
@@ -90,7 +90,7 @@ Blockly.defineBlocksWithJsonArray([
   },
   {
     type: 'date_now',
-    message0: '当前时间（毫秒）',
+    message0: 'current time（毫秒）',
     output: 'Number',
     colour: 230,
     tooltip: '',

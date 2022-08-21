@@ -38,6 +38,14 @@
       </div>
       <div>
         <span class="title header-btn"
+              @click="spy">
+          运行spy
+        </span>
+        <span class="title header-btn"
+              @click="openGameDocs">
+          运行cube
+        </span>
+        <span class="title header-btn"
               @click="connect">
           {{ connectStatus ? 'Connected' : 'connect' }}
         </span>
@@ -131,6 +139,7 @@ import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/a
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
 import Blockly from 'blockly' // todo: 拆解
 import basicCategories from '@/lib/blockly/toolbox'
+import spy from '@/lib/spy'
 import preDefine, { pureCanvas, runSample } from '@/lib/blocks/preBlock'
 import preDefinePuzzle from '@/lib/blocks/preBlockPuzzle'
 import testCode from '@/lib/blocks/testCode'
@@ -160,6 +169,7 @@ declare global {
     interface Window {
       oidChange: any;
       OID_change: any;
+      lastOID: any;
       workspace: any;
       blePlayMusic: any;
       bleSetLight: any;
@@ -439,8 +449,8 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      (Blockly as any).setLocale(Zh);
-      (Blockly as any).setLocale(CustomZh)
+      // (Blockly as any).setLocale(Zh);
+      // (Blockly as any).setLocale(CustomZh)
       Blockly.zelos.ConstantProvider.prototype.FIELD_COLOUR_FULL_BLOCK = false
       workspace = Blockly.inject('blocklyDiv', {
         grid: {
@@ -476,29 +486,40 @@ export default defineComponent({
       // Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(xml));
 
       window.Blockly = Blockly
-      window.workspace = workspace;
+      window.workspace = workspace
+      window.lastOID = -1;
 
       (window as any).handleNotifyEvent = (msg: number[]) => {
         if (msg.length === 11 && msg[2] === 0x05 && msg[3] === 0xB1 && msg[4] === 0x04) {
-          if (myInterpreter && myInterpreter.appendCode) {
-            const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
-            console.log('appendCode', val)
-            // 限定 1 到 54
-            if (val > 0 && val < 55) {
-              myInterpreter.appendCode(`OID_change(${val})`)
-              myInterpreter.run()
-              // 获取状态更新
-              const obj = myInterpreter.globalObject.properties
-              const vars = getVariables(Object.keys(obj), obj)
-              state.varInfo = vars.map(e => {
-                if (typeof obj[e] === 'object') {
-                  return e + ':' + JSON.stringify(obj[e]?.properties)
-                } else {
-                  return e + ':' + obj[e] ?? '--'
-                }
-              })
-            }
+          const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+          console.log('appendCode', val)
+          // 限定 1 到 54
+          if (val > 0 && val < 55 && val !== window.lastOID) {
+            window.lastOID = val
+            window.OID_change && window.OID_change(val)
           }
+          // if (myInterpreter && myInterpreter.appendCode) {
+          //   const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+          //   console.log('appendCode', val)
+          //   // 限定 1 到 54
+          //   if (val > 0 && val < 55 && val !== window.lastOID) {
+          //     window.lastOID = val
+          //     myInterpreter.appendCode(`OID_change(${val})`)
+          //     myInterpreter.run()
+          //     // 获取参数状态
+          //     const obj = myInterpreter.globalObject.properties
+          //     const vars = getVariables(Object.keys(obj), obj)
+          //     state.varInfo = vars.map(e => {
+          //       if (typeof obj[e] === 'object') {
+          //         return e + ':' + JSON.stringify(obj[e]?.properties)
+          //       } else {
+          //         return e + ':' + obj[e] ?? '--'
+          //       }
+          //     })
+          //     console.log(val, '444')
+          //     window.OID_change && window.OID_change(val)
+          //   }
+          // }
 
           // window.OID_change && window.OID_change(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
         }
@@ -519,6 +540,7 @@ export default defineComponent({
       loadCode,
       navigatorBack,
       switchCode,
+      spy,
 
     }
   },
