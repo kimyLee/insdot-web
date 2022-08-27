@@ -1,4 +1,4 @@
-// export default '<xml xmlns="https://developers.google.com/blockly/xml"><variables><variable id="?3U;%e-F`beKTnGkyWPA">value</variable></variables><block type="setUp" id="hYtIewSkz:6WqAz~P5lt" x="90" y="50"></block><block type="procedures_defnoreturn" id=":1.cYyqLE85HpPfX8DcK" x="90" y="450"><mutation><arg name="value" varid="?3U;%e-F`beKTnGkyWPA"></arg></mutation><field name="NAME">OID_change</field><comment pinned="false" h="80" w="160">Describe this function...</comment></block></xml>'
+// export default '<xml xmlns="https://developers.google.com/blockly/xml"><variables><variable id="?3U;%e-F`beKTnGkyWPA">value</variable></variables><block type="setUp" id="hYtIewSkz:6WqAz~P5lt" x="90" y="50"></block><block type="procedures_defnoreturn" id=":1.cYyqLE85HpPfX8DcK" x="90" y="450"><mutation><arg name="value" varid="?3U;%e-F`beKTnGkyWPA"></arg></mutation><field name="NAME">When_JOYO_Read</field><comment pinned="false" h="80" w="160">Describe this function...</comment></block></xml>'
 
 export default `
 var number, value, currentQuestion, currentLight, inputCode, answer, i;
@@ -41,8 +41,8 @@ function showLightLength () {
 }
 
 // Describe this function...
-function OID_change (value) {
-  print("OID_change", value);
+function When_JOYO_Read (value) {
+  print("When_JOYO_Read", value);
 
   if (value >= 801 || value <= 816) {
     getLock(value);

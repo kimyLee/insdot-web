@@ -22,6 +22,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Blockly',
     component: () => import(/* webpackChunkName: "art" */ '@/views/Blockly.vue'),
   },
+  {
+    path: '/js-editor',
+    name: 'JsEditor',
+    component: () => import(/* webpackChunkName: "art" */ '@/views/Monaco.vue'),
+  },
 ]
 
 const router = createRouter({

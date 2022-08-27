@@ -37,14 +37,11 @@
         </span>
       </div>
       <div>
-        <span class="title header-btn"
+        <!-- <span class="title header-btn"
               @click="spy">
           运行spy
-        </span>
-        <span class="title header-btn"
-              @click="openGameDocs">
-          运行cube
-        </span>
+        </span> -->
+
         <span class="title header-btn"
               @click="connect">
           {{ connectStatus ? 'Connected' : 'connect' }}
@@ -92,6 +89,12 @@
                    class="menu-item"
                    @click="openGameDocs">游戏指南</a>
               </a-menu-item>
+              <a-menu-item>
+                <a href="javascript:;"
+                   class="menu-item"
+                   style="color: red;"
+                   @click="recoverStatus">Recover</a>
+              </a-menu-item>
             </a-menu>
           </template>
         </a-dropdown>
@@ -101,10 +104,10 @@
       <div id="blocklyDiv" />
       <div class="blockly-info">
         <p>调试信息台：</p>
-        <p v-for="(item,index) in varInfo"
-           :key="index"
+        <p v-for="(item,key) in varInfo"
+           :key="key"
            class="var-info">
-          {{ item }}
+          {{ key }}:{{ JSON.stringify(item || '') || '--' }}
         </p>
         <br />
         <span style="color: #888">{{ debugInfo }}</span>
@@ -168,7 +171,7 @@ const Interpreter = window.Interpreter
 declare global {
     interface Window {
       oidChange: any;
-      OID_change: any;
+      When_JOYO_Read: any;
       lastOID: any;
       workspace: any;
       blePlayMusic: any;
@@ -189,18 +192,24 @@ export default defineComponent({
     // @ts-ignore
     const { proxy } = getCurrentInstance()
     let myInterpreter: any = markRaw({})
-    const preserveVar = ['window', 'self', 'print', 'getDateNow', 'sleepFn', 'blePlayMusic', 'bleSetLight', 'clearAllLight', 'bleSetLightAnimation', 'value', 'OID_change', 'setUp']
+    const preserveVar = ['window', 'self', 'print', 'getDateNow', 'sleepFn', 'blePlayMusic', 'bleSetLight', 'clearAllLight', 'bleSetLightAnimation', 'value', 'When_JOYO_Read', 'setUp']
     const state = reactive({
       workspace: null,
       connectStatus: false,
+      recoverFlag: false,
       runStatus: false,
       currentState: 'local',
       visible: false,
       gameVisible: false,
-      varInfo: [] as string[],
+      // varInfo: [] as string[],
+      varInfo: {} as Record<string, any>,
+      varInfoOrigin: {} as Record<string, any>,
+      OIDstatus: [] as number[], // 识别的OID序列
       debugInfo: '',
       sandBoxStepCount: 0,
-      sandBoxMaxStep: 2000,
+      sandBoxMaxStep: 8000,
+      sandBoxMaxSetupTime: 5000,
+      sandBoxMaxSetupBegin: 0,
     })
     let timer = null as any
     let workspace = null as any
@@ -300,6 +309,7 @@ export default defineComponent({
     const stopRun = () => {
       // runCode
       state.sandBoxStepCount = 0
+      state.sandBoxMaxSetupBegin = 0
       clearAnimation()
       clearAllLight()
       // clearInterval(timer)
@@ -326,6 +336,7 @@ export default defineComponent({
 
       // 清除所有灯光事件
       const clearAllLightFn = () => {
+        clearAnimation()
         return clearAllLight()
       }
 
@@ -373,10 +384,74 @@ export default defineComponent({
       })
     }
 
+    // function saveStatus () { // 保存当前数据快照，在识别OID前触发
+    //   // localStorage.setItem('state', JSON.stringify(state.varInfoOrigin))
+    //   // localStorage.setItem('lastOID', window.lastOID)
+    // }
+
+    function pushOIDStatus (val: number) { // 第二种识别方式，记录每一个OID的操作序列，恢复时候依次执行
+      state.OIDstatus.push(val)
+      localStorage.setItem('OIDstatus', JSON.stringify(state.OIDstatus))
+    }
+
+    function sleep (ms: number) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    async function recoverStatus () { // 根据oid status 重置当前快照
+      if (!bleState.connectStatus) {
+        alert('JOYO未连接')
+        return
+      }
+      state.recoverFlag = true
+      // const stacks = (localStorage.getItem('OIDstatus') || []) as number[]
+      // stopRun()
+      // await sleep(100)
+      // runCode()
+      // setTimeout(async () => {
+      //   for (let i = 0; i < stacks.length; i++) {
+      //     handleInterpreterOIDEvt(stacks[i])
+      //     await sleep(50)
+      //   }
+      //   state.recoverFlag = false // 恢复结束
+      // }, 300)
+    }
+
+    function handleInterpreterOIDEvt (val: number) {
+      state.sandBoxStepCount = 0
+      console.log('handleInterpreterOIDEvt', val, Date.now())
+      if (myInterpreter && myInterpreter?.appendCode) {
+        myInterpreter.appendCode(`When_JOYO_Read(${val})`)
+        // nextStep()
+        myInterpreter.run()
+        // 获取参数状态
+        const obj = myInterpreter.globalObject.properties
+        const vars = getVariables(Object.keys(obj), obj)
+        for (let i = 0; i < vars.length; i++) {
+          const e = vars[i]
+          // state.varInfoOrigin = obj[e]
+          if (typeof obj[e] === 'object') {
+            state.varInfo[e] = (obj[e]?.properties)
+          } else {
+            state.varInfo[e] = obj[e]
+          }
+        }
+      }
+    }
+
+    function triggerLastOID () { // 触发最后一次OID信号
+      //
+    }
+
     function nextStep () {
+      // if (!state.sandBoxMaxSetupBegin) {
+      //   state.sandBoxMaxSetupBegin = Date.now()
+      // }
       try {
         if (myInterpreter?.step()) {
           state.sandBoxStepCount++
+          // const lastTime = Date.now() - state.sandBoxMaxSetupBegin
+          // if (state.sandBoxStepCount < state.sandBoxMaxStep && (lastTime < (state.sandBoxMaxSetupTime * 1000))) {
           if (state.sandBoxStepCount < state.sandBoxMaxStep) {
             // const obj = myInterpreter.globalObject.properties
             // const vars = getVariables(Object.keys(obj), obj)
@@ -409,12 +484,12 @@ export default defineComponent({
         stopRun()
         return
       }
-      state.varInfo = []
+      state.varInfo = {}
+      // state.varInfoOrigin = {}
+      window.lastOID = -1
+      state.OIDstatus = []
       state.debugInfo = ''
-      // clearInterval(timer)
-      // timer = setInterval(() => { // 定时防止休眠
-      //   bleSetSingleLight(11, 0x000000)
-      // }, 20000)
+
       if (!bleState.connectStatus) {
         debugLog('JOYO未连接', 'system')
       }
@@ -428,8 +503,6 @@ export default defineComponent({
           item.indexOf('var ') === 0
         })
         code = newCodeArr.join('\n')
-        // code = code + '\n print(a.b.c)' // test error
-        console.log(code)
         try {
           // 新建一个解释器
           myInterpreter = new Interpreter(code, initFunc)
@@ -461,13 +534,7 @@ export default defineComponent({
         },
         toolbox: basicCategories,
         renderer: 'zelos',
-        // theme: {
-        //   FIELD_COLOUR_FULL_BLOCK: false,
-        //   startHats: true,
-        //   colourPrimary: '#4a148c',
-        //   colourSecondary: '#AD7BE9',
-        //   colourTertiary: '#CDB6E9',
-        // },
+
       } as any)
 
       Blockly.JavaScript.addReservedWords('code') // 获取js代码
@@ -484,44 +551,50 @@ export default defineComponent({
 
       // load xml
       // Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(xml));
-
+      state.OIDstatus = JSON.parse(localStorage.getItem('OIDstatus') || '[]')
       window.Blockly = Blockly
       window.workspace = workspace
       window.lastOID = -1;
 
       (window as any).handleNotifyEvent = (msg: number[]) => {
         if (msg.length === 11 && msg[2] === 0x05 && msg[3] === 0xB1 && msg[4] === 0x04) {
-          const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
-          console.log('appendCode', val)
-          // 限定 1 到 54
-          if (val > 0 && val < 55 && val !== window.lastOID) {
-            window.lastOID = val
-            window.OID_change && window.OID_change(val)
-          }
-          // if (myInterpreter && myInterpreter.appendCode) {
-          //   const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
-          //   console.log('appendCode', val)
-          //   // 限定 1 到 54
-          //   if (val > 0 && val < 55 && val !== window.lastOID) {
-          //     window.lastOID = val
-          //     myInterpreter.appendCode(`OID_change(${val})`)
-          //     myInterpreter.run()
-          //     // 获取参数状态
-          //     const obj = myInterpreter.globalObject.properties
-          //     const vars = getVariables(Object.keys(obj), obj)
-          //     state.varInfo = vars.map(e => {
-          //       if (typeof obj[e] === 'object') {
-          //         return e + ':' + JSON.stringify(obj[e]?.properties)
-          //       } else {
-          //         return e + ':' + obj[e] ?? '--'
-          //       }
-          //     })
-          //     console.log(val, '444')
-          //     window.OID_change && window.OID_change(val)
-          //   }
-          // }
+          if (myInterpreter && myInterpreter.appendCode) {
+            const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+            console.log('appendCode', val)
+            // 限定 1 到 54
+            if (val > 0 && val < 55 && val !== window.lastOID) { // todo: 通用码
+              window.lastOID = val
+              pushOIDStatus(val)
+              // // 在oid识别和run code前执行状态保存，恢复保存时候手动触发最后一次oid事件
+              // // 确保恢复时候 When_JOYO_Read 代码能够执行
+              handleInterpreterOIDEvt(val)
 
-          // window.OID_change && window.OID_change(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+              // myInterpreter.appendCode(`When_JOYO_Read(${val})`)
+              // myInterpreter.run()
+              // // 获取参数状态
+              // const obj = myInterpreter.globalObject.properties
+              // const vars = getVariables(Object.keys(obj), obj)
+              // for (let i = 0; i < vars.length; i++) {
+              //   const e = vars[i]
+              //   // state.varInfoOrigin = obj[e]
+              //   if (typeof obj[e] === 'object') {
+              //     state.varInfo[e] = (obj[e]?.properties)
+              //   } else {
+              //     state.varInfo[e] = obj[e]
+              //   }
+              // }
+
+              // -----------------------
+              // state.varInfo = vars.map(e => {
+              //   if (typeof obj[e] === 'object') {
+              //     return e + ':' + JSON.stringify(obj[e]?.properties)
+              //   } else {
+              //     return e + ':' + obj[e] ?? '--'
+              //   }
+              // })
+              // window.When_JOYO_Read && window.When_JOYO_Read(val)
+            }
+          }
         }
       }
     })
@@ -541,6 +614,7 @@ export default defineComponent({
       navigatorBack,
       switchCode,
       spy,
+      recoverStatus,
 
     }
   },
@@ -629,6 +703,11 @@ export default defineComponent({
   flex: 1;
   display: flex;
   .blockly-info {
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 20px;
+    height: calc(100vh - 80px);
+
     width: 300px;
     text-align: left;
     color: #444;

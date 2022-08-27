@@ -32,7 +32,7 @@
       如何实现识别ID逻辑
     </h2>
     <p class="content">
-      JOYO"识别"的核心逻辑在于"OID_change"(识别到)事件 <br />
+      JOYO"识别"的核心逻辑在于"When_JOYO_Read"(识别到)事件 <br />
       <img class="docs-img"
            src="~@/assets/oid.jpeg" />
       该block会在每次JOYO识别到的id变化时候，立刻执行该block里面内容，并且变量value值即为此时OID识别到的值<br />

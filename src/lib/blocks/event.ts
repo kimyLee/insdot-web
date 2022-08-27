@@ -117,7 +117,6 @@ Blockly.JavaScript.printany = function (block: any) {
   // const number_name = block.getFieldValue('NAME')
   const value_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC)
   // TODO: Assemble JavaScript into code variable.
-  console.log(value_name)
   const code = 'print(' + value_name + ');\n'
   return code
 }

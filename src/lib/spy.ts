@@ -6,7 +6,7 @@ import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
 
 declare global {
   interface Window {
-    OID_change: any;
+    When_JOYO_Read: any;
   }
 }
 
@@ -51,7 +51,7 @@ export default function spy () {
     //
   }
 
-  window.OID_change = function (value: number) {
+  window.When_JOYO_Read = function (value: number) {
     // 录入题目
 
     console.log('oid', value)

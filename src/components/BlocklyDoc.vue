@@ -27,7 +27,7 @@
       <img class="docs-img"
            style="width: 200px"
            src="~@/assets/setup.png" />
-      2. OID_change: OID变化事件：<br />
+      2. When_JOYO_Read: OID变化事件：<br />
       每次识别到的OID变化时候，都会触发执行的事件，变量value即为识别到的码值<br />
       码值对应贴纸上的数字
       <img class="docs-img"
