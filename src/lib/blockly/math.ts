@@ -1,6 +1,9 @@
 export default {
   kind: 'category',
   name: '运算',
+  cssConfig: {
+    container: 'category-math',
+  },
   contents: [
     {
       kind: 'block',

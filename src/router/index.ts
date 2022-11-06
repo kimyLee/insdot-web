@@ -5,7 +5,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Home',
-    component: () => import(/* webpackChunkName: "art" */ '@/views/Blockly.vue'),
+    component: () => import(/* webpackChunkName: "art" */ '@/views/ProjectList.vue'),
   },
   // {
   //   path: '/test',
@@ -16,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/no-permit',
     name: 'NoPermit',
     component: () => import(/* webpackChunkName: "art" */ '@/views/NoPermit.vue'),
+  },
+  {
+    path: '/project-list',
+    name: 'ProjectList',
+    component: () => import(/* webpackChunkName: "art" */ '@/views/ProjectList.vue'),
   },
   {
     path: '/blockly',

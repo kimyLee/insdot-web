@@ -6,4 +6,5 @@ declare module '*.vue' {
 }
 
 declare module 'blockly/msg/zh-hans'
+declare module 'blockly/msg/en'
 

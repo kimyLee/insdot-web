@@ -1,6 +1,9 @@
 export default {
   kind: 'category',
   name: '字符串',
+  cssConfig: {
+    container: 'category-string',
+  },
   contents: [
 
     {

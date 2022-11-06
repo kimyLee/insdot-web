@@ -78,8 +78,13 @@ export async function clearAllLight () { // todo: params ide提示
 // }
 
 // 使能摇晃
+export async function enableShake () { // todo: params ide提示
+  // handleSendCommandWithoutRsp([0x55, 0xA1, 0x05, 0xB1, 0x05, 0x01, 0x00])
+}
+
+// 使能摇晃
 // export async function enableShake () { // todo: params ide提示
-//   handleSendCommandWithoutRsp([0x55, 0xA1, 0x05, 0xB1, 0x05, 0x01, 0x00])
+//   // handleSendCommandWithoutRsp([0x55, 0xA1, 0x05, 0xB1, 0x05, 0x01, 0x00])
 // }
 
 // 控制单个灯效

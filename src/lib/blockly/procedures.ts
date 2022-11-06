@@ -2,6 +2,9 @@ export default {
   kind: 'category',
   name: '函数',
   custom: 'PROCEDURE',
+  cssConfig: {
+    container: 'category-func',
+  },
   contents: [
     // {
     //   kind: 'block',

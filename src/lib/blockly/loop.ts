@@ -1,6 +1,9 @@
 export default {
   kind: 'category',
   name: '循环',
+  cssConfig: {
+    container: 'category-loop',
+  },
   contents: [
     {
       kind: 'block',

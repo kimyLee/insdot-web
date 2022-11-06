@@ -239,7 +239,8 @@ export default defineComponent({
     // }
 
     const handleOIDVal = (num: number) => { // 预先处理下OID码, 将8010 ···值映射到 1···
-      return Math.round(num / 10) - 800
+      // return Math.round(num / 10) - 800
+      return num
     }
 
     // 暂停运行代码
@@ -475,7 +476,8 @@ export default defineComponent({
           if (myInterpreter && myInterpreter.appendCode) {
             const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
             // 限定 1 到 54
-            if (val > 0 && val < 55 && val !== window.lastOID) { // todo: 通用码
+            // if (val > 0 && val < 55 && val !== window.lastOID) { // todo: 通用码
+            if (val !== window.lastOID) { // todo: 通用码
               window.lastOID = val
               handleInterpreterOIDEvt(val)
             }

@@ -1,6 +1,9 @@
 export default {
   kind: 'category',
   name: '列表',
+  cssConfig: {
+    container: 'category-list',
+  },
   contents: [
     {
       kind: 'block',

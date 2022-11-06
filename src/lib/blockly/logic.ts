@@ -1,6 +1,9 @@
 export default {
   kind: 'category',
   name: '判断',
+  cssConfig: {
+    container: 'category-logic',
+  },
   contents: [
     // {
     //   kind: 'block',

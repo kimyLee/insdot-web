@@ -5,127 +5,127 @@ import Blockly from 'blockly'
 Blockly.defineBlocksWithJsonArray([
   {
     type: 'play_audio',
-    // message0: 'play audio %1',
-    message0: 'play %1 audio',
+    // message0: 'play %1 audio',
+    message0: '%{BKY_AUDIO_PLAY_AUDIO}',
     args0: [
       {
         type: 'field_dropdown',
         name: 'NAME',
         options: [
           [
-            'win',
+            '%{BKY_AUDIO_WIN}',
             'gwin',
           ],
           [
-            'wrong',
+            '%{BKY_AUDIO_WRONG}',
             'olwh',
           ],
           [
-            'game begin',
+            '%{BKY_AUDIO_GAME_BEGIN_1}',
             'gbeg',
           ],
           [
-            'game begin2',
+            '%{BKY_AUDIO_GAME_BEGIN_2}',
             'pbgn',
           ],
           [
-            'game begin3',
+            '%{BKY_AUDIO_GAME_BEGIN_3}',
             'stat',
           ],
           [
-            'count down',
+            '%{BKY_AUDIO_COUNT_DOWN}',
             'tend',
           ],
           [
-            'count last',
+            '%{BKY_AUDIO_COUNT_LAST}',
             'tala',
           ],
+          // [
+          //   '%{BKY_AUDIO_WIN}',
+          //   'poff',
+          // ],
           [
-            'count last',
-            'poff',
-          ],
-          [
-            'move1',
+            '%{BKY_AUDIO_MOVE_1}',
             'mov1',
           ],
           [
-            'move2',
+            '%{BKY_AUDIO_MOVE_2}',
             'mov2',
           ],
           [
-            'move3',
+            '%{BKY_AUDIO_MOVE_3}',
             'mov3',
           ],
           [
-            'move4',
+            '%{BKY_AUDIO_MOVE_4}',
             'mov4',
           ],
           [
-            'move5',
+            '%{BKY_AUDIO_MOVE_5}',
             'mov5',
           ],
           [
-            'match 1',
+            '%{BKY_AUDIO_MATCH_1}',
             'mat1',
           ],
           [
-            'match 2',
+            '%{BKY_AUDIO_MATCH_2}',
             'mat2',
           ],
           [
-            'match 3',
+            '%{BKY_AUDIO_MATCH_3}',
             'mat3',
           ],
           [
-            'match 4',
+            '%{BKY_AUDIO_MATCH_4}',
             'mat4',
           ],
           [
-            'match 5',
+            '%{BKY_AUDIO_MATCH_5}',
             'mat5',
           ],
           [
-            'hred',
+            '%{BKY_AUDIO_HRED}',
             'hred',
           ],
           [
-            'find nothing',
+            '%{BKY_AUDIO_FIND_NOTHING}',
             'fnon',
           ],
           [
-            'find target',
+            '%{BKY_AUDIO_FIND_TARGET}',
             'fhed',
           ],
           [
-            'find target2',
+            '%{BKY_AUDIO_FIND_TARGET_2}',
             'fbdy',
           ],
           [
-            'check',
+            '%{BKY_AUDIO_CHECK}',
             'chek',
           ],
           [
-            'do',
+            '%{BKY_AUDIO_DO}',
             '01do',
           ],
           [
-            're',
+            '%{BKY_AUDIO_RE}',
             '02re',
           ],
           [
-            'mi',
+            '%{BKY_AUDIO_MI}',
             '03mi',
           ],
           [
-            'fa',
+            '%{BKY_AUDIO_FA}',
             '04fa',
           ],
           [
-            'so',
+            '%{BKY_AUDIO_SO}',
             '05so',
           ],
           [
-            'la',
+            '%{BKY_AUDIO_LA}',
             '06la',
           ],
         ],
