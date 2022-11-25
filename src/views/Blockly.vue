@@ -138,7 +138,7 @@ declare global {
     interface Window {
       oidChange: any;
       When_JOYO_Read: any;
-      lastOID: any;
+      // lastOID: any;
       workspace: any;
       blePlayMusic: any;
       bleSetLight: any;
@@ -345,7 +345,7 @@ export default defineComponent({
 
     function handleInterpreterOIDEvt (val: number) {
       console.log('识别到', val)
-      state.lastOID = val
+      // state.lastOID = val
       state.sandBoxStepCount = 0
       if (myInterpreter && myInterpreter?.appendCode) {
         myInterpreter.appendCode(`When_JOYO_Read(${val})`)
@@ -518,6 +518,8 @@ export default defineComponent({
 
       (window as any).handleNotifyEvent = (msg: number[]) => {
         if (msg.length === 11 && msg[2] === 0x05 && msg[3] === 0xB1 && msg[4] === 0x04) {
+          const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+          state.lastOID = val
           if (myInterpreter && myInterpreter.appendCode) {
             const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
             handleInterpreterOIDEvt(val)
@@ -530,7 +532,7 @@ export default defineComponent({
           } else {
             // 没有连接时候
             if (!state.runStatus) {
-              const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+              // const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
               // window.oidChange(val)
             }
           }

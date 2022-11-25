@@ -3,7 +3,7 @@
     <HeaderNav title="Design tool"
                sub-title="for JOYO Design">
       <a-button key="2">
-        创建程序
+        新建程序
         <template #icon>
           <PlusOutlined />
         </template>
