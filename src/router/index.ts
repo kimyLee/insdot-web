@@ -28,6 +28,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import(/* webpackChunkName: "art" */ '@/views/Blockly.vue'),
   },
   {
+    path: '/check',
+    name: 'Check',
+    component: () => import(/* webpackChunkName: "art" */ '@/views/check.vue'),
+  },
+  {
     path: '/js-editor',
     name: 'JsEditor',
     component: () => import(/* webpackChunkName: "art" */ '@/views/Monaco.vue'),
