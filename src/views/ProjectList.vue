@@ -2,7 +2,8 @@
   <div class="project-list page">
     <HeaderNav title="Design tool"
                sub-title="for JOYO Design">
-      <a-button key="2">
+      <a-button key="2"
+                @click.stop="createProjectPop">
         新建程序
         <template #icon>
           <PlusOutlined />
@@ -11,8 +12,23 @@
       <a-button>
         导入程序
       </a-button>
+      <a-popconfirm title="确定导出所有程序文件到zip吗，此过程较耗时"
+                    ok-text="确定"
+                    placement="bottomRight"
+                    cancel-text="取消"
+                    @confirm="exportAllProgram">
+        <a-button>
+          一键导出
+        </a-button>
+      </a-popconfirm>
     </HeaderNav>
     <div class="container">
+      <div class="warning-tip">
+        <a-alert message="请及时导出程序文件保存到本地，当前数据使用浏览器缓存，避免因不稳定因素而丢失程序"
+                 show-icon
+                 type="warning" />
+      </div>
+
       <transition-group name="fade"
                         class="list-view"
                         tag="div">
@@ -26,10 +42,38 @@
             <span class="title">
               {{ v.name }}
             </span>
+            <!-- 更多选择 -->
+            <div class="bottom-line"
+                 @click.stop>
+              <!-- 下载 -->
+              <vertical-align-bottom-outlined class="bottom-icon download-icon"
+                                              title="下载程序" />
+              <!-- 删除 -->
+              <a-popconfirm title="确定要删除该程序吗?"
+                            ok-text="确定"
+                            cancel-text="取消"
+                            @confirm="handleDelete(v.uuid)">
+                <span class="bottom-icon del-icon">
+                  <delete-outlined title="删除程序" />
+                </span>
+              </a-popconfirm>
+            </div>
           </div>
         </div>
       </transition-group>
     </div>
+
+    <!-- 输入新建程序名弹窗 -->
+    <a-modal v-model:visible="visibleOfCreateProject"
+             :width="360"
+             ok-text="确定"
+             cancel-text="取消"
+             title="创建新程序"
+             @ok="handleOk">
+      <a-input ref="refCreatePopBox"
+               v-model:value="programName"
+               placeholder="程序名" />
+    </a-modal>
   </div>
 </template>
 
@@ -45,18 +89,25 @@ import {
   onUnmounted,
   reactive,
   toRefs,
+  ref,
+  nextTick,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
 
 // import { useStore } from '@/store'
 import HeaderNav from '@/components/HeaderNav.vue'
-import { PlusOutlined, DownloadOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons-vue'
+import { useStore } from 'vuex'
 
 export default defineComponent({
   name: 'Home',
   components: {
     // DownloadOutlined,
+    // EllipsisOutlined,
+    VerticalAlignBottomOutlined,
     PlusOutlined,
+    DeleteOutlined,
     HeaderNav,
   },
 
@@ -67,26 +118,66 @@ export default defineComponent({
 
     const route = useRoute()
     const router = useRouter()
+    const store = useStore()
+    const refCreatePopBox = ref()
 
     const state: any = reactive({
-      projectList: [
-        { uuid: 1, name: '24点', createAt: 1665914070600 },
-        { uuid: 2, name: '倒计时', createAt: 1665914071601 },
-      ],
+      programName: '',
+      visibleOfCreateProject: false,
+      visibleOfExportProject: false,
     })
 
+    const projectList = computed(() => store.state.projectList)
+
     const fetchProjectList = async () => {
-      //
+      store.dispatch('getProject')
     }
 
+    // 创建程序
+    const createProjectPop = () => {
+      state.visibleOfCreateProject = true
+      nextTick(() => {
+        refCreatePopBox.value.focus()
+      })
+    }
+    const createProject = (name: string) => {
+      store.dispatch('createProject', { name })
+    }
+    const handleOk = () => {
+      if (state.programName) {
+        const list = projectList.value
+        // 检查名字是否重复
+        for (let i = list.length; i--;) {
+          if (list[i].name === state.programName) {
+            message.warning('程序名已存在')
+            return
+          }
+        }
+        createProject(state.programName)
+        state.programName = ''
+        state.visibleOfCreateProject = false
+      } else {
+        message.warning('程序名不能为空')
+      }
+    }
     const onProjectClick = (v: { uuid: string }) => {
       router.push(`/blockly?uuid=${v.uuid}`)
+    }
+
+    // 导出程序
+    function exportAllProgram () {
+      console.log('export')
+      // state.visibleOfCreateProject = true
     }
 
     function handleItemClass (v: any) {
       const classList = []
       classList.push('item-color' + ((v.createAt || 0) % 5))
       return classList
+    }
+
+    function handleDelete (uuid: number) {
+      store.dispatch('deleteProject', uuid)
     }
 
     onBeforeMount(async () => {
@@ -98,24 +189,44 @@ export default defineComponent({
     })
 
     onMounted(async () => {
+      fetchProjectList()
       //
     })
 
     return {
       router,
+      refCreatePopBox,
       ...toRefs(state),
-      fetchProjectList,
+      projectList,
+
+      createProjectPop,
+      createProject,
+      handleOk,
+
+      handleDelete,
+
       onProjectClick,
+
+      exportAllProgram,
+
       handleItemClass,
     }
   },
 })
 </script>
 
+<style lang="scss">
+.pop-menu-item {
+  .anticon {
+    font-size: 16px !important;
+  }
+}
+</style>
 <style lang="scss" scoped>
 .project-list {
   .container {
-    padding: 20px;
+    position: relative;
+    // padding: 20px;
     width: 100%;
     height: 100%;
     overflow-x: hidden;
@@ -125,8 +236,9 @@ export default defineComponent({
 
     .list-view {
       position: relative;
-      margin: 0 auto;
+      margin: 0 20px;
       display: flex;
+      flex-wrap: wrap;
 
       .item {
         padding: 20px;
@@ -140,26 +252,12 @@ export default defineComponent({
         color: transparent;
         position: relative;
         transition: transform 0.3s ease;
-        margin: 0 20px;
+        margin: 20px 20px;
         cursor: pointer;
         &:active {
           background-size: 110% 110%;
         }
-        // &.item-color0 {
-        //   background-color: #e96954;
-        // }
-        // &.item-color1 {
-        //   background-color: #61e1a4;
-        // }
-        // &.item-color2 {
-        //   background-color: #61a4e1;
-        // }
-        // &.item-color3 {
-        //   background-color: #e19e61;
-        // }
-        // &.item-color4 {
-        //   background-color: #c36498;
-        // }
+
         .content {
           .title {
             display: block;
@@ -168,8 +266,40 @@ export default defineComponent({
             text-align: left;
             color: #666;
           }
+          .bottom-line {
+            position: absolute;
+            color: #888;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: right;
+            font-size: 24px;
+            // padding: 5px 20px;
+            box-sizing: border-box;
+            .bottom-icon {
+              padding-right: 15px;
+              padding-bottom: 10px;
+            }
+            .download-icon {
+              &:hover {
+                color: #1890ff;
+              }
+            }
+            .del-icon {
+              &:hover {
+                color: red;
+              }
+            }
+          }
         }
       }
+    }
+
+    .warning-tip {
+      // position: absolute;
+      // top: 0;
+      // left: 0;
+      text-align: left;
     }
     // 删掉了fade-leave-to
     .fade-enter {
