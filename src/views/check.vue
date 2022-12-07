@@ -356,6 +356,7 @@ export default defineComponent({
         'NR-HR-198',
         'NR-HR-199',
         'NR-HR-200',
+        'NR-SP-062',
       ],
     })
 
@@ -365,7 +366,7 @@ export default defineComponent({
     const attrs = useAttrs()
 
     const cardNum = computed(() => {
-      if (state.lastOID >= 100532225 && state.lastOID <= 100532461) {
+      if (state.lastOID >= 100532225 && state.lastOID <= 100532462) {
         return state.cardMap[state.lastOID - 100532225]
       } else {
         return 'xx-xx-xx'
