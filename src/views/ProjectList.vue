@@ -9,15 +9,32 @@
           <PlusOutlined />
         </template>
       </a-button>
-      <a-button>
+
+      <!-- <a-button key="2"
+                @click.stop="createProjectPop">
+        新建程序
+        <template #icon>
+          <PlusOutlined />
+        </template>
+      </a-button> -->
+
+      <label class="head-btn"
+             for="listFileInput">
+        <delivered-procedure-outlined />
         导入程序
-      </a-button>
+        <input id="listFileInput"
+               type="file"
+               accept=".jo"
+               hidden="" />
+      </label>
+
       <a-popconfirm title="确定导出所有程序文件到zip吗，此过程较耗时"
                     ok-text="确定"
                     placement="bottomRight"
                     cancel-text="取消"
                     @confirm="exportAllProgram">
         <a-button>
+          <vertical-align-bottom-outlined class="bottom-icon download-icon" />
           一键导出
         </a-button>
       </a-popconfirm>
@@ -47,7 +64,8 @@
                  @click.stop>
               <!-- 下载 -->
               <vertical-align-bottom-outlined class="bottom-icon download-icon"
-                                              title="下载程序" />
+                                              title="下载程序"
+                                              @click="exportProgram(v.name, v.uuid)" />
               <!-- 删除 -->
               <a-popconfirm title="确定要删除该程序吗?"
                             ok-text="确定"
@@ -93,18 +111,21 @@ import {
   nextTick,
 } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+// import type { UploadChangeParam } from 'ant-design-vue'
 import { message } from 'ant-design-vue'
 
 // import { useStore } from '@/store'
 import HeaderNav from '@/components/HeaderNav.vue'
-import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined, DeliveredProcedureOutlined } from '@ant-design/icons-vue'
 import { useStore } from 'vuex'
+import { exportFile } from '@/lib/project/common'
 
 export default defineComponent({
   name: 'Home',
   components: {
     // DownloadOutlined,
     // EllipsisOutlined,
+    DeliveredProcedureOutlined,
     VerticalAlignBottomOutlined,
     PlusOutlined,
     DeleteOutlined,
@@ -120,6 +141,7 @@ export default defineComponent({
     const router = useRouter()
     const store = useStore()
     const refCreatePopBox = ref()
+    const fileList = ref([])
 
     const state: any = reactive({
       programName: '',
@@ -127,7 +149,9 @@ export default defineComponent({
       visibleOfExportProject: false,
     })
 
-    const projectList = computed(() => store.state.projectList)
+    const projectList = computed(() => {
+      return store.getters.projectListByFilter
+    })
 
     const fetchProjectList = async () => {
       store.dispatch('getProject')
@@ -164,10 +188,46 @@ export default defineComponent({
       router.push(`/blockly?uuid=${v.uuid}`)
     }
 
+    function importProgram () { // 从已有程序里倒入
+      //
+    }
+
+    function initFileEvt () {
+      const fileInput = document.getElementById('listFileInput') as HTMLInputElement
+      if (fileInput) {
+        fileInput.addEventListener('change', function selectedFileChanged () {
+          if (this?.files?.length === 0) {
+            return
+          }
+          const files = this?.files
+          const reader = new FileReader()
+          reader.onload = function fileReadCompleted () {
+          // 当读取完成时，内容只在`reader.result`中
+            const name = files?.[0]?.name?.split('.')[0]
+            try {
+              store.dispatch('createProject', { name, content: reader.result })
+            } catch (err) {
+              console.log(err)
+            }
+          }
+          files && reader.readAsText(files[0])
+        })
+      }
+    }
+
     // 导出程序
     function exportAllProgram () {
       console.log('export')
-      // state.visibleOfCreateProject = true
+    }
+
+    // 导出单个程序
+    function exportProgram (name: string, uuid: string) {
+      const content = localStorage.getItem(`block-${uuid}`) // todo: 获取程序详情收归一处
+      if (content) {
+        exportFile(name + '.jo', content)
+      } else {
+        message.warn('导出失败')
+      }
     }
 
     function handleItemClass (v: any) {
@@ -190,6 +250,7 @@ export default defineComponent({
 
     onMounted(async () => {
       fetchProjectList()
+      initFileEvt()
       //
     })
 
@@ -198,6 +259,7 @@ export default defineComponent({
       refCreatePopBox,
       ...toRefs(state),
       projectList,
+      fileList,
 
       createProjectPop,
       createProject,
@@ -208,6 +270,7 @@ export default defineComponent({
       onProjectClick,
 
       exportAllProgram,
+      exportProgram,
 
       handleItemClass,
     }
@@ -224,6 +287,30 @@ export default defineComponent({
 </style>
 <style lang="scss" scoped>
 .project-list {
+  .head-btn {
+    line-height: 1.5715;
+    position: relative;
+    display: inline-block;
+    font-weight: 400;
+    white-space: nowrap;
+    text-align: center;
+    background-image: none;
+    border: 1px solid transparent;
+    box-shadow: 0 2px 0 rgb(0 0 0 / 2%);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    height: 32px;
+    padding: 4px 15px;
+    font-size: 14px;
+    border-radius: 2px;
+    color: rgba(0, 0, 0, 0.85);
+    background: #fff;
+    border-color: #d9d9d9;
+  }
   .container {
     position: relative;
     // padding: 20px;

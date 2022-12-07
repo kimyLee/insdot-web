@@ -13,9 +13,9 @@
       <a-button @click="saveCode">
         Save
       </a-button>
-      <a-button @click="loadCode">
+      <!-- <a-button @click="loadCode">
         Load
-      </a-button>
+      </a-button> -->
       <a-button type="primary"
                 @click="connect">
         {{ connectStatus ? 'Connected' : 'connect' }}
@@ -88,6 +88,8 @@ import {
   BleList,
 } from '@/api/common-type'
 import router from '@/router'
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+
 import {
   defineComponent,
   getCurrentInstance,
@@ -109,7 +111,6 @@ import preDefine, { pureCanvas, runSample } from '@/lib/blocks/preBlock'
 import '@/lib/blocks/index'
 import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
 
-import { useRoute, useRouter } from 'vue-router'
 import HeaderNav from '@/components/HeaderNav.vue'
 
 import * as Zh from 'blockly/msg/zh-hans'
@@ -118,6 +119,7 @@ import * as En from 'blockly/msg/en'
 import '@/style/blockly-category.scss'
 
 import { setLocale } from '@/lib/i18n'
+import { useStore } from 'vuex'
 
 const CustomZh = {
   PROCEDURES_DEFNORETURN_TITLE: '跳转到',
@@ -185,6 +187,8 @@ export default defineComponent({
 
     const route = useRoute()
     const attrs = useAttrs()
+    const store = useStore()
+
     console.log('attrs,', attrs)
 
     watch(() => bleState.connectStatus, (val) => {
@@ -213,7 +217,11 @@ export default defineComponent({
     const saveCode = () => {
       // 保存代码
       const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
-      localStorage.setItem('temp', xml)
+      const uuid = (route.query?.uuid as string) || 'temp'
+      // localStorage.setItem(`block-${uuid}`, xml)
+      // 更新
+      store.dispatch('updateProject', { uuid, content: xml })
+
       alert('save success')
     }
 
@@ -444,7 +452,8 @@ export default defineComponent({
     }
 
     function getContentByUUID (uuid = '') {
-      //
+      const content = localStorage.getItem(`block-${uuid}`) || runSample
+      Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(content) as any)
     }
 
     // 重新绘制当前页面，切换多语言时候使用
@@ -474,14 +483,27 @@ export default defineComponent({
       reRenderCanvas()
     }
 
+    // 路由守卫
+    onBeforeRouteLeave((to, from) => {
+      const uuid = route.query?.uuid as string
+      const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
+      if (uuid) {
+        const content = localStorage.getItem(`block-${uuid}`)
+        if (content !== xml) {
+          if (window.confirm('当前程序未保存，确认离开？')) {
+            return true
+          }
+          return false
+        }
+      }
+      return true
+    })
+
     onUnmounted(() => {
       //
     })
 
     onMounted(() => {
-      // 获取当前游戏内容
-      getContentByUUID(route.query?.uuid as string)
-
       // 切换语言
       toggleLang(localStorage.getItem('lang') || 'en')
 
@@ -500,7 +522,10 @@ export default defineComponent({
 
       Blockly.JavaScript.addReservedWords('code') // 获取js代码
 
-      Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(runSample) as any)
+      // 获取当前ID的程序
+      // 获取当前游戏内容
+      getContentByUUID(route.query?.uuid as string)
+      store.dispatch('getProject') // 获取所有文件
 
       // <xml xmlns="https://developers.google.com/blockly/xml"><variables><variable id="3M(I7I.CjqF~v%Y)w|kA">curOIDVal</variable><variable id="sXCY/+MxMdH?07[tOd^V">answer</variable><variable id="]|IsB:02;4hvk!fc{NYT">word</variable><variable id="60wvtq~HkfMT}_qDr|L5">val</variable><variable id="U|G,nKyM-XG.,u;Xa1UB">wordArr</variable><variable id="@+E[;UI]+F0KR]y$BO{l">wordSet</variable></variables><block type="variables_set" id="h7p:/;,c+qzH-a87**L-" x="77" y="47"><field name="VAR" id="3M(I7I.CjqF~v%Y)w|kA">curOIDVal</field><value name="VALUE"><block type="math_number" id="7`Tkl)|2]+vfnngi*rg@"><field name="NUM">0</field></block></value><next><block type="variables_set" id="jr$Iea!V)1!)U*L+fm1$"><field name="VAR" id="sXCY/+MxMdH?07[tOd^V">answer</field><value name="VALUE"><block type="text" id="=@jug))(48x7c62J/,Y,"><field name="TEXT"></field></block></value><next><block type="variables_set" id="h#}%s/P8!!k_g2J:yGLf"><field name="VAR" id="]|IsB:02;4hvk!fc{NYT">word</field><value name="VALUE"><block type="text" id="avf^rDFLKjk5EN0o31+N"><field name="TEXT"></field></block></value><next><block type="variables_set" id="U1UqV!oA{Aq_DjF%HL78"><field name="VAR" id="U|G,nKyM-XG.,u;Xa1UB">wordArr</field><value name="VALUE"><block type="text" id="%|,*[x-!776L5b^288Fn"><field name="TEXT">abcdefghijklmnopqrstuvwxyz</field></block></value><next><block type="variables_set" id="sjtV#%0~/io*bSrA,Y)W"><field name="VAR" id="@+E[;UI]+F0KR]y$BO{l">wordSet</field><value name="VALUE"><block type="lists_create_with" id=",Lc1u8-(iQRCD#|xkgI#"><mutation items="3"></mutation><value name="ADD0"><block type="text" id="$SOPip}QB]gj~t@~$AdR"><field name="TEXT">about</field></block></value><value name="ADD1"><block type="text" id="+Yuss|+5KDiIQ.h4E_=+"><field name="TEXT">coast</field></block></value><value name="ADD2"><block type="text" id="}7cV?PHb(80CcnVuYZ;I"><field name="TEXT">group</field></block></value></block></value></block></next></block></next></block></next></block></next></block><block type="procedures_defnoreturn" id="R:Xk[Q}P_1nS]UyxUefO" x="73" y="422"><field name="NAME">initGame</field><comment pinned="false" h="80" w="160">Describe this function...</comment><statement name="STACK"><block type="ble_set_audio" id="y.XIAg{s58wsR8.[udtk"><value name="TEXT"><block type="text" id="ND;_dk+1_$AH#[`nDd2:"><field name="TEXT">gbeg</field></block></value><next><block type="variables_set" id="{q1U[l4.p5FH[!I+@Dhh"><field name="VAR" id="sXCY/+MxMdH?07[tOd^V">answer</field><value name="VALUE"><block type="lists_getIndex" id="-OD2TN3*|db#[ubQ1/Ud"><mutation statement="false" at="false"></mutation><field name="MODE">GET</field><field name="WHERE">RANDOM</field><value name="VALUE"><block type="variables_get" id="h@k`j(a;r7n`l#~g;1mu"><field name="VAR" id="@+E[;UI]+F0KR]y$BO{l">wordSet</field></block></value></block></value><next><block type="ble_set_light" id=";R;M;3Y-[.M*}!2h_kA0"><value name="list"><block type="lists_repeat" id="6/g1g.AT_?Y:Iv9DRvK:"><value name="ITEM"><block type="math_number" id="+q((P,#6OJ+M(]`9y}]H"><field name="NUM">0</field></block></value><value name="NUM"><block type="math_number" id="dvnxDqoLM[f1Su5`7A@P"><field name="NUM">12</field></block></value></block></value></block></next></block></next></block></statement></block><block type="procedures_defnoreturn" id="[Z;ax:MWA}Qnx:Y7tsQo" x="74" y="670"><field name="NAME">oidChange</field><comment pinned="false" h="80" w="160">Describe this function...</comment><statement name="STACK"><block type="controls_if" id="x(0]YN/w[~oxfi/@)1,?"><value name="IF0"><block type="logic_compare" id="-5.$ylT]l{+:v(bl!8oU"><field name="OP">EQ</field><value name="A"><block type="variables_get" id="~.1G6ZPh1!44-2dh@rCx"><field name="VAR" id="60wvtq~HkfMT}_qDr|L5">val</field></block></value><value name="B"><block type="math_number" id="I#lmxjtT*;lyMZ#)PT~#"><field name="NUM">126</field></block></value></block></value><statement name="DO0"><block type="procedures_callnoreturn" id="TF*sER]puiCA:_YSVGSv"><mutation name="initGame"></mutation></block></statement><next><block type="lists_setIndex" id="2l+7(-?*|yYxS|R8kTue"><mutation at="true"></mutation><field name="MODE">SET</field><field name="WHERE">FROM_START</field><value name="LIST"><block type="variables_get" id=":G2c/e(*1]#y4!qj$ZiV"><field name="VAR" id="]|IsB:02;4hvk!fc{NYT">word</field></block></value><value name="AT"><block type="variables_get" id="UXw@U37WVXU?ETL+eZ+L"><field name="VAR" id="60wvtq~HkfMT}_qDr|L5">val</field></block></value><value name="TO"><block type="lists_getIndex" id="7N*uUjbC)U,$86LqY!=7"><mutation statement="false" at="true"></mutation><field name="MODE">GET</field><field name="WHERE">FROM_START</field><value name="VALUE"><block type="variables_get" id="+o.F|6=F1!wK{$sy^A0X"><field name="VAR" id="U|G,nKyM-XG.,u;Xa1UB">wordArr</field></block></value><value name="AT"><block type="variables_get" id="e9)X(r^;vp3][93.X2r2"><field name="VAR" id="60wvtq~HkfMT}_qDr|L5">val</field></block></value></block></value></block></next></block></statement></block><block type="procedures_defnoreturn" id="5p}1/mBBAz`VZW=I42?I" x="593" y="660"><field name="NAME">checkAnswer</field><comment pinned="false" h="80" w="160">Describe this function...</comment></block></xml>
 
