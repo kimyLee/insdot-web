@@ -10,14 +10,6 @@
         </template>
       </a-button>
 
-      <!-- <a-button key="2"
-                @click.stop="createProjectPop">
-        新建程序
-        <template #icon>
-          <PlusOutlined />
-        </template>
-      </a-button> -->
-
       <label class="head-btn"
              for="listFileInput">
         <delivered-procedure-outlined />
@@ -120,6 +112,12 @@ import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutl
 import { useStore } from 'vuex'
 import { exportFile } from '@/lib/project/common'
 
+declare global {
+    interface Window {
+      JSZip: any,
+    }
+}
+
 export default defineComponent({
   name: 'Home',
   components: {
@@ -217,7 +215,35 @@ export default defineComponent({
 
     // 导出程序
     function exportAllProgram () {
-      console.log('export')
+      // 初始化一个zip打包对象
+      try {
+        const JSZip = window.JSZip
+        const zip = new JSZip()
+        projectList.value.forEach((project: any) => {
+        // zip包里面不断塞svg文件
+          const content = localStorage.getItem(`block-${project.uuid}`)
+          zip.file(project.name + '.jo', content)
+        })
+        zip.generateAsync({
+          type: 'blob',
+        }).then((content: any) => {
+        // 下载的文件名
+          var filename = 'programs.zip'
+          // 创建隐藏的可下载链接
+          var eleLink = document.createElement('a')
+          eleLink.download = filename
+          eleLink.style.display = 'none'
+          // 下载内容转变成blob地址
+          eleLink.href = URL.createObjectURL(content)
+          // 触发点击
+          document.body.appendChild(eleLink)
+          eleLink.click()
+          // 然后移除
+          document.body.removeChild(eleLink)
+        })
+      } catch {
+        message.error('导出出错')
+      }
     }
 
     // 导出单个程序

@@ -385,8 +385,8 @@ export default defineComponent({
         'NRSS-SV-S09',
         'NRSS-SV-S10',
         'NRSS-SE-001',
-        'NRSS-SE-002',
-        'NRSS-HR-011',
+        'NRSS-SE-002', // 100532552
+        'NRSS-HR-011', // 100532553 - 100532525 = 27
         'NRSS-HR-012',
         'NRSS-HR-013',
         'NRSS-HR-014',
@@ -407,8 +407,8 @@ export default defineComponent({
     const cardNum = computed(() => {
       if (state.lastOID >= 100532225 && state.lastOID <= 100532462) {
         return state.cardMap[state.lastOID - 100532225]
-      } else if (state.lastOID >= 100532526 && state.lastOID <= 100532562) {
-        return state.newYearCardMap[state.lastOID - 100532526]
+      } else if (state.lastOID >= 100532525 && state.lastOID <= 100532562) {
+        return state.newYearCardMap[state.lastOID - 100532525]
       } else {
         return 'xx-xx-xx'
       }
