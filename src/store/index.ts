@@ -1,8 +1,14 @@
-import { createStore } from 'vuex'
+import { InjectionKey } from 'vue'
 
-import { reNameRepeatFile } from '@/lib/project/common'
+import { createStore, useStore as baseUseStore, Store } from 'vuex'
+import type State from '@/store/interface'
 
 import { runSample } from '@/lib/blocks/preBlock'
+
+import ble from './ble'
+import type { BleStateType } from './ble'
+
+export const key: InjectionKey<Store<State>> = Symbol('key')
 
 interface ProjectListItem {
   uuid: number,
@@ -14,7 +20,7 @@ interface ProjectListItem {
 export default createStore({
   state: {
     projectList: [] as ProjectListItem[], // 程序列表
-    currentProject: {} as ProjectListItem, // 当前打开的程序
+    // currentProject: {} as ProjectListItem, // 当前打开的程序
   },
   getters: {
     projectListByFilter (state) {
@@ -35,7 +41,6 @@ export default createStore({
     // todo: 结合TS优化store
     createProject ({ commit, state }, { name, content }) {
       // 确保名称唯一
-      // let maxUuid = 0
       const project = {} as any
       project.name = name
       for (let i = state.projectList.length; i--;) {
@@ -77,15 +82,16 @@ export default createStore({
         }
       }
     },
-
-    updateCurrentProject ({ commit, state }, uuid) { // 更新当前的查看项目
-      for (let i = state.projectList.length; i--;) {
-        if (state.projectList[i].uuid === uuid) {
-          state.currentProject = state.projectList[i]
-        }
-      }
-    },
   },
   modules: {
+    ble,
   },
 })
+
+interface AllStateType extends State {
+  ble: BleStateType,
+}
+
+export function useStore () {
+  return baseUseStore<AllStateType>(key)
+}

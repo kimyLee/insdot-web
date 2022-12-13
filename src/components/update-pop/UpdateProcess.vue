@@ -1,0 +1,402 @@
+<template>
+  <!-- 不同步骤下的升级状态 -->
+  <div>
+    <!-- step1 -->
+    <a-modal v-model:visible="versionPopVisible"
+             :width="360"
+             ok-text="更新版本"
+             cancel-text="我知道了"
+             title="设备信息"
+             @cancel="handleCancel"
+             @ok="handleUpdateJOYO">
+      <div>当前版本号：v1.0.0</div>
+      <div>最新版本: {{ lastVersion }}</div>
+    </a-modal>
+
+    <!-- step2 -->
+  </div>
+
+  <!-- <ContainerDialog ref="containerDialog"
+                   :close-btn="false"
+                   dialog-type="update">
+    <div class="content">
+      <transition name="fade">
+        <div v-if="step === 1"
+             class="con-step">
+          <div class="title">
+            {{ title[0] }}
+          </div>
+          <div class="middle-pic">
+            <div class="icon-update" />
+          </div>
+          <div class="footer">
+            <div class="footer-btn success"
+                 @click="startUpdate">
+              Start
+            </div>
+            <div class="footer-btn fail"
+                 @click="finishUpdate">
+              Close
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="step === 2"
+             class="con-step">
+          <div class="title">
+            {{ title[1] }}
+          </div>
+          <div class="middle-pic updating">
+            <div class="icon-update">
+              <div class="loading" />
+            </div>
+            <div v-if="progress < 100"
+                 class="update-status">
+              transmitting {{ progress }} %
+            </div>
+            <div v-if="progress === 100"
+                 class="update-status">
+              upgrading
+            </div>
+          </div>
+          <div class="footer update">
+            <div class="footer-text">
+              Don`t turn off Joyo.
+            </div>
+            <div class="footer-text">
+              Don`t close the application.
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="step === 3"
+             class="con-step">
+          <div class="title">
+            {{ title[2] }}
+          </div>
+          <div class="middle-pic">
+            <div class="icon-update">
+              <div class="icon-update-success" />
+            </div>
+          </div>
+          <div class="footer">
+            <div class="footer-btn success"
+                 @click="finishUpdate">
+              Go
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="step === 4"
+             class="con-step">
+          <div class="title">
+            {{ title[3] }}
+          </div>
+          <div class="middle-pic">
+            <div class="icon-update" />
+          </div>
+          <div class="footer">
+            <div class="footer-btn fail"
+                 @click="startUpdate">
+              Retry
+            </div>
+            <div class="footer-btn fail"
+                 @click="finishUpdate">
+              OK
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="step === 5"
+             class="con-step">
+          <div class="title step5">
+            {{ title[4] }}
+          </div>
+          <div class="middle-pic">
+            <div class="icon-update" />
+          </div>
+          <div class="footer">
+            <div class="footer-btn fail"
+                 @click="closeToReConnect">
+              OK
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <transition name="fade">
+        <div v-if="step === 6"
+             class="con-step">
+          <div class="title">
+            {{ title[5] }}
+          </div>
+          <div class="middle-pic">
+            <div class="icon-update" />
+          </div>
+          <div class="footer">
+            <div class="footer-btn fail"
+                 @click="startUpdate">
+              Retry
+            </div>
+            <div class="footer-btn fail"
+                 @click="finishUpdate">
+              Close
+            </div>
+          </div>
+        </div>
+      </transition>
+    </div>
+  </ContainerDialog> -->
+</template>
+
+<script>
+import { reactive, ref, toRefs, defineComponent, onMounted, watch, computed } from 'vue'
+// import ContainerDialog from '@/components/dialog/ContainerDialog.vue'
+import { useStore } from 'vuex'
+
+export default defineComponent({
+  components: {
+    // ContainerDialog,
+  },
+  props: {
+    modelValue: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ['start-upgrade', 're-connect', 'update:modelValue'],
+  setup (props, { emit }) {
+    const containerDialog = ref()
+    const state = reactive({
+      versionPopVisible: false,
+      // lastVersion: '',
+      step: 1,
+      title: [
+        'Joyo needs an update',
+        'Updating Joyo',
+        'Update success!',
+        'Update fail!',
+        'Reconnection failed, please connect Joyo manually!',
+        'Update Timeout!',
+      ],
+    })
+
+    const store = useStore()
+
+    const lastVersion = computed(() => { // 看下行否
+      return store.state.ble.lastVersion
+    })
+
+    watch(() => props.modelValue, () => {
+      console.log(props.modelValue)
+      if (props.modelValue) {
+        // 初次打开弹窗：获取固件版本
+        state.versionPopVisible = true
+        store.dispatch('ble/bleGetCurrentVersion')
+      }
+    })
+
+    // 获取当前固件版本号
+    // function fetchCurrentVersion () {
+    //   store.dispatch('')
+    // }
+
+    const open = () => {
+      containerDialog.value.open()
+    }
+    // step 1 的操作
+    const resetUpdate = () => {
+      state.step = 1
+    }
+    const startUpdate = () => {
+      emit('start-upgrade')
+      state.step = 2
+    }
+    const updateSuccess = () => {
+      state.step = 3
+    }
+    const updateFail = () => {
+      state.step = 4
+    }
+    const updateTimeout = () => {
+      state.step = 6
+    }
+    const updateHandle = () => {
+      state.step = 5
+    }
+    const finishUpdate = () => {
+      containerDialog.value.close()
+    }
+    const closeToReConnect = () => {
+      containerDialog.value.close()
+      emit('re-connect')
+    }
+
+    function handleCancel () {
+      emit('update:modelValue', false)
+    }
+    function handleUpdateJOYO () {
+      store.dispatch('ble/bleGetCurrentVersion')
+    }
+
+    onMounted(() => {
+      // state.versionPopVisible = true
+      //
+    })
+    return {
+      ...toRefs(state),
+      // modelValue,
+      // containerDialog,
+
+      handleUpdateJOYO,
+      handleCancel,
+
+      lastVersion,
+
+      open,
+      resetUpdate,
+      startUpdate,
+      finishUpdate,
+      updateSuccess,
+      updateFail,
+      updateHandle,
+      updateTimeout,
+      closeToReConnect,
+    }
+  },
+})
+</script>
+
+<style lang="scss" scoped>
+// 过渡动画
+// .fade-enter-active,
+// .fade-leave-active {
+//   transition: opacity 0.5s ease;
+// }
+
+// .fade-enter-from,
+// .fade-leave-to {
+//   opacity: 0;
+// }
+// .content {
+//   height: 500px;
+//   position: relative;
+//   display: flex;
+//   justify-content: center;
+//   .con-step {
+//     position: absolute;
+//     .title {
+//       text-align: center;
+//       font-size: 60px;
+//       font-weight: 600;
+//       margin: 0 auto;
+//       &.step5 {
+//         width: 90%;
+//         font-size: 35px;
+//         font-weight: 500;
+//       }
+//     }
+//     .middle-pic {
+//       display: flex;
+//       justify-content: center;
+//       &.updating {
+//         flex-wrap: wrap;
+//       }
+//       .update-status {
+//         width: 100%;
+//         height: 60px;
+//         line-height: 60px;
+//         text-align: center;
+//         font-size: 32px;
+//         color: #444;
+//       }
+//       .icon-update {
+//         width: 0.8rem;
+//         height: 0.8rem;
+//         margin-top: 40px;
+//         background-image: url("~@/assets/image/joyo.png");
+//         background-repeat: no-repeat;
+//         background-size: 100% 100%;
+//         position: relative;
+//         .loading {
+//           position: absolute;
+//           width: 0.3rem;
+//           height: 0.3rem;
+//           left: 50%;
+//           top: 20px;
+//           margin-left: -0.15rem;
+//           // margin: 20px auto;
+//           background-image: url("~@/assets/image/icon-update-loading.svg");
+//           background-repeat: no-repeat;
+//           background-position: 0 1px; /*no*/
+//           background-size: cover;
+//           animation: rotateLoading 3s linear infinite;
+//         }
+//         .icon-update-success {
+//           width: 27px;
+//           height: 45px;
+//           margin: 22px auto;
+//           border-right: 8px solid #fff;
+//           border-bottom: 8px solid #fff;
+//           transform: rotate(45deg);
+//         }
+//       }
+//     }
+//     .footer {
+//       display: flex;
+//       flex-wrap: wrap;
+//       justify-content: center;
+//       &:not(.update) {
+//         margin-top: 60px;
+//       }
+
+//       .footer-btn {
+//         width: 300px;
+//         height: 100px;
+//         text-align: center;
+//         line-height: 100px;
+//         font-size: 50px;
+//         font-weight: 500;
+//         color: white;
+//         border-radius: 20px;
+//         &:not(:first-child) {
+//           margin-left: 20px;
+//         }
+//         &.success {
+//           background: $color-green;
+//           &:hover {
+//             background: $color-green-tapped;
+//           }
+//         }
+//         &.fail {
+//           background: $color-red;
+//           &:hover {
+//             background: $color-red-tapped;
+//           }
+//         }
+//       }
+//       .footer-text {
+//         font-size: 40px;
+//       }
+//     }
+//   }
+// }
+// @keyframes rotateLoading {
+//   0% {
+//     transform: rotate(0deg);
+//     -webkit-transform: rotate(0deg);
+//   }
+//   100% {
+//     transform: rotate(360deg);
+//     -webkit-transform: rotate(360deg);
+//   }
+// }
+</style>

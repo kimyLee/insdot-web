@@ -23,10 +23,10 @@ import { sendCommand } from '@/api/web-ble/web-ble-server'
 
 // import nativeApi from '@/api/native-api'
 
-// export async function bleGetFirmWareVersion () {
-//   const params = generateReqParams(CommandType.COMMON, CommandOrder.GET_VERSION)
-//   return handleSendCommand(params)
-// }
+export async function bleGetFirmWareVersion () {
+  const params = generateReqParams(CommandType.COMMON, CommandOrder.GET_VERSION)
+  return sendCommand(params)
+}
 
 // // 升级
 // export async function bleUpgrade (data: { version: string }) {

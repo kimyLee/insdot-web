@@ -1,6 +1,7 @@
 
 import { reactive } from 'vue'
 
+let bleDevice = null as any
 let writeCharacteristic = null as any
 let notifyCharacteristic = null as any
 let gattServer = null
@@ -21,13 +22,27 @@ const naviga: any = window.navigator
 // function toLowerCase (str: string) {
 //   return str.toLowerCase()
 // }
-function handleDisconnect () {
+function handleDisconnect () { // TODO：这里同一设备会重复两次
   console.log('断开连接')
   writeCharacteristic = null
+  bleDevice = null
   notifyCharacteristic = null
   gattServer = null
   commandService = null
   bleState.connectStatus = false
+}
+
+export function disconnectJoyo () {
+  if (!bleDevice) {
+    return
+  }
+  if (bleDevice.gatt.connected) {
+    bleDevice.gatt.disconnect()
+    // bleDevice.removeEventListener('gattserverdisconnected', handleDisconnect)
+    bleDevice = null
+  } else {
+    console.log('already disconnect')
+  }
 }
 
 export function connectJoyo () {
@@ -44,10 +59,9 @@ export function connectJoyo () {
       .then((device: any) => {
         console.log('Connecting to GATT Server...')
         // 断连监听
-        device.addEventListener('gattserverdisconnected', () => {
-          handleDisconnect()
-        })
-        return device.gatt.connect()
+        bleDevice = device
+        bleDevice.addEventListener('gattserverdisconnected', handleDisconnect)
+        return bleDevice.gatt.connect()
       })
       .then((server: any) => {
         console.log('> Found GATT server')
@@ -65,8 +79,8 @@ export function connectJoyo () {
       .then((characteristic: any) => {
         console.log('> Found write characteristic')
         writeCharacteristic = characteristic
-        const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
-        sendCommand(params)
+        // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
+        // sendCommand(params)
         return commandService.getCharacteristic(('00002161-0000-1000-8000-00805F9B34FB').toLowerCase())
       })
       .then((characteristic: any) => {

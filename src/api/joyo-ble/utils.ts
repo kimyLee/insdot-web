@@ -126,37 +126,38 @@ export function generateRspResult (arr: number[]) {
   }
 }
 
-// const evtSet = {} as Record<string, any>
+const evtSet = {} as Record<string, any>
 
-// (window as any).flutterNotify = (val: number[]) => {
-//   const res = generateRspResult(val)
-//   if (res.cmd && evtSet[res.cmd]) evtSet[res.cmd](res)
-// }
+// 检测蓝牙广播，接收消息回包
+(window as any).webBleNotify = (val: number[]) => {
+  const res = generateRspResult(val)
+  console.log(res)
+  if (res.cmd && evtSet[res.cmd]) evtSet[res.cmd](res)
+}
 
-// export function handleSendCommand (params: number[]) {
-//   const cmd = getCmdFromParams(params)
-//   if (!cmd) {
-//     return Promise.resolve({ code: -1 }) as unknown as ClientResponse // 找不到对应cmd
-//   }
-//   if (evtSet[cmd]) {
-//     return Promise.resolve({ code: -2 }) as unknown as ClientResponse// 重复请求返回错误
-//   }
+export function handleSendCommand (params: number[]) {
+  const cmd = getCmdFromParams(params)
+  if (!cmd) {
+    return Promise.resolve({ code: -1 }) as unknown as ClientResponse // 找不到对应cmd
+  }
+  if (evtSet[cmd]) {
+    return Promise.resolve({ code: -2 }) as unknown as ClientResponse// 重复请求返回错误
+  }
+  // bleApi.sendCommand(params)
+  // nativeApi.log('发送指令:' + JSON.stringify(params))
 
-//   // bleApi.sendCommand(params)
-//   // nativeApi.log('发送指令:' + JSON.stringify(params))
-
-//   return new Promise((resolve) => {
-//     const timer = setTimeout(() => { // 超时处理
-//       evtSet[cmd] = null
-//       resolve({ code: -3 }) // 请求超时
-//     }, 5000)
-//     evtSet[cmd] = (d: number[]) => {
-//       resolve(d)
-//       clearTimeout(timer)
-//       evtSet[cmd] = null
-//     }
-//   }) as unknown as ClientResponse
-// }
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => { // 超时处理
+      evtSet[cmd] = null
+      resolve({ code: -3 }) // 请求超时
+    }, 5000)
+    evtSet[cmd] = (d: number[]) => {
+      resolve(d)
+      clearTimeout(timer)
+      evtSet[cmd] = null
+    }
+  }) as unknown as ClientResponse
+}
 
 // export function handleSendCommandWithoutRsp (params: number[]) {
 //   const cmd = getCmdFromParams(params)

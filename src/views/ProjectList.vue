@@ -2,6 +2,21 @@
   <div class="project-list page">
     <HeaderNav title="Design tool"
                sub-title="for JOYO Design">
+      <!-- 显示JOYO ICON -->
+      <a-button shape="circle"
+                @click="visibleOfJOYOUpdate = true">
+        <img class="joyo-icon"
+             src="~@/assets/joyo.png" />
+      </a-button>
+      <a-button key="2"
+                @click="connectJoyo">
+        <span class="connect-text">
+          <span class="connect-dot"
+                :class="{'active': connectStatus}" />
+          {{ connectStatus ? '断开连接' : '连接JOYO' }}
+        </span>
+      </a-button>
+
       <a-button key="2"
                 @click.stop="createProjectPop">
         新建程序
@@ -84,6 +99,18 @@
                v-model:value="programName"
                placeholder="程序名" />
     </a-modal>
+
+    <!-- JOYO版本信息及更新 -->
+    <UpdateProcess v-model="visibleOfJOYOUpdate" />
+    <!-- <a-modal
+             :width="360"
+             ok-text="更新版本"
+             cancel-text="我知道了"
+             title="创建新程序"
+             @ok="handleUpdateJOYO">
+      <div>当前版本号：v1.0.0</div>
+      <div>已是最新版本</div>
+    </a-modal> -->
   </div>
 </template>
 
@@ -108,9 +135,12 @@ import { message } from 'ant-design-vue'
 
 // import { useStore } from '@/store'
 import HeaderNav from '@/components/HeaderNav.vue'
+import UpdateProcess from '@/components/update-pop/UpdateProcess.vue'
 import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined, DeliveredProcedureOutlined } from '@ant-design/icons-vue'
 import { useStore } from 'vuex'
 import { exportFile } from '@/lib/project/common'
+
+import { bleState } from '@/api/web-ble/web-ble-server'
 
 declare global {
     interface Window {
@@ -128,6 +158,7 @@ export default defineComponent({
     PlusOutlined,
     DeleteOutlined,
     HeaderNav,
+    UpdateProcess,
   },
 
   setup () {
@@ -143,12 +174,17 @@ export default defineComponent({
 
     const state: any = reactive({
       programName: '',
+      visibleOfJOYOUpdate: false,
       visibleOfCreateProject: false,
       visibleOfExportProject: false,
     })
 
     const projectList = computed(() => {
       return store.getters.projectListByFilter
+    })
+
+    const connectStatus = computed(() => { // 看下行否
+      return store.getters['ble/connectStatus']
     })
 
     const fetchProjectList = async () => {
@@ -266,6 +302,32 @@ export default defineComponent({
       store.dispatch('deleteProject', uuid)
     }
 
+    function connectJoyo () {
+      if (!connectStatus.value) {
+        store.dispatch('ble/bleConnect')
+      } else {
+        store.dispatch('ble/bleDisconnect')
+      }
+    }
+
+    function handleUpdateJOYO () { // 升级JOYO
+      // try {
+      //   const res = await bleUpgrade({
+      //     version: state.versionInfo.lastVersion,
+      //   }) // todo: 异常处理
+      //   if (res.result.status === 1) {
+      //     // 可以升级
+      //     (window as any).handleDFUProgress(0)
+      //     BleApi.DFUUpgrade()
+      //   } else {
+      //     // 升级失败处理
+      //     updateJoyoDialog.value.updateFail()
+      //   }
+      // } catch (error) {
+      //   updateJoyoDialog.value.updateFail()
+      // }
+    }
+
     onBeforeMount(async () => {
       // await fetchProjectList(state.tabType)
     })
@@ -286,6 +348,7 @@ export default defineComponent({
       ...toRefs(state),
       projectList,
       fileList,
+      connectStatus,
 
       createProjectPop,
       createProject,
@@ -299,6 +362,8 @@ export default defineComponent({
       exportProgram,
 
       handleItemClass,
+
+      connectJoyo,
     }
   },
 })
@@ -337,6 +402,27 @@ export default defineComponent({
     background: #fff;
     border-color: #d9d9d9;
   }
+  .joyo-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .connect-text {
+  }
+  .connect-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
+    margin-top: -4px;
+    vertical-align: middle;
+    background: #ccc;
+    border-radius: 50%;
+    &.active {
+      background: #52c41a;
+    }
+  }
+
+  // 程序列表相关
   .container {
     position: relative;
     // padding: 20px;
