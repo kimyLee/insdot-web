@@ -109,7 +109,7 @@ import Blockly from 'blockly' // todo: 拆解
 import basicCategories from '@/lib/blockly/toolbox'
 import preDefine, { pureCanvas, runSample } from '@/lib/blocks/preBlock'
 import '@/lib/blocks/index'
-import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
+import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 import HeaderNav from '@/components/HeaderNav.vue'
 
@@ -546,7 +546,7 @@ export default defineComponent({
           const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
           state.lastOID = val
           if (myInterpreter && myInterpreter.appendCode) {
-            const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
+            // const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
             handleInterpreterOIDEvt(val)
 
             // 限定 1 到 54
@@ -689,11 +689,6 @@ export default defineComponent({
         font-size: 16px;
         margin-bottom: 12px;
       }
-      // .info-content {
-      //   color: #000000d9;
-      //   font-weight: 400;
-      //   font-size: 14px;
-      // }
       .ant-form-item {
         margin-bottom: 0;
       }

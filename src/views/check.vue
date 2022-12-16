@@ -85,7 +85,7 @@ import {
 } from 'vue'
 import Blockly from 'blockly' // todo: 拆解
 import '@/lib/blocks/index'
-import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
+import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 import { useRoute, useRouter } from 'vue-router'
 import HeaderNav from '@/components/HeaderNav.vue'

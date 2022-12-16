@@ -108,7 +108,6 @@ export const bleSetLightAnimation = (type: string, time: number, color: number) 
       animationTimer = setTimeout(() => {
         const factor = 255 - (count < 150 ? count : (300 - count))
         const newColor = hexBrightness(color, factor)
-        console.log(factor, 'factor')
         for (let i = 0; i < 8; i++) {
           arr[i] = newColor
         }

@@ -1,13 +1,4 @@
-/*
- * @Author: cuby-team
- * @LastEditors: kimmy
- * @Date: 2022-02-25 11:26:59
- * @LastEditTime: 2022-03-10 11:02:22
- * @FilePath: /web-tpl/src/api/joyo-ble/index.ts
- * @Description:
- *
- * Copyright (c) 2022 by Cuby, All Rights Reserved.
- */
+
 import {
   CommandType,
   CommandOrder,
@@ -15,24 +6,22 @@ import {
 
 import {
   generateReqParams,
-  // handleSendCommand,
+  handleSendCommand,
   // handleSendCommandWithoutRsp,
 } from './utils'
 
-import { sendCommand } from '@/api/web-ble/web-ble-server'
-
-// import nativeApi from '@/api/native-api'
+import { sendCommand } from '@/api/joyo-ble/web-ble-server'
 
 export async function bleGetFirmWareVersion () {
   const params = generateReqParams(CommandType.COMMON, CommandOrder.GET_VERSION)
-  return sendCommand(params)
+  return handleSendCommand(params)
 }
 
-// // 升级
-// export async function bleUpgrade (data: { version: string }) {
-//   const params = generateReqParams(CommandType.UPGRADE, CommandOrder.BEGIN_UPGRADE, data)
-//   return handleSendCommand(params)
-// }
+// // 发送升级命令
+export async function bleUpgrade (data: { version: string }) {
+  const params = generateReqParams(CommandType.UPGRADE, CommandOrder.BEGIN_UPGRADE, data)
+  return handleSendCommand(params)
+}
 
 // // 清除升级状态
 // export async function bleResetUpgrade () {
@@ -56,7 +45,6 @@ export async function bleSetLight (data: { colors: number[], bright: number }) {
   // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
   // handleSendCommandWithoutRsp(params)
   sendCommand(params)
-  // await sleep(50)
 }
 
 export async function clearAllLight () { // todo: params ide提示
@@ -66,7 +54,6 @@ export async function clearAllLight () { // todo: params ide提示
     bright: 1,
   })
   sendCommand(params)
-  // await sleep(50)
 }
 
 // 控制灯效动画
@@ -82,26 +69,16 @@ export async function enableShake () { // todo: params ide提示
   // handleSendCommandWithoutRsp([0x55, 0xA1, 0x05, 0xB1, 0x05, 0x01, 0x00])
 }
 
-// 使能摇晃
-// export async function enableShake () { // todo: params ide提示
-//   // handleSendCommandWithoutRsp([0x55, 0xA1, 0x05, 0xB1, 0x05, 0x01, 0x00])
-// }
-
 // 控制单个灯效
 export async function bleSetSingleLight (num: number, color: number) { // todo: params ide提示
   const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_SINGLE_LIGHT, { color: [color], num })
-  // console.log(params)
-  // nativeApi.log(params)
   // handleSendCommandWithoutRsp(params)
   sendCommand(params)
-  // await sleep(50)
 }
 
 // 控制音效
 export async function blePlayMusic (id: string) { // 长度小于4
   const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_MUSIC, { id })
-  // console.log(params)
-  // nativeApi.log(params)
   // return handleSendCommandWithoutRsp(params)
   sendCommand(params)
   // await sleep(50)
@@ -110,8 +87,6 @@ export async function blePlayMusic (id: string) { // 长度小于4
 // // 准备mp3传输, todo: CommandType 两个参数合并
 // export async function readyMp3Transfer (data: { filename: string, size: number }) { // 长度小于4
 //   const params = generateReqParams(CommandType.UPGRADE, CommandOrder.READY_AUDIO, data)
-//   nativeApi.log('???')
-//   nativeApi.log(params)
 //   return handleSendCommand(params)
 // }
 // // 开始mp3传输

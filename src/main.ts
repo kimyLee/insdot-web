@@ -6,7 +6,7 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import '@/style/common.scss'
 
-import NoSleep from 'nosleep.js'
+import NoSleep from 'nosleep.js' // 连接蓝牙时候，电脑可能休眠导致断连
 
 const noSleep = new NoSleep()
 document.addEventListener('click', function enableNoSleep () {

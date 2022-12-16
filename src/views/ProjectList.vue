@@ -3,7 +3,7 @@
     <HeaderNav title="Design tool"
                sub-title="for JOYO Design">
       <!-- 显示JOYO ICON -->
-      <a-button shape="circle"
+      <!-- <a-button shape="circle"
                 @click="visibleOfJOYOUpdate = true">
         <img class="joyo-icon"
              src="~@/assets/joyo.png" />
@@ -15,7 +15,7 @@
                 :class="{'active': connectStatus}" />
           {{ connectStatus ? '断开连接' : '连接JOYO' }}
         </span>
-      </a-button>
+      </a-button> -->
 
       <a-button key="2"
                 @click.stop="createProjectPop">
@@ -140,7 +140,7 @@ import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutl
 import { useStore } from 'vuex'
 import { exportFile } from '@/lib/project/common'
 
-import { bleState } from '@/api/web-ble/web-ble-server'
+import { bleState } from '@/api/joyo-ble/web-ble-server'
 
 declare global {
     interface Window {

@@ -7,26 +7,22 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Home',
     component: () => import(/* webpackChunkName: "art" */ '@/views/ProjectList.vue'),
   },
-  // {
-  //   path: '/test',
-  //   name: 'Home',
-  //   component: () => import(/* webpackChunkName: "art" */ '@/views/Home.vue'),
-  // },
   {
     path: '/no-permit',
     name: 'NoPermit',
     component: () => import(/* webpackChunkName: "art" */ '@/views/NoPermit.vue'),
   },
-  {
-    path: '/project-list',
-    name: 'ProjectList',
-    component: () => import(/* webpackChunkName: "art" */ '@/views/ProjectList.vue'),
-  },
+  // {
+  //   path: '/project-list',
+  //   name: 'ProjectList',
+  //   component: () => import(/* webpackChunkName: "art" */ '@/views/ProjectList.vue'),
+  // },
   {
     path: '/blockly',
     name: 'Blockly',
     component: () => import(/* webpackChunkName: "art" */ '@/views/Blockly.vue'),
   },
+  // todo: 后续删除，临时用途
   {
     path: '/check',
     name: 'Check',

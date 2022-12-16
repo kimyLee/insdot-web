@@ -2,7 +2,6 @@
 // export enum FilterType {
 //   ALL = 'all',
 //   JOYO = 'joyo',
-//   CUBY = 'cuby',
 // }
 
 interface ProjectListItem {

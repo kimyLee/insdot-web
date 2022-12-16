@@ -1,7 +1,7 @@
 <template>
   <!-- 不同步骤下的升级状态 -->
   <div>
-    <!-- step1 -->
+    <!-- step1 版本信息 -->
     <a-modal v-model:visible="versionPopVisible"
              :width="360"
              ok-text="更新版本"
@@ -9,11 +9,14 @@
              title="设备信息"
              @cancel="handleCancel"
              @ok="handleUpdateJOYO">
-      <div>当前版本号：v1.0.0</div>
+      <div>当前版本号：{{ currentVersion }}</div>
       <div>最新版本: {{ lastVersion }}</div>
     </a-modal>
+    <!-- step2 下载固件 -->
 
-    <!-- step2 -->
+    <!-- step3 传输固件 -->
+    <!-- step4 固件升级 -->
+    <!-- step5 升级结束 -->
   </div>
 
   <!-- <ContainerDialog ref="containerDialog"
@@ -191,8 +194,14 @@ export default defineComponent({
 
     const store = useStore()
 
-    const lastVersion = computed(() => { // 看下行否
+    const lastVersion = computed(() => {
       return store.state.ble.lastVersion
+    })
+    const currentVersion = computed(() => {
+      return store.state.ble.currentVersion
+    })
+    const updateStep = computed(() => { // 升级步骤
+      return store.state.ble.updateStep
     })
 
     watch(() => props.modelValue, () => {
@@ -200,6 +209,7 @@ export default defineComponent({
       if (props.modelValue) {
         // 初次打开弹窗：获取固件版本
         state.versionPopVisible = true
+        store.dispatch('ble/bleGetOriginVersion')
         store.dispatch('ble/bleGetCurrentVersion')
       }
     })
@@ -241,10 +251,11 @@ export default defineComponent({
     }
 
     function handleCancel () {
-      emit('update:modelValue', false)
+      // emit('update:modelValue', false)
+      // store.dispatch('ble/bleReconnect')
     }
     function handleUpdateJOYO () {
-      store.dispatch('ble/bleGetCurrentVersion')
+      // store.dispatch('ble/bleUpgradeDevice')
     }
 
     onMounted(() => {
@@ -260,6 +271,7 @@ export default defineComponent({
       handleCancel,
 
       lastVersion,
+      currentVersion,
 
       open,
       resetUpdate,

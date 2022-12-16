@@ -37,8 +37,6 @@ export default defineComponent({
       onBack = attrs.onBack
     }
 
-    // console.log(attrs, 'attr')
-    // console.log(attrs.back, 'attr')
     return {
       onBack,
     }

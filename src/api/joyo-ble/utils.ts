@@ -9,7 +9,8 @@ import {
   CommandCallbackRule,
 } from './config'
 
-// import nativeApi from '@/api/native-api'
+import { sendCommand } from '@/api/joyo-ble/web-ble-server'
+
 // import bleApi from '@/api/native-ble'
 
 function getCmdFromParams (arr: number[]) { // 如'a1-b1-01'
@@ -143,8 +144,7 @@ export function handleSendCommand (params: number[]) {
   if (evtSet[cmd]) {
     return Promise.resolve({ code: -2 }) as unknown as ClientResponse// 重复请求返回错误
   }
-  // bleApi.sendCommand(params)
-  // nativeApi.log('发送指令:' + JSON.stringify(params))
+  sendCommand(params)
 
   return new Promise((resolve) => {
     const timer = setTimeout(() => { // 超时处理

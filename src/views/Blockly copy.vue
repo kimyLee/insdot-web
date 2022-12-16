@@ -17,12 +17,12 @@
               @click="generateCode">
           生成
         </span>
-        <span class="title"
+        <!-- <span class="title"
               :class="{'active': currentState === 'spy'}"
               style="font-size: 14px;margin-left: 16px;"
               @click="switchCode('spy')">
           spy game
-        </span>
+        </span> -->
         <span class="title"
               :class="{'active': currentState === 'puzzle'}"
               style="font-size: 14px"
@@ -142,14 +142,14 @@ import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/a
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
 import Blockly from 'blockly' // todo: 拆解
 import basicCategories from '@/lib/blockly/toolbox'
-import spy from '@/lib/spy'
+// import spy from '@/lib/spy'
 import preDefine, { pureCanvas, runSample } from '@/lib/blocks/preBlock'
 import preDefinePuzzle from '@/lib/blocks/preBlockPuzzle'
 import testCode from '@/lib/blocks/testCode'
 import '@/lib/blocks/index'
-import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
-import BlocklyDoc from '@/components/BlocklyDoc.vue' // @ is an alias to /src
-import GameDoc from '@/components/GameDoc.vue' // @ is an alias to /src
+import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
+import BlocklyDoc from '@/components/tech/BlocklyDoc.vue' // @ is an alias to /src
+import GameDoc from '@/components/tech/GameDoc.vue' // @ is an alias to /src
 
 import emailjs from '@emailjs/browser'
 
@@ -668,7 +668,7 @@ export default defineComponent({
       loadCode,
       navigatorBack,
       switchCode,
-      spy,
+      // spy,
       recoverStatus,
 
     }
