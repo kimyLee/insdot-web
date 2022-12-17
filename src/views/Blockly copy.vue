@@ -144,8 +144,8 @@ import Blockly from 'blockly' // todo: 拆解
 import basicCategories from '@/lib/blockly/toolbox'
 // import spy from '@/lib/spy'
 import preDefine, { pureCanvas, runSample } from '@/lib/blocks/preBlock'
-import preDefinePuzzle from '@/lib/blocks/preBlockPuzzle'
-import testCode from '@/lib/blocks/testCode'
+// import preDefinePuzzle from '@/lib/blocks/preBlockPuzzle'
+// import testCode from '@/lib/blocks/testCode'
 import '@/lib/blocks/index'
 import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 import BlocklyDoc from '@/components/tech/BlocklyDoc.vue' // @ is an alias to /src
@@ -279,7 +279,7 @@ export default defineComponent({
         setTimeout(() => {
           if (str === 'puzzle') {
             workspace.clear()
-            Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(preDefinePuzzle) as any)
+            // Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(preDefinePuzzle) as any)
           } else {
             workspace.clear()
             Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(preDefine) as any)

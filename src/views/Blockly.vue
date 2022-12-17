@@ -106,9 +106,9 @@ import {
 import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/api/joyo-ble/index'
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
 import Blockly from 'blockly' // todo: 拆解
-import basicCategories from '@/lib/blockly/toolbox'
-import preDefine, { pureCanvas, runSample } from '@/lib/blocks/preBlock'
-import '@/lib/blocks/index'
+import basicCategories from '@/lib/blockly/category-toolbox/toolbox'
+import { pureCanvas, runSample } from '@/lib/blockly/blocks/preBlock'
+import '@/lib/blockly/blocks/index'
 import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 import HeaderNav from '@/components/HeaderNav.vue'
@@ -118,7 +118,7 @@ import * as En from 'blockly/msg/en'
 
 import '@/style/blockly-category.scss'
 
-import { setLocale } from '@/lib/i18n'
+import { setLocale } from '@/lib/blockly/i18n'
 import { useStore } from 'vuex'
 
 const CustomZh = {

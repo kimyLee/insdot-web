@@ -3,7 +3,7 @@ import { InjectionKey } from 'vue'
 import { createStore, useStore as baseUseStore, Store } from 'vuex'
 import type State from '@/store/interface'
 
-import { runSample } from '@/lib/blocks/preBlock'
+import { runSample } from '@/lib/blockly/blocks/preBlock'
 
 import ble from './ble'
 import type { BleStateType } from './ble'

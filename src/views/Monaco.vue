@@ -99,7 +99,7 @@ import {
 } from 'vue'
 import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/api/joyo-ble/index'
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
-import '@/lib/blocks/index'
+// import '@/lib/blocks/index'
 import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 // 引入解释器
