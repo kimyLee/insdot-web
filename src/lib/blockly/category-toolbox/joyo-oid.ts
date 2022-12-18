@@ -1,3 +1,4 @@
+
 export default {
   kind: 'category',
   name: '识别',
@@ -7,7 +8,23 @@ export default {
   contents: [
     {
       kind: 'block',
-      type: 'setUp',
+      type: 'receive_letter',
+    },
+    {
+      kind: 'block',
+      type: 'receive_number',
+    },
+    {
+      kind: 'block',
+      type: 'receive_symbol',
+    },
+    {
+      kind: 'block',
+      type: 'receive_card',
+    },
+    {
+      kind: 'block',
+      type: 'receive_color',
     },
     {
       kind: 'block',
@@ -24,6 +41,10 @@ export default {
     {
       kind: 'block',
       type: 'date_now',
+    },
+    {
+      kind: 'block',
+      type: 'setUp',
     },
   ],
 }

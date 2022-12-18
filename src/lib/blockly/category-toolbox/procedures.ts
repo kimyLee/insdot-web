@@ -9,10 +9,6 @@ export default {
     // {
     //   kind: 'block',
     //   type: 'procedures_defnoreturn',
-    // },
-    // {
-    //   kind: 'block',
-    //   type: 'procedures_defnoreturn',
     //   blockxml: '',
     // },
     // {

@@ -1,3 +1,13 @@
+
+export function registerToolboxCategoryCallback (myWorkspace: any) {
+  myWorkspace.registerButtonCallback('myFirstButtonPressed', () => {
+    // dosomething
+  })
+  // Associates the function with the string '···'
+  // myWorkspace.registerToolboxCategoryCallback(
+  //   'list_var', listVarFlyoutCallback)
+}
+
 export default {
   kind: 'category',
   name: '列表',
@@ -5,6 +15,19 @@ export default {
     container: 'category-list',
   },
   contents: [
+    // {
+    //   kind: 'button',
+    //   text: '创建列表',
+    //   callbackKey: 'myFirstButtonPressed',
+    // },
+    // {
+    //   kind: 'block',
+    //   type: 'variables_get_list',
+    // },
+    // {
+    //   kind: 'block',
+    //   type: 'variables_set_list',
+    // },
     {
       kind: 'block',
       type: 'lists_create_empty',

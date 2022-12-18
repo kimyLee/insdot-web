@@ -6,5 +6,19 @@ export default {
     container: 'category-var',
   },
   contents: [
+    {
+      kind: 'block',
+      type: 'variables_set',
+      inputs: {
+        VALUE: {
+          block: {
+            type: 'math_number',
+            fields: {
+              NUM: 0,
+            },
+          },
+        },
+      },
+    },
   ],
 }
