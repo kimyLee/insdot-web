@@ -255,7 +255,7 @@ export default defineComponent({
       // store.dispatch('ble/bleReconnect')
     }
     function handleUpdateJOYO () {
-      // store.dispatch('ble/bleUpgradeDevice')
+      store.dispatch('ble/bleUpgradeDevice')
     }
 
     onMounted(() => {
