@@ -2675,7 +2675,7 @@ bl@^4.1.0:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
-blockly@^8.0.3:
+blockly@^8.0.5:
   version "8.0.5"
   resolved "https://registry.yarnpkg.com/blockly/-/blockly-8.0.5.tgz#66e96911a82dd54b52b8ddf56b2f2f9b523ce065"
   integrity sha512-jgr3PHImkFYSC2pNWZ74TmXP1HdajxeRd2DQaAt+9I+XLl9RCWvInqNHcS+blsKBTn6zOIxHK6nLzRATbLrDSw==
