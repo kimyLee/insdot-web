@@ -18,7 +18,7 @@ function getCmdFromParams (arr: number[]) { // 如'a1-b1-01'
   return arr[1].toString(16) + '-' + arr[3].toString(16) + '-' + arr[4].toString(16)
 }
 
-function floatToHex (num: number, isReverse = false): number[] {
+export function floatToHex (num: number, isReverse = false): number[] {
   const getHex = (i: number) => Number('0x' + ('00' + i.toString(16)).slice(-2))
   const view = new DataView(new ArrayBuffer(4))
   view.setFloat32(0, num)

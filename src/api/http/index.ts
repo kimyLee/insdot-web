@@ -13,7 +13,7 @@ export function fetchOriginVersion (): Promise<string> {
 }
 
 export function fetchFirmware (url: string): Promise<void> {
-  return axios.get(url, { responseType: 'blob' })
+  return axios.get(url, { responseType: 'arraybuffer' })
     .then(function (response: any) {
       // 处理成功情况
       console.log(response)

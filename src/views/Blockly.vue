@@ -125,8 +125,8 @@ import { setLocale } from '@/lib/blockly/i18n'
 import { useStore } from 'vuex'
 
 const CustomZh = {
-  PROCEDURES_DEFNORETURN_TITLE: '跳转到',
-  PROCEDURES_DEFRETURN_TITLE: '跳转到',
+  PROCEDURES_DEFNORETURN_TITLE: '函数',
+  PROCEDURES_DEFRETURN_TITLE: '函数',
 }
 
 // import * as Blockly from 'blockly/core'

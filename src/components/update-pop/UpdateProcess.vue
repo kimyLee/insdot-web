@@ -11,162 +11,24 @@
              @ok="handleUpdateJOYO">
       <div>当前版本号：{{ currentVersion }}</div>
       <div>最新版本: {{ lastVersion }}</div>
+      <div v-show="updateStep > 0">
+        <loading-outlined />
+        {{ updateStatusMap[updateStep] }}
+        <span v-show="updateStep === 2">({{ transferProgress }}%)</span>
+      </div>
     </a-modal>
-    <!-- step2 下载固件 -->
-
-    <!-- step3 传输固件 -->
-    <!-- step4 固件升级 -->
-    <!-- step5 升级结束 -->
   </div>
-
-  <!-- <ContainerDialog ref="containerDialog"
-                   :close-btn="false"
-                   dialog-type="update">
-    <div class="content">
-      <transition name="fade">
-        <div v-if="step === 1"
-             class="con-step">
-          <div class="title">
-            {{ title[0] }}
-          </div>
-          <div class="middle-pic">
-            <div class="icon-update" />
-          </div>
-          <div class="footer">
-            <div class="footer-btn success"
-                 @click="startUpdate">
-              Start
-            </div>
-            <div class="footer-btn fail"
-                 @click="finishUpdate">
-              Close
-            </div>
-          </div>
-        </div>
-      </transition>
-
-      <transition name="fade">
-        <div v-if="step === 2"
-             class="con-step">
-          <div class="title">
-            {{ title[1] }}
-          </div>
-          <div class="middle-pic updating">
-            <div class="icon-update">
-              <div class="loading" />
-            </div>
-            <div v-if="progress < 100"
-                 class="update-status">
-              transmitting {{ progress }} %
-            </div>
-            <div v-if="progress === 100"
-                 class="update-status">
-              upgrading
-            </div>
-          </div>
-          <div class="footer update">
-            <div class="footer-text">
-              Don`t turn off Joyo.
-            </div>
-            <div class="footer-text">
-              Don`t close the application.
-            </div>
-          </div>
-        </div>
-      </transition>
-
-      <transition name="fade">
-        <div v-if="step === 3"
-             class="con-step">
-          <div class="title">
-            {{ title[2] }}
-          </div>
-          <div class="middle-pic">
-            <div class="icon-update">
-              <div class="icon-update-success" />
-            </div>
-          </div>
-          <div class="footer">
-            <div class="footer-btn success"
-                 @click="finishUpdate">
-              Go
-            </div>
-          </div>
-        </div>
-      </transition>
-
-      <transition name="fade">
-        <div v-if="step === 4"
-             class="con-step">
-          <div class="title">
-            {{ title[3] }}
-          </div>
-          <div class="middle-pic">
-            <div class="icon-update" />
-          </div>
-          <div class="footer">
-            <div class="footer-btn fail"
-                 @click="startUpdate">
-              Retry
-            </div>
-            <div class="footer-btn fail"
-                 @click="finishUpdate">
-              OK
-            </div>
-          </div>
-        </div>
-      </transition>
-
-      <transition name="fade">
-        <div v-if="step === 5"
-             class="con-step">
-          <div class="title step5">
-            {{ title[4] }}
-          </div>
-          <div class="middle-pic">
-            <div class="icon-update" />
-          </div>
-          <div class="footer">
-            <div class="footer-btn fail"
-                 @click="closeToReConnect">
-              OK
-            </div>
-          </div>
-        </div>
-      </transition>
-
-      <transition name="fade">
-        <div v-if="step === 6"
-             class="con-step">
-          <div class="title">
-            {{ title[5] }}
-          </div>
-          <div class="middle-pic">
-            <div class="icon-update" />
-          </div>
-          <div class="footer">
-            <div class="footer-btn fail"
-                 @click="startUpdate">
-              Retry
-            </div>
-            <div class="footer-btn fail"
-                 @click="finishUpdate">
-              Close
-            </div>
-          </div>
-        </div>
-      </transition>
-    </div>
-  </ContainerDialog> -->
 </template>
 
 <script>
 import { reactive, ref, toRefs, defineComponent, onMounted, watch, computed } from 'vue'
 // import ContainerDialog from '@/components/dialog/ContainerDialog.vue'
 import { useStore } from 'vuex'
+import { loadingOutlined } from '@ant-design/icons-vue'
 
 export default defineComponent({
   components: {
+    loadingOutlined,
     // ContainerDialog,
   },
   props: {
@@ -190,6 +52,12 @@ export default defineComponent({
         'Reconnection failed, please connect Joyo manually!',
         'Update Timeout!',
       ],
+      updateStatusMap: [
+        '升级完成',
+        '下载固件',
+        '传输固件',
+        '升级中，等待设备重启',
+      ],
     })
 
     const store = useStore()
@@ -202,6 +70,9 @@ export default defineComponent({
     })
     const updateStep = computed(() => { // 升级步骤
       return store.state.ble.updateStep
+    })
+    const transferProgress = computed(() => { // 升级步骤
+      return store.state.ble.transferProgress
     })
 
     watch(() => props.modelValue, () => {
@@ -251,10 +122,10 @@ export default defineComponent({
     }
 
     function handleCancel () {
-      // emit('update:modelValue', false)
+      emit('update:modelValue', false)
       // store.dispatch('ble/bleReconnect')
     }
-    function handleUpdateJOYO () {
+    function handleUpdateJOYO () { // 开始升级
       store.dispatch('ble/bleUpgradeDevice')
     }
 
@@ -272,6 +143,8 @@ export default defineComponent({
 
       lastVersion,
       currentVersion,
+      updateStep,
+      transferProgress,
 
       open,
       resetUpdate,
