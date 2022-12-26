@@ -158,7 +158,7 @@
                         currentServer.disconnect();
                     }
                     disconnectHandler();
-                }, 5000);
+                }, 5000); // 早一点
             })
             .catch(function(error) {
                 console.log(error);
@@ -390,7 +390,7 @@
                             view = new DataView(buffer);
                             view.setUint8(0, OPCODE.PACKET_RECEIPT_NOTIFICATION_REQUEST);
                             view.setUint16(1, interval, LITTLE_ENDIAN);
-                            setTimeout(() => {
+                            setTimeout(function () {
                                 controlChar.writeValue(view)
                                 .then(function() {
                                     log("sent packet count: " + interval);
@@ -421,20 +421,22 @@
                             });
                             break;
                         case OPCODE.REPORT_RECEIVED_IMAGE_SIZE:
+                           console.log('REPORT_RECEIVED_IMAGE_SIZE');
                             var bytesReceived = view.getUint32(3, LITTLE_ENDIAN);
                             log('length: ' + bytesReceived);
                             log('validate...');
-
-                            controlChar.writeValue(new Uint8Array([OPCODE.VALIDATE_FIRMWARE]))
-                            .catch(function(error) {
-                                error = "error validating: " + error;
-                                log(error);
-                                reject(error);
-                            });
+                            setTimeout(function () {          
+                              controlChar.writeValue(new Uint8Array([OPCODE.VALIDATE_FIRMWARE]))
+                              .catch(function(error) {
+                                  error = "error validating: " + error;
+                                  log(error);
+                                  reject(error);
+                              });
+                            }, 500)
                             break;
                         case OPCODE.VALIDATE_FIRMWARE:
                             log('complete, reset...');
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 controlChar.writeValue(new Uint8Array([OPCODE.ACTIVATE_IMAGE_AND_RESET]))
                                 .then(function() {
                                     log('image activated and dfu target reset');
@@ -478,7 +480,7 @@
             offset += packetSize;
             // console.log('count: ', count, ' offset: ', offset, ' size: ', size, ' interval: ', interval, ' arrayBuffer:', arrayBuffer.byteLength);
             if (count < interval && offset < arrayBuffer.byteLength) {
-                setTimeout(() => {
+                setTimeout(function() {
                     writePacket(packetChar, arrayBuffer, count);
                     if (handleProgress) {
                       handleProgress(Math.floor((offset / arrayBuffer.byteLength * 100)))
