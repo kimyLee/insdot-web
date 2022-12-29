@@ -12,7 +12,7 @@
     "@emailjs/browser": "^3.7.0",
     "ant-design-vue": "^2.2.8",
     "axios": "^1.2.1",
-    "blockly": "^8.0.3",
+    "blockly": "^8.0.5",
     "core-js": "^3.6.5",
     "emailjs": "^4.0.1",
     "jszip": "^3.10.1",

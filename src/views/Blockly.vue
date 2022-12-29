@@ -7,6 +7,10 @@
       <a-button @click="handleLangClick">
         {{ lang === 'zh' ? '中/En': 'En/中' }}
       </a-button>
+
+      <a-button @click="toggleVariableDrawerVisible">
+        变量
+      </a-button>
       <a-button>
         clear
       </a-button>
@@ -25,6 +29,9 @@
         {{ !runStatus ? 'Run' : 'Stop' }}
       </a-button>
     </HeaderNav>
+
+    <VariableDrawer :workspace="workspace"
+                    :variable-drawer-visible="variableDrawerVisible" />
 
     <div class="block-box container">
       <div id="blocklyDiv" />
@@ -113,6 +120,8 @@ import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 import HeaderNav from '@/components/HeaderNav.vue'
 
+import VariableDrawer from '@/components/VariableDrawer.vue'
+
 import * as Zh from 'blockly/msg/zh-hans'
 import * as En from 'blockly/msg/en'
 
@@ -157,6 +166,7 @@ export default defineComponent({
   name: 'BleUsage',
   components: {
     HeaderNav,
+    VariableDrawer,
   },
 
   setup () {
@@ -173,6 +183,7 @@ export default defineComponent({
       currentState: 'local',
       visible: false,
       gameVisible: false,
+      variableDrawerVisible: false,
       infoList: [] as string[],
       // varInfo: [] as string[],
       varInfo: {} as Record<string, any>,
@@ -216,7 +227,9 @@ export default defineComponent({
       workspace.clear()
       Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(pureCanvas || '') as any)
     }
-
+    const toggleVariableDrawerVisible = () => {
+      state.variableDrawerVisible = !state.variableDrawerVisible
+    }
     const saveCode = () => {
       // 保存代码
       const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
@@ -583,6 +596,7 @@ export default defineComponent({
       connect,
       loadCode,
       navigatorBack,
+      toggleVariableDrawerVisible,
     }
   },
 })
