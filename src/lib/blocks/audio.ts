@@ -1,8 +1,8 @@
+import { defineBlocksWithJsonArray } from 'blockly/core'
 
-// // todo: blockly 类型
-import Blockly from 'blockly'
+import { javascriptGenerator } from 'blockly/javascript'
 
-Blockly.defineBlocksWithJsonArray([
+defineBlocksWithJsonArray([
   {
     type: 'play_audio',
     // message0: 'play %1 audio',
@@ -139,7 +139,7 @@ Blockly.defineBlocksWithJsonArray([
   },
 ])
 
-Blockly.JavaScript.play_audio = function (block: any) {
+javascriptGenerator.play_audio = function (block: any) {
   const dropdown_name = block.getFieldValue('NAME')
   return 'blePlayMusic("' + dropdown_name + '");\n'
 }

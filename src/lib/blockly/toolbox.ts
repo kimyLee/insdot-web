@@ -3,6 +3,7 @@ import logic from './logic'
 import loop from './loop'
 import math from './math'
 import list from './list'
+import listCustom from './listCustom'
 import text from './text'
 import variables from './variables'
 import procedures from './procedures'
@@ -22,9 +23,11 @@ const basicCategories = {
     logic,
     loop,
     math,
-    variables,
-    list,
     text,
+    list,
+
+    variables,
+    listCustom,
     procedures,
   ],
 }

@@ -4,7 +4,22 @@ export default {
   cssConfig: {
     container: 'category-list',
   },
+  // custom: 'LIST',
   contents: [
+    // {
+    //   kind: 'label',
+    //   text: '列表',
+    //   // 'web-class': 'myLabelStyle', //  样式覆盖css
+    // },
+    // {
+    //   kind: 'block',
+    //   type: 'variables_set_list',
+    // },
+
+    // {
+    //   kind: 'block',
+    //   type: 'variables_get_list',
+    // },
     {
       kind: 'block',
       type: 'lists_create_empty',
@@ -49,10 +64,10 @@ export default {
       kind: 'block',
       type: 'lists_indexOf',
     },
-    {
-      kind: 'block',
-      type: 'list_include',
-    },
+    // {
+    //   kind: 'block',
+    //   type: 'list_include',
+    // },
     {
       kind: 'block',
       type: 'lists_getIndex',

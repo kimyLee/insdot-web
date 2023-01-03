@@ -83,7 +83,7 @@ import {
   computed,
   useAttrs,
 } from 'vue'
-import Blockly from 'blockly' // todo: 拆解
+import * as Blockly from 'blockly/core'
 import '@/lib/blocks/index'
 import { connectJoyo, bleState } from '@/api/web-ble/web-ble-server'
 

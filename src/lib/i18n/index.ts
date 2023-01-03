@@ -1,5 +1,5 @@
 
-import Blockly from 'blockly'
+import * as Blockly from 'blockly'
 
 const locale = {
   AUDIO_PLAY_AUDIO: {
@@ -126,5 +126,9 @@ export function setLocale (lang = 'en') {
   for (const item in locale) {
     obj[item] = locale[item][lang]
   }
+
+  // @ts-ignore
   Blockly.Msg = Object.assign(Blockly.Msg, obj)
+  // 貌似源码提供了合并 msg 的错误，细看后切换
+  // Blockly.utils.object.mixin(messages, optMessages);
 }

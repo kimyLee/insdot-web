@@ -29,10 +29,10 @@ export default {
       kind: 'block',
       type: 'math_number_property',
     },
-    {
-      kind: 'block',
-      type: 'math_change',
-    },
+    // {
+    //   kind: 'block',
+    //   type: 'math_change',
+    // },
     {
       kind: 'block',
       type: 'math_round',
