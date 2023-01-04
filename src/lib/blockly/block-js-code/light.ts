@@ -1,9 +1,10 @@
 
 // // todo: blockly 类型
 import Blockly from 'blockly'
+import { javascriptGenerator } from 'blockly/javascript'
 
-Blockly.JavaScript.set_light = function (block: any) {
-  const variable_light = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('light'), 'VARIABLE')
+javascriptGenerator.set_light = function (block: any) {
+  const variable_light = javascriptGenerator.nameDB_.getName(block.getFieldValue('light'), 'VARIABLE')
 
   return 'bleSetLight(JSON.stringify({colors:' + variable_light + ',bright:1}));\n'
   // return 'bleSetLight(JSON.stringify({colors:' + variable_light + '.map(function (e) {' +
@@ -14,7 +15,7 @@ Blockly.JavaScript.set_light = function (block: any) {
   //   '}),bright:1}));\n'
 }
 
-Blockly.JavaScript.set_all_light = function (block: any) {
+javascriptGenerator.set_all_light = function (block: any) {
   const number_color = block.getFieldValue('color')
   console.log(number_color)
   const arr = JSON.parse(JSON.stringify(Array(12).fill(Number(number_color))))
@@ -22,31 +23,31 @@ Blockly.JavaScript.set_all_light = function (block: any) {
   return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
 }
 
-Blockly.JavaScript.lists_create_with_row = function (block: any) {
+javascriptGenerator.lists_create_with_row = function (block: any) {
   // Create a list with any number of elements of any type.
   const elements = new Array(block.itemCount_)
   for (let i = 0; i < block.itemCount_; i++) {
     elements[i] =
-      Blockly.JavaScript.valueToCode(block, 'ADD' + i, Blockly.JavaScript.ORDER_NONE) ||
+      javascriptGenerator.valueToCode(block, 'ADD' + i, javascriptGenerator.ORDER_NONE) ||
       'null'
   }
   const code = '[' + elements.join(', ') + ']'
-  return [code, Blockly.JavaScript.ORDER_ATOMIC]
+  return [code, javascriptGenerator.ORDER_ATOMIC]
 }
 
-Blockly.JavaScript.list_include = function (block: any) {
-  // const variable_list = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('list'), 'VARIABLE')
-  const variable_list = Blockly.JavaScript.valueToCode(block, 'LIST', Blockly.JavaScript.ORDER_ATOMIC)
+javascriptGenerator.list_include = function (block: any) {
+  // const variable_list = javascriptGenerator.nameDB_.getName(block.getFieldValue('list'), 'VARIABLE')
+  const variable_list = javascriptGenerator.valueToCode(block, 'LIST', javascriptGenerator.ORDER_ATOMIC)
 
-  // const variable_name = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
-  const variable_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC)
+  // const variable_name = javascriptGenerator.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
+  const variable_name = javascriptGenerator.valueToCode(block, 'NAME', javascriptGenerator.ORDER_ATOMIC)
   // TODO: Assemble JavaScript into code variable.
   const code = `${variable_list}.indexOf(${variable_name}) >= 0`
   // TODO: Change ORDER_NONE to the correct strength.
-  return [code, Blockly.JavaScript.ORDER_NONE]
+  return [code, javascriptGenerator.ORDER_NONE]
 }
 
-Blockly.JavaScript.set_all_light_color = function (block: any) {
+javascriptGenerator.set_all_light_color = function (block: any) {
   const number_r = block.getFieldValue('R')
   const number_g = block.getFieldValue('G')
   const number_b = block.getFieldValue('B')
@@ -56,13 +57,13 @@ Blockly.JavaScript.set_all_light_color = function (block: any) {
   return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
 }
 
-Blockly.JavaScript.set_light_animation = function (block: any) {
+javascriptGenerator.set_light_animation = function (block: any) {
   const dropdown_animation = block.getFieldValue('animation')
   const number_name = block.getFieldValue('NAME')
   const text_color = block.getFieldValue('color')
   // TODO: Assemble JavaScript into code variable.
   return `bleSetLightAnimation('${dropdown_animation}', ${number_name}, ${text_color});\n`
 }
-Blockly.JavaScript.clear_light = function (block: any) {
+javascriptGenerator.clear_light = function (block: any) {
   return 'clearAllLight();\n'
 }

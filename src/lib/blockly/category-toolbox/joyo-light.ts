@@ -5,10 +5,10 @@ export default {
     container: 'category-joyo',
   },
   contents: [
-    {
-      kind: 'block',
-      type: 'set_light_turtle',
-    },
+    // {
+    //   kind: 'block',
+    //   type: 'set_light_turtle',
+    // },
     {
       kind: 'block',
       type: 'set_light',

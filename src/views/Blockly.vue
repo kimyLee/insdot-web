@@ -545,15 +545,15 @@ export default defineComponent({
 
       } as any)
 
-      function handleWorkspaceChange (event: any) {
-        if (event.type === Blockly.Events.BLOCK_CHANGE) {
-          const block = workspace.getBlockById(event.blockId)
-          if (block.type === 'play_audio') {
-            playPreviewMusic(event)
-          }
-        }
-      }
-      workspace.addChangeListener(handleWorkspaceChange)
+      // function handleWorkspaceChange (event: any) {
+      //   if (event.type === Blockly.Events.BLOCK_CHANGE) {
+      //     const block = workspace.getBlockById(event.blockId)
+      //     if (block.type === 'play_audio') {
+      //       playPreviewMusic(event)
+      //     }
+      //   }
+      // }
+      // workspace.addChangeListener(handleWorkspaceChange)
 
       // playPreviewMusic
 

@@ -1,7 +1,8 @@
 
 import Blockly from 'blockly'
+import { javascriptGenerator } from 'blockly/javascript'
 
-Blockly.JavaScript.math_arithmetic_preset = function (block: any) {
-  // const branchCode = Blockly.JavaScript.statementToCode(block, 'main')
+javascriptGenerator.math_arithmetic_preset = function (block: any) {
+  // const branchCode = javascriptGenerator.statementToCode(block, 'main')
   return '\n'
 }
