@@ -3,6 +3,88 @@
 import Blockly from 'blockly'
 import '../block-js-code/audio'
 
+const audioId = 'FVy?[zC3+iD.=igw/()?'
+const audioArray = [
+  '01do',
+  '02re',
+  '03mi',
+  '04fa',
+  '05so',
+  '06la',
+  '07xi',
+  '08dd',
+  'amaz',
+  'blad',
+  'blo2',
+  'cbeg',
+  'chek',
+  'cnnt',
+  'csm1',
+  'csm2',
+  'endp',
+  'ev00',
+  'ev01',
+  'ev02',
+  'ev03',
+  'ev04',
+  'ev05',
+  'ev06',
+  'fbdy',
+  'fhed',
+  'fnon',
+  'gbeg',
+  'ghil',
+  'ghot',
+  'good',
+  'gret',
+  'gswa',
+  'gtal',
+  'gwin',
+  'hamm',
+  'hatc',
+  'hred',
+  'mat1',
+  'mat2',
+  'mat3',
+  'mat4',
+  'mat5',
+  'mat6',
+  'mov1',
+  'mov2',
+  'mov3',
+  'mov4',
+  'mov5',
+  'nwit',
+  'ohno',
+  'olwh',
+  'pert',
+  'poff',
+  'sk01',
+  'sk02',
+  'sk03',
+  'sk04',
+  'srb2',
+  'srbl',
+  'stat',
+  'swbm',
+  'tala',
+  'tend',
+]
+const audioMap = {} as any
+for (let i = audioArray.length; i--;) {
+  audioMap[audioArray[i]] = new Audio(`audio/${audioArray[i]}.mp3`)
+}
+
+console.log(audioMap)
+
+// 如果发生音效选择事件，则播放对应音效
+export function playPreviewMusic (evt: any) {
+  if (audioMap[evt.newValue]) {
+    audioMap[evt.newValue].play()
+  }
+}
+
+// todo: 音效更新
 Blockly.defineBlocksWithJsonArray([
   {
     type: 'play_audio',

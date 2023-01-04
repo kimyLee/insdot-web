@@ -129,6 +129,7 @@ import '@/style/blockly-category.scss'
 import '@/style/blockly.scss'
 
 import { registerToolboxCategoryCallback } from '@/lib/blockly/category-toolbox/list'
+import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 
 import { setLocale } from '@/lib/blockly/i18n'
 import { useStore } from 'vuex'
@@ -136,6 +137,7 @@ import { useStore } from 'vuex'
 const CustomZh = {
   PROCEDURES_DEFNORETURN_TITLE: '函数',
   PROCEDURES_DEFRETURN_TITLE: '函数',
+  LISTS_REPEAT_TITLE: '使用重复%2个%1建立列表',
 }
 
 // import * as Blockly from 'blockly/core'
@@ -539,6 +541,18 @@ export default defineComponent({
         renderer: 'zelos',
 
       } as any)
+
+      function handleWorkspaceChange (event: any) {
+        if (event.type === Blockly.Events.BLOCK_CHANGE) {
+          const block = workspace.getBlockById(event.blockId)
+          if (block.type === 'play_audio') {
+            playPreviewMusic(event)
+          }
+        }
+      }
+      workspace.addChangeListener(handleWorkspaceChange)
+
+      // playPreviewMusic
 
       // registerToolboxCategoryCallback(workspace)
 

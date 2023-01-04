@@ -35,8 +35,11 @@ Blockly.JavaScript.lists_create_with_row = function (block: any) {
 }
 
 Blockly.JavaScript.list_include = function (block: any) {
-  const variable_list = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('list'), 'VARIABLE')
-  const variable_name = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
+  // const variable_list = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('list'), 'VARIABLE')
+  const variable_list = Blockly.JavaScript.valueToCode(block, 'LIST', Blockly.JavaScript.ORDER_ATOMIC)
+
+  // const variable_name = Blockly.JavaScript.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
+  const variable_name = Blockly.JavaScript.valueToCode(block, 'NAME', Blockly.JavaScript.ORDER_ATOMIC)
   // TODO: Assemble JavaScript into code variable.
   const code = `${variable_list}.indexOf(${variable_name}) >= 0`
   // TODO: Change ORDER_NONE to the correct strength.

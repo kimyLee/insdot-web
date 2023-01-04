@@ -77,17 +77,15 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'list_include',
     // message0: 'list %1 including item %2',
-    message0: 'is array %1 include %2',
+    message0: '列表 %1 包含 %2 ？',
     args0: [
       {
-        type: 'field_variable',
-        name: 'list',
-        variable: 'item',
+        type: 'input_value',
+        name: 'LIST',
       },
       {
-        type: 'field_variable',
+        type: 'input_value',
         name: 'NAME',
-        variable: 'item',
       },
     ],
     output: 'Boolean',
