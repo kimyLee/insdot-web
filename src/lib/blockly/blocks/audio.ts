@@ -1,6 +1,7 @@
-
+import { defineBlocksWithJsonArray } from 'blockly/core'
+import { javascriptGenerator } from 'blockly/javascript'
 // // todo: blockly 类型
-import Blockly from 'blockly'
+// import Blockly from 'blockly'
 import '../block-js-code/audio'
 
 const audioId = 'FVy?[zC3+iD.=igw/()?'
@@ -85,7 +86,7 @@ export function playPreviewMusic (evt: any) {
 }
 
 // todo: 音效更新
-Blockly.defineBlocksWithJsonArray([
+defineBlocksWithJsonArray([
   {
     type: 'play_audio',
     message0: '%{BKY_AUDIO_PLAY_AUDIO}',
@@ -220,3 +221,8 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: '',
   },
 ])
+
+javascriptGenerator.play_audio = function (block: any) {
+  const dropdown_name = block.getFieldValue('NAME')
+  return 'blePlayMusic("' + dropdown_name + '");\n'
+}

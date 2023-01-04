@@ -112,7 +112,8 @@ import {
 } from 'vue'
 import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/api/joyo-ble/index'
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
-import Blockly from 'blockly' // todo: 拆解
+import * as Blockly from 'blockly/core'
+import { javascriptGenerator } from 'blockly/javascript'
 import basicCategories from '@/lib/blockly/category-toolbox/toolbox'
 import { pureCanvas, runSample } from '@/lib/blockly/blocks/preBlock'
 import '@/lib/blockly/blocks/index'
@@ -133,6 +134,7 @@ import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 
 import { setLocale } from '@/lib/blockly/i18n'
 import { useStore } from 'vuex'
+import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeVariable'
 
 const CustomZh = {
   PROCEDURES_DEFNORETURN_TITLE: '函数',
@@ -140,7 +142,6 @@ const CustomZh = {
   LISTS_REPEAT_TITLE: '使用重复%2个%1建立列表',
 }
 
-// import * as Blockly from 'blockly/core'
 // import 'blockly/blocks'
 
 // 引入解释器
@@ -161,6 +162,8 @@ declare global {
       sleepFn: any;
       setUp: any;
       Interpreter: any;
+      javascriptGenerator: any,
+      Blockly: any
     }
 }
 
@@ -227,7 +230,7 @@ export default defineComponent({
 
     const clearCanvas = () => {
       workspace.clear()
-      Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(pureCanvas || '') as any)
+      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(pureCanvas || '') as any, workspace)
     }
     const toggleVariableDrawerVisible = () => {
       state.variableDrawerVisible = !state.variableDrawerVisible
@@ -254,12 +257,12 @@ export default defineComponent({
       // 保存代码
       const xml = localStorage.getItem('temp')
       workspace.clear()
-      Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(xml || '') as any)
+      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml || '') as any, workspace)
     }
 
     const generateCode = () => {
       // runCode
-      const code = Blockly.JavaScript.workspaceToCode(workspace)
+      const code = javascriptGenerator.workspaceToCode(workspace)
       console.log(code)
     }
 
@@ -427,8 +430,7 @@ export default defineComponent({
         debugLog('JOYO未连接', 'system')
       }
       if (workspace) {
-        let code = Blockly.JavaScript.workspaceToCode(workspace) as string
-        console.log(code)
+        let code = javascriptGenerator.workspaceToCode(workspace) as string
 
         // 移除外部的block
         const codeArr = code.split('\n\n')
@@ -472,14 +474,14 @@ export default defineComponent({
 
     function getContentByUUID (uuid = '') {
       const content = localStorage.getItem(`block-${uuid}`) || runSample
-      Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(content) as any)
+      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(content) as any, workspace)
     }
 
     // 重新绘制当前页面，切换多语言时候使用
     function reRenderCanvas () {
       const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
       workspace.clear()
-      Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(xml || '') as any)
+      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml || '') as any, workspace)
     }
 
     // 更改blockly语言
@@ -527,6 +529,7 @@ export default defineComponent({
       toggleLang(localStorage.getItem('lang') || 'en')
 
       Blockly.zelos.ConstantProvider.prototype.FIELD_COLOUR_FULL_BLOCK = false
+
       workspace = Blockly.inject('blocklyDiv', {
         grid: {
           spacing: 20,
@@ -556,7 +559,14 @@ export default defineComponent({
 
       // registerToolboxCategoryCallback(workspace)
 
-      Blockly.JavaScript.addReservedWords('code') // 获取js代码
+      // Blockly.JavaScript.addReservedWords('code') // 获取js代码
+      registerCustomToolboxCategory(workspace)
+
+      javascriptGenerator.addReservedWords('code') // 获取js代码
+
+      window.Blockly = Blockly
+      window.workspace = workspace
+      window.javascriptGenerator = javascriptGenerator
 
       // 获取当前ID的程序
       // 获取当前游戏内容
@@ -564,18 +574,16 @@ export default defineComponent({
       store.dispatch('getProject') // 获取所有文件
 
       // 获取js代码
-      // Blockly.JavaScript.workspaceToCode(workspace);
+      // javascriptGenerator.workspaceToCode(workspace);
 
       // get xml
       // Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
 
       // load xml
-      // Blockly.Xml.domToWorkspace(workspace, Blockly.Xml.textToDom(xml));
+      // Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), workspace);
       // state.OIDstatus = JSON.parse(localStorage.getItem('OIDstatus') || '[]')
-      window.Blockly = Blockly
-      window.workspace = workspace;
 
-      (window as any).handleNotifyEvent = (msg: number[]) => {
+      ;(window as any).handleNotifyEvent = (msg: number[]) => {
         if (msg.length === 11 && msg[2] === 0x05 && msg[3] === 0xB1 && msg[4] === 0x04) {
           const val = handleOIDVal(msg[10] * 256 * 256 * 256 + msg[9] * 256 * 256 + msg[8] * 256 + msg[7])
           state.lastOID = val

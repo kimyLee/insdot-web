@@ -110,12 +110,7 @@
 import { message } from 'ant-design-vue'
 import { defineComponent, nextTick, reactive, ref, toRefs } from 'vue'
 
-declare global {
-    interface Window {
-      workspace: any;
-      Blockly: any;
-    }
-}
+import * as Blockly from 'blockly/core'
 
 export default defineComponent({
   name: 'VariableDrawer',
@@ -134,11 +129,13 @@ export default defineComponent({
         key: 'variable',
         context: '变量',
         placeholder: '请输入变量名',
+        variableType: 'VAR',
       },
       list: {
         key: 'list',
         context: '列表',
         placeholder: '请输入列表名',
+        variableType: 'LIST',
       },
     }
 
@@ -160,13 +157,12 @@ export default defineComponent({
 
       if (!createValue) return
 
+      const workspace = Blockly.getMainWorkspace()
+
       // 调用blockly创建的方法
       // check  variable existing
 
-      const workspace = window.workspace
-      const Blockly = window.Blockly
-
-      const type = createKey === 'variable' ? '' : 'list'
+      const type = createKey === tabs.variable.key ? tabs.variable.variableType : tabs.list.variableType
 
       const existing = Blockly.Variables.nameUsedWithAnyType(createValue, workspace)
       if (existing) {
@@ -179,7 +175,7 @@ export default defineComponent({
         }
         message.error(msg)
       } else {
-        window.workspace.createVariable(createValue, type)
+        workspace.createVariable(createValue, type)
 
         nextTick(() => {
           getVariables()
@@ -197,18 +193,17 @@ export default defineComponent({
     }
 
     const getVariables = () => {
-      const workspace = window.workspace
-      // const Blockly = window.Blockly
+      const workspace = Blockly.getMainWorkspace()
 
-      const variableMap = workspace.getVariableMap().variableMap_
+      state.variables = [...workspace.getVariablesOfType(tabs.variable.variableType)]
 
-      state.variables = [...variableMap['']]
-      state.list = variableMap.list ? [...variableMap.list] : []
+      state.list = [...workspace.getVariablesOfType(tabs.list.variableType)]
     }
 
     const renameVariable = (variable: any) => {
       //
-      window.Blockly.Variables.renameVariable(window.workspace, variable, () => {
+      const workspace = Blockly.getMainWorkspace()
+      Blockly.Variables.renameVariable(workspace, variable, () => {
         nextTick(() => {
           getVariables()
         })
@@ -216,7 +211,8 @@ export default defineComponent({
     }
 
     const deleteVariableById = (id: string) => {
-      window.workspace.deleteVariableById(id)
+      const workspace = Blockly.getMainWorkspace()
+      workspace.deleteVariableById(id)
 
       nextTick(() => {
         getVariables()

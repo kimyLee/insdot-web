@@ -7,5 +7,7 @@ import './joyo-oid'
 import './math'
 import './list'
 
+import './variable'
+
 // 多语言
 import '../i18n/index'
