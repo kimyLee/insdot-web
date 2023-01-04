@@ -1,7 +1,31 @@
+/**
+ * @license
+ * Copyright 2019 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import Blockly from 'blockly'
+/**
+ * @fileoverview A field used to customize a turtle.
+ * @author bekawestberg@gmail.com (Beka Westberg)
+ */
+'use strict'
 
-export class FieldLight extends Blockly.Field {
+// You must provide the constructor for your custom field.
+goog.provide('CustomFields.FieldTurtle')
+
+// You must require the abstract field class to inherit from.
+goog.require('Blockly.Field')
+goog.require('Blockly.fieldRegistry')
+goog.require('Blockly.utils')
+goog.require('Blockly.utils.dom')
+goog.require('Blockly.utils.object')
+goog.require('Blockly.utils.Size')
+
+var CustomFields = CustomFields || {}
+
+class FieldTurtle extends Blockly.Field {
+  // Since this field is editable we must also define serializable as true
+  // (for backwards compatibility reasons serializable is false by default).
   SERIALIZABLE = true;
 
   // The cursor property defines what the mouse will look like when the user
@@ -17,41 +41,24 @@ export class FieldLight extends Blockly.Field {
   // Used to keep track of our editor event listeners, so they can be
   // properly disposed of when the field closes. You can keep track of your
   // listeners however you want, just be sure to dispose of them!
-  editorListeners_ = [] as any[];
+  editorListeners_ = [];
 
-  displayValue_ = null as any;
-  cachedValidatedValue_ = null as any;
-  editor_ = null as any;
-  stovepipe_ = null as any;
-  crown_ = null as any;
-  mask_ = null as any;
-  propeller_ = null as any;
-  fedora_ = null as any;
-  turtleGroup_ = null as any;
-  shellPattern_ = null as any;
-  isValueInvalid_ = null as any;
-  borderRect_ = null as any;
-  movableGroup_ = null as any;
-  defs_ = null as any;
-  polkadotPattern_ = null as any;
-  polkadotGroup_ = null as any;
-  hexagonPattern_ = null as any;
-  stripesPattern_ = null as any;
-  constructor (opt_pattern?: any, opt_hat?: any, opt_turtleName?: any, opt_validator?: any) {
+  // Generally field's values should be optional, and have logical defaults.
+  // If this is not possible (for example image fields can't have logical
+  // defaults) the field should throw a clear error when a value is not provided.
+  // Editable fields also generally accept validators, so we will accept a
+  // validator.
+  constructor (opt_pattern, opt_hat, opt_turtleName, opt_validator) {
     // The turtle field contains an object as its value, so we need to compile
     // the parameters into an object.
-    // const value = {} as any
-    // value.pattern = opt_pattern || FieldLight.PATTERNS[0]
-    // value.hat = opt_hat || FieldLight.HATS[0]
-    // value.turtleName = opt_turtleName || FieldLight.NAMES[0]
+    const value = {}
+    value.pattern = opt_pattern || FieldTurtle.PATTERNS[0]
+    value.hat = opt_hat || FieldTurtle.HATS[0]
+    value.turtleName = opt_turtleName || FieldTurtle.NAMES[0]
 
     // A field constructor should always call its parent constructor, because
     // that helps keep the code organized and DRY.
-    super({
-      pattern: opt_pattern || FieldLight.PATTERNS[0],
-      hat: opt_hat || FieldLight.HATS[0],
-      turtleName: opt_turtleName || FieldLight.NAMES[0],
-    }, opt_validator)
+    super(value, opt_validator)
 
     /**
      * The size of the area rendered by the field.
@@ -62,6 +69,10 @@ export class FieldLight extends Blockly.Field {
     this.size_ = new Blockly.utils.Size(0, 0)
   }
 
+  // These are the different options for our turtle. Being declared this way
+  // means they are static, and not translatable. If you want to do something
+  // similar, but make it translatable you should set up your options like a
+  // dropdown field, with language-neutral keys and human-readable values.
   static PATTERNS =
     ['Dots', 'Stripes', 'Hexagons'];
 
@@ -72,13 +83,13 @@ export class FieldLight extends Blockly.Field {
     ['Yertle', 'Franklin', 'Crush', 'Leonardo', 'Bowser', 'Squirtle', 'Oogway'];
 
   // This allows the field to be constructed using a JSON block definition.
-  static fromJson (options: any) {
+  static fromJson (options) {
     // In this case we simply pass the JSON options along to the constructor,
     // but you can also use this to get message references, and other such things.
-    return new FieldLight(
-      options?.pattern,
-      options?.hat,
-      options?.turtleName)
+    return new FieldTurtle(
+      options.pattern,
+      options.hat,
+      options.turtleName)
   }
 
   // Used to create the DOM of our field.
@@ -106,7 +117,7 @@ export class FieldLight extends Blockly.Field {
     // Things like this are best applied to the clickTarget_. By default the
     // click target is the same as getSvgRoot, which by default is the
     // fieldGroup_.
-    const group = this.getClickTarget_() as any
+    const group = this.getClickTarget_()
     if (!this.isCurrentlyEditable()) {
       group.style.cursor = 'not-allowed'
     } else {
@@ -117,7 +128,7 @@ export class FieldLight extends Blockly.Field {
   // Gets the text to display when the block is collapsed
   getText () {
     let text = this.value_.turtleName + ' wearing a ' + this.value_.hat
-    if (this.value_.hat === 'Stovepipe' || this.value_.hat === 'Propeller') {
+    if (this.value_.hat == 'Stovepipe' || this.value_.hat == 'Propeller') {
       text += ' hat'
     }
     return text
@@ -127,27 +138,27 @@ export class FieldLight extends Blockly.Field {
   // something this field can legally "hold". Class validators can either change
   // the input value, or return null if the input value is invalid. Called by
   // the setValue() function.
-  doClassValidation_ (newValue: any) {
+  doClassValidation_ (newValue) {
     // Undefined signals that we want the value to remain unchanged. This is a
     // special feature of turtle fields, but could be useful for other
     // multi-part fields.
-    if (newValue.pattern === undefined) {
+    if (newValue.pattern == undefined) {
       newValue.pattern = this.displayValue_ && this.displayValue_.pattern
       // We only want to allow patterns that are part of our pattern list.
       // Anything else is invalid, so we return null.
-    } else if (FieldLight.PATTERNS.indexOf(newValue.pattern) === -1) {
+    } else if (FieldTurtle.PATTERNS.indexOf(newValue.pattern) == -1) {
       newValue.pattern = null
     }
 
-    if (newValue.hat === undefined) {
+    if (newValue.hat == undefined) {
       newValue.hat = this.displayValue_ && this.displayValue_.hat
-    } else if (FieldLight.HATS.indexOf(newValue.hat) === -1) {
+    } else if (FieldTurtle.HATS.indexOf(newValue.hat) == -1) {
       newValue.hat = null
     }
 
-    if (newValue.turtleName === undefined) {
+    if (newValue.turtleName == undefined) {
       newValue.turtleName = this.displayValue_ && this.displayValue_.turtleName
-    } else if (FieldLight.NAMES.indexOf(newValue.turtleName) === -1) {
+    } else if (FieldTurtle.NAMES.indexOf(newValue.turtleName) == -1) {
       newValue.turtleName = null
     }
 
@@ -167,7 +178,7 @@ export class FieldLight extends Blockly.Field {
   }
 
   // Saves the new field value. Called by the setValue function.
-  doValueUpdate_ (newValue: any) {
+  doValueUpdate_ (newValue) {
     // The default function sets this field's this.value_ property to the
     // newValue, and its this.isDirty_ property to true. The isDirty_ property
     // tells the setValue function whether the field needs to be re-rendered.
@@ -181,7 +192,7 @@ export class FieldLight extends Blockly.Field {
   // Notifies that the field that the new value was invalid. Called by
   // setValue function. Can either be triggered by the class validator, or the
   // local validator.
-  doValueInvalid_ (invalidValue: any) {
+  doValueInvalid_ (invalidValue) {
     // By default this function is no-op, meaning if the new value is invalid
     // the field simply won't be updated. This field has custom UI for invalid
     // values, so we override this function.
@@ -196,7 +207,6 @@ export class FieldLight extends Blockly.Field {
   // Updates the field's on-block display based on the current display value.
   render_ () {
     const value = this.displayValue_
-    console.log(value, this, 'render_')
 
     // Always do editor updates inside render. This makes sure the editor
     // always displays the correct value, even if a validator changes it.
@@ -313,9 +323,9 @@ export class FieldLight extends Blockly.Field {
     Blockly.DropDownDiv.getContentDiv().appendChild(this.editor_)
 
     // These allow us to have the editor match the block's colour.
-    const fillColour = this.sourceBlock_.getColour() as any
+    const fillColour = this.sourceBlock_.getColour()
     Blockly.DropDownDiv.setColour(fillColour,
-      (this.sourceBlock_ as any).style.colourTertiary)
+      this.sourceBlock_.style.colourTertiary)
 
     // Always pass the dropdown div a dispose function so that you can clean
     // up event listeners when the editor closes.
@@ -325,12 +335,12 @@ export class FieldLight extends Blockly.Field {
 
   // Creates the UI of the editor, and adds event listeners to it.
   dropdownCreate_ () {
-    const createRow = function (table: any) {
+    const createRow = function (table) {
       const row = table.appendChild(document.createElement('tr'))
       row.className = 'row'
       return row
     }
-    const createLeftArrow = function (row: any) {
+    const createLeftArrow = function (row) {
       const cell = document.createElement('div')
       cell.className = 'arrow'
       const leftArrow = document.createElement('button')
@@ -340,8 +350,8 @@ export class FieldLight extends Blockly.Field {
       row.appendChild(cell)
       return cell
     }
-    const createTextNode = function (row: any, text: any) {
-      const cell = document.createElement('div') as any
+    const createTextNode = function (row, text) {
+      const cell = document.createElement('div')
       cell.className = 'text'
       const textElem = document.createTextNode(text)
       cell.appendChild(textElem)
@@ -356,7 +366,7 @@ export class FieldLight extends Blockly.Field {
       row.appendChild(cell)
       return cell
     }
-    const createRightArrow = function (row: any) {
+    const createRightArrow = function (row) {
       const cell = document.createElement('div')
       cell.className = 'arrow'
       const rightArrow = document.createElement('button')
@@ -366,8 +376,8 @@ export class FieldLight extends Blockly.Field {
       row.appendChild(cell)
       return cell
     }
-    const createArrowListener = function (variable: any, array: any, direction: any) {
-      return function (this: any) {
+    const createArrowListener = function (variable, array, direction) {
+      return function () {
         let currentIndex = array.indexOf(this.displayValue_[variable])
         currentIndex += direction
         if (currentIndex <= -1) {
@@ -375,13 +385,13 @@ export class FieldLight extends Blockly.Field {
         } else if (currentIndex >= array.length) {
           currentIndex = 0
         }
-        const value = {} as any
+        const value = {}
         value[variable] = array[currentIndex]
         this.setValue(value)
       }
     }
 
-    const widget = document.createElement('div') as any
+    const widget = document.createElement('div')
     widget.className = 'customFieldsTurtleWidget blocklyNonSelectable'
 
     const table = document.createElement('div')
@@ -393,40 +403,40 @@ export class FieldLight extends Blockly.Field {
     widget.patternText = createTextNode(row, this.displayValue_.pattern)
     let rightArrow = createRightArrow(row)
     this.editorListeners_.push(Blockly.browserEvents.bind(leftArrow, 'mouseup', this,
-      createArrowListener('pattern', FieldLight.PATTERNS, -1)))
+      createArrowListener('pattern', FieldTurtle.PATTERNS, -1)))
     this.editorListeners_.push(Blockly.browserEvents.bind(rightArrow, 'mouseup', this,
-      createArrowListener('pattern', FieldLight.PATTERNS, 1)))
+      createArrowListener('pattern', FieldTurtle.PATTERNS, 1)))
 
     row = createRow(table)
     leftArrow = createLeftArrow(row)
     widget.hatText = createTextNode(row, this.displayValue_.hat)
     rightArrow = createRightArrow(row)
     this.editorListeners_.push(Blockly.browserEvents.bind(leftArrow, 'mouseup', this,
-      createArrowListener('hat', FieldLight.HATS, -1)))
+      createArrowListener('hat', FieldTurtle.HATS, -1)))
     this.editorListeners_.push(Blockly.browserEvents.bind(rightArrow, 'mouseup', this,
-      createArrowListener('hat', FieldLight.HATS, 1)))
+      createArrowListener('hat', FieldTurtle.HATS, 1)))
 
     row = createRow(table)
     leftArrow = createLeftArrow(row)
     widget.turtleNameText = createTextNode(row, this.displayValue_.turtleName)
     rightArrow = createRightArrow(row)
     this.editorListeners_.push(Blockly.browserEvents.bind(leftArrow, 'mouseup', this,
-      createArrowListener('turtleName', FieldLight.NAMES, -1)))
+      createArrowListener('turtleName', FieldTurtle.NAMES, -1)))
     this.editorListeners_.push(Blockly.browserEvents.bind(rightArrow, 'mouseup', this,
-      createArrowListener('turtleName', FieldLight.NAMES, 1)))
+      createArrowListener('turtleName', FieldTurtle.NAMES, 1)))
 
     const randomizeButton = document.createElement('button')
     randomizeButton.className = 'randomize'
     randomizeButton.setAttribute('type', 'button')
     randomizeButton.textContent = 'randomize turtle'
     this.editorListeners_.push(Blockly.browserEvents.bind(randomizeButton, 'mouseup', this,
-      function (this: any) {
-        const value = {} as any
-        value.pattern = FieldLight.PATTERNS[Math.floor(Math.random() * FieldLight.PATTERNS.length)]
+      function () {
+        const value = {}
+        value.pattern = FieldTurtle.PATTERNS[Math.floor(Math.random() * FieldTurtle.PATTERNS.length)]
 
-        value.hat = FieldLight.HATS[Math.floor(Math.random() * FieldLight.HATS.length)]
+        value.hat = FieldTurtle.HATS[Math.floor(Math.random() * FieldTurtle.HATS.length)]
 
-        value.turtleName = FieldLight.NAMES[Math.floor(Math.random() * FieldLight.NAMES.length)]
+        value.turtleName = FieldTurtle.NAMES[Math.floor(Math.random() * FieldTurtle.NAMES.length)]
 
         this.setValue(value)
       }))
@@ -437,8 +447,7 @@ export class FieldLight extends Blockly.Field {
 
   // Cleans up any event listeners that were attached to the now hidden editor.
   dropdownDispose_ () {
-    for (let i = this.editorListeners_.length, listener; listener === this.editorListeners_[i]; i--) {
-      listener = this.editorListeners_[i]
+    for (let i = this.editorListeners_.length, listener; listener = this.editorListeners_[i]; i--) {
       Blockly.browserEvents.unbind(listener)
       this.editorListeners_.pop()
     }
@@ -453,22 +462,22 @@ export class FieldLight extends Blockly.Field {
     // The getColourX functions are the best way to access the colours of a block.
     const isShadow = this.sourceBlock_.isShadow()
     const fillColour = isShadow
-      ? (this.sourceBlock_ as any).style.colourSecondary : this.sourceBlock_.getColour()
+      ? this.sourceBlock_.style.colourSecondary : this.sourceBlock_.getColour()
     // This is technically a package function, meaning it could change.
     const borderColour = isShadow ? fillColour
-      : (this.sourceBlock_ as any).style.colourTertiary
+      : this.sourceBlock_.style.colourTertiary
 
     if (this.turtleGroup_) {
       let child = this.turtleGroup_.firstChild
       while (child) {
         // If it is a text node, continue.
-        if (child.nodeType === 3) {
+        if (child.nodeType == 3) {
           child = child.nextSibling
           continue
         }
         // Or if it is a non-turtle node, continue.
         const className = child.getAttribute('class')
-        if (!className || className.indexOf('turtleBody') === -1) {
+        if (!className || className.indexOf('turtleBody') == -1) {
           child = child.nextSibling
           continue
         }
@@ -481,7 +490,7 @@ export class FieldLight extends Blockly.Field {
   }
 
   // Saves the field's value to an XML node. Allows for custom serialization.
-  toXml (fieldElement: any) {
+  toXml (fieldElement) {
     // The default implementation of this function creates a node that looks
     // like this: (where value is returned by getValue())
     // <field name="FIELDNAME">value</field>
@@ -499,10 +508,10 @@ export class FieldLight extends Blockly.Field {
 
   // Sets the field's value based on an XML node. Allows for custom
   // de-serialization.
-  fromXml (fieldElement: any) {
+  fromXml (fieldElement) {
     // Because we had to do custom serialization for this field, we also need
     // to do custom de-serialization.
-    const value = {} as any
+    const value = {}
     value.pattern = fieldElement.getAttribute('pattern')
     value.hat = fieldElement.getAttribute('hat')
     value.turtleName = fieldElement.textContent
@@ -520,7 +529,7 @@ export class FieldLight extends Blockly.Field {
     const scaleGroup = Blockly.utils.dom.createSvgElement('g',
       {
         transform: 'scale(1.5)',
-      }, this.movableGroup_) as any
+      }, this.movableGroup_)
     this.turtleGroup_ = Blockly.utils.dom.createSvgElement('g',
       {
         // Makes the smaller turtle graphic align with the hats.
@@ -680,7 +689,7 @@ export class FieldLight extends Blockly.Field {
     let use = Blockly.utils.dom.createSvgElement('use',
       {
         x: 5,
-      }, this.hexagonPattern_) as any
+      }, this.hexagonPattern_)
     use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#hex')
     use = Blockly.utils.dom.createSvgElement('use',
       {
@@ -721,13 +730,8 @@ export class FieldLight extends Blockly.Field {
   }
 }
 
-// (LightField as any).fromJson = function (options: any) {
-//   const value = Blockly.utils.replaceMessageReferences(
-//     options.value)
-//   return new CustomFields.GenericField(value)
-// }
-Blockly.fieldRegistry.register('field_turtle', FieldLight as any)
+// Blockly needs to know the JSON name of this field. Usually this is
+// registered at the bottom of the field class.
+Blockly.fieldRegistry.register('field_turtle', FieldTurtle)
 
-// CustomFields.FieldLight = FieldLight
-
-// Blockly.fieldRegistry.register('field_light', LightField as any)
+CustomFields.FieldTurtle = FieldTurtle

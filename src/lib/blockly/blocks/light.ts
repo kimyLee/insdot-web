@@ -2,8 +2,40 @@
 // // todo: blockly 类型
 import Blockly from 'blockly'
 import '../block-js-code/light'
+// import './custom-field/field_light'
+import { FieldLight } from './custom-field/field_light'
+
+// 自定义block
+Blockly.Blocks.set_light_turtle = {
+  init: function () {
+    this.appendDummyInput()
+      .appendField('simple turtle')
+    this.appendDummyInput()
+      .setAlign(Blockly.ALIGN_CENTRE)
+      .appendField(new FieldLight(), 'TURTLE')
+    this.setStyle('loop_blocks')
+    this.setCommentText('Demonstrates a turtle field with no validator.')
+  },
+}
 
 Blockly.defineBlocksWithJsonArray([
+  // {
+  //   type: 'set_light_turtle',
+  //   // message0: 'set lights with array %1',
+  //   message0: 'set turtle %1',
+  //   args0: [
+  //     {
+  //       type: 'field_turtle',
+  //       name: 'TURTLE',
+  //       // variable: 'item',
+  //     },
+  //   ],
+  //   colour: 230,
+  //   tooltip: '',
+  //   helpUrl: '',
+  //   previousStatement: null,
+  //   nextStatement: null,
+  // },
   {
     type: 'set_light',
     // message0: 'set lights with array %1',
