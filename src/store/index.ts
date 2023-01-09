@@ -6,7 +6,9 @@ import type State from '@/store/interface'
 import { runSample } from '@/lib/blockly/blocks/preBlock'
 
 import ble from './ble'
+import blockly from './blockly'
 import type { BleStateType } from './ble'
+import type { BlocklyStateType } from './blockly'
 
 export const key: InjectionKey<Store<State>> = Symbol('key')
 
@@ -85,11 +87,13 @@ export default createStore({
   },
   modules: {
     ble,
+    blockly,
   },
 })
 
 interface AllStateType extends State {
   ble: BleStateType,
+  blockly: BlocklyStateType,
 }
 
 export function useStore () {

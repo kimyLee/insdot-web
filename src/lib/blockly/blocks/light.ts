@@ -3,27 +3,26 @@
 import * as Blockly from 'blockly/core'
 
 // import { defineBlocksWithJsonArray, Blocks, Msg, Mutator } from 'blockly/core'
-
 import { javascriptGenerator } from 'blockly/javascript'
+import './custom-field/field_light'
 
 Blockly.defineBlocksWithJsonArray([
-  // {
-  //   type: 'set_light_turtle',
-  //   // message0: 'set lights with array %1',
-  //   message0: 'set turtle %1',
-  //   args0: [
-  //     {
-  //       type: 'field_turtle',
-  //       name: 'TURTLE',
-  //       // variable: 'item',
-  //     },
-  //   ],
-  //   colour: 230,
-  //   tooltip: '',
-  //   helpUrl: '',
-  //   previousStatement: null,
-  //   nextStatement: null,
-  // },
+  {
+    type: 'set_light_demo',
+    // message0: 'set lights with array %1',
+    message0: 'set turtle %1',
+    args0: [
+      {
+        type: 'field_light',
+        name: 'Light',
+      },
+    ],
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+    previousStatement: null,
+    nextStatement: null,
+  },
   {
     type: 'set_light',
     // message0: 'set lights with array %1',

@@ -85,6 +85,7 @@
 
     <!-- <BlocklyDoc v-model:visible="visible" />
     <GameDoc v-model:visible="gameVisible" /> -->
+    <BlocklyModal />
   </div>
 </template>
 
@@ -120,6 +121,7 @@ import '@/lib/blockly/blocks/index'
 import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 import HeaderNav from '@/components/HeaderNav.vue'
+import BlocklyModal from '@/components/blockly-modal/index.vue'
 
 import VariableDrawer from '@/components/VariableDrawer.vue'
 
@@ -133,6 +135,7 @@ import { registerToolboxCategoryCallback } from '@/lib/blockly/category-toolbox/
 import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 
 import { setLocale } from '@/lib/blockly/i18n'
+import { initBlocklyStore } from '@/lib/blockly/blockly-use-vuex/index'
 import { useStore } from 'vuex'
 import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeVariable'
 
@@ -172,6 +175,7 @@ export default defineComponent({
   components: {
     HeaderNav,
     VariableDrawer,
+    BlocklyModal,
   },
 
   setup () {
@@ -207,6 +211,7 @@ export default defineComponent({
     const route = useRoute()
     const attrs = useAttrs()
     const store = useStore()
+    initBlocklyStore(store)
 
     console.log('attrs,', attrs)
 

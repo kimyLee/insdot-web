@@ -1,733 +1,527 @@
+/**
+ * @license
+ * Copyright 2021 Google LLC
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import Blockly from 'blockly'
+/**
+ * @fileoverview Bitmap input field.
+ * @author gregoryc@outlook.com (Greg Cannon)
+ */
 
+import Blockly from 'blockly/core'
+import { openModalOfLightColor } from '@/lib/blockly/blockly-use-vuex/index'
+
+export const DEFAULT_HEIGHT = 5
+export const DEFAULT_WIDTH = 5
+const PIXEL_SIZE = 15
+const FILLED_PIXEL_COLOR = '#363d80'
+const EMPTY_PIXEL_COLOR = 'white'
+
+/**
+ * Field for inputting a small bitmap image.
+ * Includes a grid of clickable pixels that's exported as a bitmap.
+ */
 export class FieldLight extends Blockly.Field {
-  SERIALIZABLE = true;
+  /**
+   *Constructor for the bitmap field.
+   * @param {!Array<!Array<number>>=} value 2D rectangular array of 1s and 0s.
+   * @param {Function=} validator A function that is called to validate.
+   * @param {!Object=} config Config A map of options used to
+   * configure the field.
+   */
+  imgHeight_ = 0
+  imgWidth_ = 0
+  boundEvents_ = [] as any
+  editorPixels_ = null as any
+  blockDisplayPixels_ = null as any
+  mouseIsDown_ = false
+  valToPaintWith_ = undefined as any
+  constructor (value = undefined, validator = undefined, config: any = undefined) {
+    super(value, validator, config)
 
-  // The cursor property defines what the mouse will look like when the user
-  // hovers over the field. By default the cursor will be whatever
-  // .blocklyDraggable's cursor is defined as (vis. grab). Most fields define
-  // this property as 'default'.
-  CURSOR = 'pointer';
+    this.SERIALIZABLE = true
 
-  // How far to move the text to keep it to the right of the turtle.
-  // May change if the turtle gets fancy enough.
-  TEXT_OFFSET_X = 80;
+    // Configure value, height, and width
+    if (this.getValue() !== null) {
+      this.imgHeight_ = this.getValue().length
+      this.imgWidth_ = this.getValue()[0].length || 0
+    } else {
+      this.imgHeight_ = (config && config.height) || DEFAULT_HEIGHT
+      this.imgWidth_ = (config && config.width) || DEFAULT_WIDTH
+    }
 
-  // Used to keep track of our editor event listeners, so they can be
-  // properly disposed of when the field closes. You can keep track of your
-  // listeners however you want, just be sure to dispose of them!
-  editorListeners_ = [] as any[];
-
-  displayValue_ = null as any;
-  cachedValidatedValue_ = null as any;
-  editor_ = null as any;
-  stovepipe_ = null as any;
-  crown_ = null as any;
-  mask_ = null as any;
-  propeller_ = null as any;
-  fedora_ = null as any;
-  turtleGroup_ = null as any;
-  shellPattern_ = null as any;
-  isValueInvalid_ = null as any;
-  borderRect_ = null as any;
-  movableGroup_ = null as any;
-  defs_ = null as any;
-  polkadotPattern_ = null as any;
-  polkadotGroup_ = null as any;
-  hexagonPattern_ = null as any;
-  stripesPattern_ = null as any;
-  constructor (opt_pattern?: any, opt_hat?: any, opt_turtleName?: any, opt_validator?: any) {
-    // The turtle field contains an object as its value, so we need to compile
-    // the parameters into an object.
-    // const value = {} as any
-    // value.pattern = opt_pattern || FieldLight.PATTERNS[0]
-    // value.hat = opt_hat || FieldLight.HATS[0]
-    // value.turtleName = opt_turtleName || FieldLight.NAMES[0]
-
-    // A field constructor should always call its parent constructor, because
-    // that helps keep the code organized and DRY.
-    super({
-      pattern: opt_pattern || FieldLight.PATTERNS[0],
-      hat: opt_hat || FieldLight.HATS[0],
-      turtleName: opt_turtleName || FieldLight.NAMES[0],
-    }, opt_validator)
+    // Set a default empty value
+    if (this.getValue() === null) {
+      this.setValue(this.getEmptyArray_())
+    }
 
     /**
-     * The size of the area rendered by the field.
-     * @type {Blockly.utils.Size}
-     * @protected
-     * @override
+     * Array holding info needed to unbind events.
+     * Used for disposing.
+     * Ex: [[node, name, func], [node, name, func]].
+     * @type {!Array<!Array<?>>}
+     * @private
      */
-    this.size_ = new Blockly.utils.Size(0, 0)
+    this.boundEvents_ = []
+
+    /** References to UI elements */
+    this.editorPixels_ = null
+    this.fieldGroup_ = null
+    this.blockDisplayPixels_ = null
+
+    /** Stateful variables */
+    this.mouseIsDown_ = false
+    this.valToPaintWith_ = undefined
   }
 
-  static PATTERNS =
-    ['Dots', 'Stripes', 'Hexagons'];
-
-  static HATS =
-    ['Stovepipe', 'Crown', 'Propeller', 'Mask', 'Fedora'];
-
-  static NAMES =
-    ['Yertle', 'Franklin', 'Crush', 'Leonardo', 'Bowser', 'Squirtle', 'Oogway'];
-
-  // This allows the field to be constructed using a JSON block definition.
+  /**
+   * Constructs a FieldLight from a JSON arg object.
+   * @param {!Object} options A JSON object with options.
+   * @return {!FieldLight} The new field instance.
+   * @package
+   * @nocollapse
+   */
   static fromJson (options: any) {
-    // In this case we simply pass the JSON options along to the constructor,
-    // but you can also use this to get message references, and other such things.
-    return new FieldLight(
-      options?.pattern,
-      options?.hat,
-      options?.turtleName)
+    return new FieldLight(options && options.value, undefined, options)
   }
 
-  // Used to create the DOM of our field.
-  initView () {
-    // Because we want to have both a borderRect_ (background) and a
-    // textElement_ (text) we can call the super-function. If we only wanted
-    // one or the other, we could call their individual createX functions.
-    super.initView()
-
-    // Note that the field group is created by the abstract field's init_
-    // function. This means that *all elements* should be children of the
-    // fieldGroup_.
-    this.createView_()
+  /**
+   * Returns the width of the image in pixels.
+   * @return {number} The width in pixels.
+   */
+  getImageWidth () {
+    return this.imgWidth_
   }
 
-  // Updates how the field looks depending on if it is editable or not.
-  updateEditable () {
-    if (!this.fieldGroup_) {
-      // Not initialized yet.
-      return
-    }
-    // The default functionality just makes it so the borderRect_ does not
-    // highlight when hovered.
-    super.updateEditable()
-    // Things like this are best applied to the clickTarget_. By default the
-    // click target is the same as getSvgRoot, which by default is the
-    // fieldGroup_.
-    const group = this.getClickTarget_() as any
-    if (!this.isCurrentlyEditable()) {
-      group.style.cursor = 'not-allowed'
-    } else {
-      group.style.cursor = this.CURSOR
-    }
+  /**
+   * Returns the height of the image in pixels.
+   * @return {number} The height in pixels.
+   */
+  getImageHeight () {
+    return this.imgHeight_
   }
 
-  // Gets the text to display when the block is collapsed
-  getText () {
-    let text = this.value_.turtleName + ' wearing a ' + this.value_.hat
-    if (this.value_.hat === 'Stovepipe' || this.value_.hat === 'Propeller') {
-      text += ' hat'
-    }
-    return text
-  }
-
-  // Makes sure new field values (given to setValue) are valid, meaning
-  // something this field can legally "hold". Class validators can either change
-  // the input value, or return null if the input value is invalid. Called by
-  // the setValue() function.
-  doClassValidation_ (newValue: any) {
-    // Undefined signals that we want the value to remain unchanged. This is a
-    // special feature of turtle fields, but could be useful for other
-    // multi-part fields.
-    if (newValue.pattern === undefined) {
-      newValue.pattern = this.displayValue_ && this.displayValue_.pattern
-      // We only want to allow patterns that are part of our pattern list.
-      // Anything else is invalid, so we return null.
-    } else if (FieldLight.PATTERNS.indexOf(newValue.pattern) === -1) {
-      newValue.pattern = null
-    }
-
-    if (newValue.hat === undefined) {
-      newValue.hat = this.displayValue_ && this.displayValue_.hat
-    } else if (FieldLight.HATS.indexOf(newValue.hat) === -1) {
-      newValue.hat = null
-    }
-
-    if (newValue.turtleName === undefined) {
-      newValue.turtleName = this.displayValue_ && this.displayValue_.turtleName
-    } else if (FieldLight.NAMES.indexOf(newValue.turtleName) === -1) {
-      newValue.turtleName = null
-    }
-
-    // This is a strategy for dealing with defaults on multi-part values.
-    // The class validator sets individual properties of the object to null
-    // to indicate that they are invalid, and then caches that object to the
-    // cachedValidatedValue_ property. This way the field can, for
-    // example, properly handle an invalid pattern, combined with a valid hat.
-    // This can also be done with local validators.
-    this.cachedValidatedValue_ = newValue
-
-    // Always be sure to return!
-    if (!newValue.pattern || !newValue.hat || !newValue.turtleName) {
+  /**
+   * Validates that a new value meets the requirements for a valid bitmap array.
+   * @param {*} newValue The new value to be tested.
+   * @return {Object} The new value if it's valid, or null.
+   */
+  doClassValidation_ (newValue: any = undefined) {
+    if (!newValue) {
       return null
+    }
+    // Check if the new value is an array
+    if (!Array.isArray(newValue)) {
+      return null
+    }
+    const newHeight = newValue.length
+    // The empty list is not an acceptable bitmap
+    if (newHeight === 0) {
+      return null
+    }
+
+    // Check that the width matches the existing width of the image if it
+    // already has a value
+    const newWidth = newValue[0].length
+    for (const row of newValue) {
+      if (!Array.isArray(row)) {
+        return null
+      }
+      if (row.length !== newWidth) {
+        return null
+      }
+    }
+
+    // Check if all contents of the arrays are either 0 or 1
+    for (const row of newValue) {
+      for (const cell of row) {
+        if (cell !== 0 && cell !== 1) {
+          return null
+        }
+      }
     }
     return newValue
   }
 
-  // Saves the new field value. Called by the setValue function.
+  /**
+   * Called when a new value has been validated and is about to be set.
+   * @param {*} newValue The value that's about to be set.
+   */
   doValueUpdate_ (newValue: any) {
-    // The default function sets this field's this.value_ property to the
-    // newValue, and its this.isDirty_ property to true. The isDirty_ property
-    // tells the setValue function whether the field needs to be re-rendered.
     super.doValueUpdate_(newValue)
-    this.displayValue_ = newValue
-    // Since this field has custom UI for invalid values, we also want to make
-    // sure it knows it is now valid.
-    this.isValueInvalid_ = false
-  }
-
-  // Notifies that the field that the new value was invalid. Called by
-  // setValue function. Can either be triggered by the class validator, or the
-  // local validator.
-  doValueInvalid_ (invalidValue: any) {
-    // By default this function is no-op, meaning if the new value is invalid
-    // the field simply won't be updated. This field has custom UI for invalid
-    // values, so we override this function.
-    // We want the value to be displayed like normal.
-    // But we want to flag it as invalid, so the render_ function knows to
-    // make the borderRect_ red.
-    this.displayValue_ = invalidValue
-    this.isDirty_ = true
-    this.isValueInvalid_ = true
-  }
-
-  // Updates the field's on-block display based on the current display value.
-  render_ () {
-    const value = this.displayValue_
-    console.log(value, this, 'render_')
-
-    // Always do editor updates inside render. This makes sure the editor
-    // always displays the correct value, even if a validator changes it.
-    if (this.editor_) {
-      this.renderEditor_()
-    }
-
-    this.stovepipe_.style.display = 'none'
-    this.crown_.style.display = 'none'
-    this.mask_.style.display = 'none'
-    this.propeller_.style.display = 'none'
-    this.fedora_.style.display = 'none'
-    switch (value.hat) {
-      case 'Stovepipe':
-        this.stovepipe_.style.display = ''
-        this.turtleGroup_.setAttribute('transform', 'translate(0,12)')
-        this.textElement_.setAttribute(
-          'transform', 'translate(' + this.TEXT_OFFSET_X + ',20)')
-        break
-      case 'Crown':
-        this.crown_.style.display = ''
-        this.turtleGroup_.setAttribute('transform', 'translate(0,9)')
-        this.textElement_.setAttribute(
-          'transform', 'translate(' + this.TEXT_OFFSET_X + ',16)')
-        break
-      case 'Mask':
-        this.mask_.style.display = ''
-        this.turtleGroup_.setAttribute('transform', 'translate(0,6)')
-        this.textElement_.setAttribute('transform',
-          'translate(' + this.TEXT_OFFSET_X + ',12)')
-        break
-      case 'Propeller':
-        this.propeller_.style.display = ''
-        this.turtleGroup_.setAttribute('transform', 'translate(0,6)')
-        this.textElement_.setAttribute('transform',
-          'translate(' + this.TEXT_OFFSET_X + ',12)')
-        break
-      case 'Fedora':
-        this.fedora_.style.display = ''
-        this.turtleGroup_.setAttribute('transform', 'translate(0,6)')
-        this.textElement_.setAttribute('transform',
-          'translate(' + this.TEXT_OFFSET_X + ',12)')
-        break
-    }
-
-    switch (value.pattern) {
-      case 'Dots':
-        this.shellPattern_.setAttribute('fill', 'url(#polkadots)')
-        break
-      case 'Stripes':
-        this.shellPattern_.setAttribute('fill', 'url(#stripes)')
-        break
-      case 'Hexagons':
-        this.shellPattern_.setAttribute('fill', 'url(#hexagons)')
-        break
-    }
-
-    // Always modify the textContent_ rather than the textElement_. This
-    // allows fields to append DOM to the textElement (e.g. the angle field).
-    this.textContent_.nodeValue = value.turtleName
-
-    if (this.isValueInvalid_) {
-      this.borderRect_.style.fill = '#f99'
-      this.borderRect_.style.fillOpacity = 1
-    } else {
-      this.borderRect_.style.fill = '#fff'
-      this.borderRect_.style.fillOpacity = 0.6
-    }
-
-    this.updateSize_()
-  }
-
-  renderEditor_ () {
-    const value = this.displayValue_
-
-    // .textElement is a property assigned to the element.
-    // It allows the text to be edited without destroying the warning icon.
-    this.editor_.patternText.textElement.nodeValue = value.pattern
-    this.editor_.hatText.textElement.nodeValue = value.hat
-    this.editor_.turtleNameText.textElement.nodeValue = value.turtleName
-
-    this.editor_.patternText.warningIcon.style.display =
-      this.cachedValidatedValue_.pattern ? 'none' : ''
-    this.editor_.hatText.warningIcon.style.display =
-      this.cachedValidatedValue_.hat ? 'none' : ''
-    this.editor_.turtleNameText.warningIcon.style.display =
-      this.cachedValidatedValue_.turtleName ? 'none' : ''
-  }
-
-  // Used to update the size of the field. This function's logic could be simply
-  // included inside render_ (it is not called anywhere else), but it is
-  // usually separated to keep code more organized.
-  updateSize_ () {
-    const bbox = this.movableGroup_.getBBox()
-    let width = bbox.width
-    let height = bbox.height
-    if (this.borderRect_) {
-      width += this.constants_.FIELD_BORDER_RECT_X_PADDING * 2
-      height += this.constants_.FIELD_BORDER_RECT_X_PADDING * 2
-      this.borderRect_.setAttribute('width', width)
-      this.borderRect_.setAttribute('height', height)
-    }
-    // Note how both the width and the height can be dynamic.
-    this.size_.width = width
-    this.size_.height = height
-  }
-
-  // Called when the field is clicked. It is usually used to show an editor,
-  // but it can also be used for other things e.g. the checkbox field uses
-  // this function to check/uncheck itself.
-  showEditor_ () {
-    this.editor_ = this.dropdownCreate_()
-    this.renderEditor_()
-    Blockly.DropDownDiv.getContentDiv().appendChild(this.editor_)
-
-    // These allow us to have the editor match the block's colour.
-    const fillColour = this.sourceBlock_.getColour() as any
-    Blockly.DropDownDiv.setColour(fillColour,
-      (this.sourceBlock_ as any).style.colourTertiary)
-
-    // Always pass the dropdown div a dispose function so that you can clean
-    // up event listeners when the editor closes.
-    Blockly.DropDownDiv.showPositionedByField(
-      this, this.dropdownDispose_.bind(this))
-  }
-
-  // Creates the UI of the editor, and adds event listeners to it.
-  dropdownCreate_ () {
-    const createRow = function (table: any) {
-      const row = table.appendChild(document.createElement('tr'))
-      row.className = 'row'
-      return row
-    }
-    const createLeftArrow = function (row: any) {
-      const cell = document.createElement('div')
-      cell.className = 'arrow'
-      const leftArrow = document.createElement('button')
-      leftArrow.setAttribute('type', 'button')
-      leftArrow.textContent = '<'
-      cell.appendChild(leftArrow)
-      row.appendChild(cell)
-      return cell
-    }
-    const createTextNode = function (row: any, text: any) {
-      const cell = document.createElement('div') as any
-      cell.className = 'text'
-      const textElem = document.createTextNode(text)
-      cell.appendChild(textElem)
-      cell.textElement = textElem
-      const warning = document.createElement('img')
-      warning.setAttribute('src', 'media/warning.svg')
-      warning.setAttribute('height', '16px')
-      warning.setAttribute('width', '16px')
-      warning.style.marginLeft = '4px'
-      cell.appendChild(warning)
-      cell.warningIcon = warning
-      row.appendChild(cell)
-      return cell
-    }
-    const createRightArrow = function (row: any) {
-      const cell = document.createElement('div')
-      cell.className = 'arrow'
-      const rightArrow = document.createElement('button')
-      rightArrow.setAttribute('type', 'button')
-      rightArrow.textContent = '>'
-      cell.appendChild(rightArrow)
-      row.appendChild(cell)
-      return cell
-    }
-    const createArrowListener = function (variable: any, array: any, direction: any) {
-      return function (this: any) {
-        let currentIndex = array.indexOf(this.displayValue_[variable])
-        currentIndex += direction
-        if (currentIndex <= -1) {
-          currentIndex = array.length - 1
-        } else if (currentIndex >= array.length) {
-          currentIndex = 0
-        }
-        const value = {} as any
-        value[variable] = array[currentIndex]
-        this.setValue(value)
+    if (newValue) {
+      const newHeight = newValue.length
+      const newWidth = newValue[0] ? newValue[0].length : 0
+      if (this.imgHeight_ !== newHeight || this.imgWidth_ !== newWidth) {
+        this.imgHeight_ = newHeight
+        this.imgWidth_ = newWidth
       }
-    }
 
-    const widget = document.createElement('div') as any
-    widget.className = 'customFieldsTurtleWidget blocklyNonSelectable'
-
-    const table = document.createElement('div')
-    table.className = 'table'
-    widget.appendChild(table)
-
-    let row = createRow(table)
-    let leftArrow = createLeftArrow(row)
-    widget.patternText = createTextNode(row, this.displayValue_.pattern)
-    let rightArrow = createRightArrow(row)
-    this.editorListeners_.push(Blockly.browserEvents.bind(leftArrow, 'mouseup', this,
-      createArrowListener('pattern', FieldLight.PATTERNS, -1)))
-    this.editorListeners_.push(Blockly.browserEvents.bind(rightArrow, 'mouseup', this,
-      createArrowListener('pattern', FieldLight.PATTERNS, 1)))
-
-    row = createRow(table)
-    leftArrow = createLeftArrow(row)
-    widget.hatText = createTextNode(row, this.displayValue_.hat)
-    rightArrow = createRightArrow(row)
-    this.editorListeners_.push(Blockly.browserEvents.bind(leftArrow, 'mouseup', this,
-      createArrowListener('hat', FieldLight.HATS, -1)))
-    this.editorListeners_.push(Blockly.browserEvents.bind(rightArrow, 'mouseup', this,
-      createArrowListener('hat', FieldLight.HATS, 1)))
-
-    row = createRow(table)
-    leftArrow = createLeftArrow(row)
-    widget.turtleNameText = createTextNode(row, this.displayValue_.turtleName)
-    rightArrow = createRightArrow(row)
-    this.editorListeners_.push(Blockly.browserEvents.bind(leftArrow, 'mouseup', this,
-      createArrowListener('turtleName', FieldLight.NAMES, -1)))
-    this.editorListeners_.push(Blockly.browserEvents.bind(rightArrow, 'mouseup', this,
-      createArrowListener('turtleName', FieldLight.NAMES, 1)))
-
-    const randomizeButton = document.createElement('button')
-    randomizeButton.className = 'randomize'
-    randomizeButton.setAttribute('type', 'button')
-    randomizeButton.textContent = 'randomize turtle'
-    this.editorListeners_.push(Blockly.browserEvents.bind(randomizeButton, 'mouseup', this,
-      function (this: any) {
-        const value = {} as any
-        value.pattern = FieldLight.PATTERNS[Math.floor(Math.random() * FieldLight.PATTERNS.length)]
-
-        value.hat = FieldLight.HATS[Math.floor(Math.random() * FieldLight.HATS.length)]
-
-        value.turtleName = FieldLight.NAMES[Math.floor(Math.random() * FieldLight.NAMES.length)]
-
-        this.setValue(value)
-      }))
-    widget.appendChild(randomizeButton)
-
-    return widget
-  }
-
-  // Cleans up any event listeners that were attached to the now hidden editor.
-  dropdownDispose_ () {
-    for (let i = this.editorListeners_.length, listener; listener === this.editorListeners_[i]; i--) {
-      listener = this.editorListeners_[i]
-      Blockly.browserEvents.unbind(listener)
-      this.editorListeners_.pop()
+      this.imgHeight_ = newValue.length
+      this.imgWidth_ = newValue[0] ? newValue[0].length : 0
     }
   }
 
-  // Updates the field's colour based on the colour of the block. Called by
-  // block.applyColour.
-  applyColour () {
-    if (!this.sourceBlock_) {
+  /**
+   * Show the bitmap editor dialog.
+   * @param {!Event=} e Optional mouse event that triggered the field to
+   *     open, or undefined if triggered programmatically.
+   * @param {boolean=} _quietInput Quiet input.
+   * @protected
+   */
+  showEditor_ (e = undefined, _quietInput = undefined) {
+    console.log('showEditor_')
+    openModalOfLightColor()
+  }
+
+  /**
+   * Updates the block display and editor dropdown when the field re-renders.
+   * @protected
+   * @override
+   */
+  render_ () {
+    super.render_()
+
+    if (!this.getValue()) {
       return
     }
-    // The getColourX functions are the best way to access the colours of a block.
-    const isShadow = this.sourceBlock_.isShadow()
-    const fillColour = isShadow
-      ? (this.sourceBlock_ as any).style.colourSecondary : this.sourceBlock_.getColour()
-    // This is technically a package function, meaning it could change.
-    const borderColour = isShadow ? fillColour
-      : (this.sourceBlock_ as any).style.colourTertiary
 
-    if (this.turtleGroup_) {
-      let child = this.turtleGroup_.firstChild
-      while (child) {
-        // If it is a text node, continue.
-        if (child.nodeType === 3) {
-          child = child.nextSibling
-          continue
-        }
-        // Or if it is a non-turtle node, continue.
-        const className = child.getAttribute('class')
-        if (!className || className.indexOf('turtleBody') === -1) {
-          child = child.nextSibling
-          continue
-        }
+    if (this.blockDisplayPixels_) {
+      this.forAllCells_((r: any, c: any) => {
+        const pixel = this.getValue()[r][c]
 
-        child.style.fill = fillColour
-        child.style.stroke = borderColour
-        child = child.nextSibling
+        if (this.blockDisplayPixels_) {
+          (this.blockDisplayPixels_[r][c] as any).style.fill = pixel
+            ? FILLED_PIXEL_COLOR
+            : EMPTY_PIXEL_COLOR
+        }
+        if (this.editorPixels_) {
+          (this.editorPixels_[r][c] as any).style.background = pixel
+            ? FILLED_PIXEL_COLOR
+            : EMPTY_PIXEL_COLOR
+        }
+      })
+    }
+  }
+
+  /**
+   * Determines whether the field is editable.
+   * @return {boolean} True since it is always editable.
+   */
+  updateEditable () {
+    return true
+  }
+
+  /**
+   * Creates the bitmap editor and add event listeners.
+   * @return {!Element} The newly created dropdown menu.
+   * @private
+   */
+  dropdownCreate_ () {
+    const dropdownEditor = this.createElementWithClassname_(
+      'div',
+      'dropdownEditor',
+    )
+    const pixelContainer = this.createElementWithClassname_(
+      'div',
+      'pixelContainer',
+    )
+    dropdownEditor.appendChild(pixelContainer)
+
+    this.bindEvent_(dropdownEditor, 'mouseup', this.onMouseUp_)
+    this.bindEvent_(dropdownEditor, 'mouseleave', this.onMouseUp_)
+    this.bindEvent_(dropdownEditor, 'dragstart', (e: any) => {
+      e.preventDefault()
+    })
+
+    this.editorPixels_ = []
+    for (let r = 0; r < this.imgHeight_; r++) {
+      this.editorPixels_.push([])
+      const rowDiv = this.createElementWithClassname_('div', 'pixelRow')
+      for (let c = 0; c < this.imgWidth_; c++) {
+        // Add the button to the UI and save a reference to it
+        const button = this.createElementWithClassname_('div', 'pixelButton')
+        this.editorPixels_[r].push(button)
+        rowDiv.appendChild(button)
+
+        // Load the current pixel color
+        const isOn = this.getValue()[r][c]
+        button.style.background = isOn ? FILLED_PIXEL_COLOR : EMPTY_PIXEL_COLOR
+
+        // Handle clicking a pixel
+        this.bindEvent_(button, 'mousedown', () => {
+          this.onMouseDownInPixel_(r, c)
+          return true
+        })
+
+        // Handle dragging into a pixel when mouse is down
+        this.bindEvent_(button, 'mouseenter', () => {
+          this.onMouseEnterPixel_(r, c)
+        })
+      }
+      pixelContainer.appendChild(rowDiv)
+    }
+
+    // Add control buttons below the pixel grid
+    this.addControlButton_(dropdownEditor, 'Randomize', this.randomizePixels_)
+    this.addControlButton_(dropdownEditor, 'Clear', this.clearPixels_)
+
+    if (this.blockDisplayPixels_) {
+      this.forAllCells_((r: any, c: any) => {
+        const pixel = this.getValue()[r][c]
+
+        // if (this.blockDisplayPixels_) {
+        //   this.blockDisplayPixels_[r][c].style.fill =
+        //     pixel ? FILLED_PIXEL_COLOR : EMPTY_PIXEL_COLOR;
+        // }
+        if (this.editorPixels_) {
+          this.editorPixels_[r][c].style.background = pixel
+            ? FILLED_PIXEL_COLOR
+            : EMPTY_PIXEL_COLOR
+        }
+      })
+    }
+
+    return dropdownEditor
+  }
+
+  /**
+   * Initializes the on-block display.
+   * @override
+   */
+  initView () {
+    this.blockDisplayPixels_ = []
+    for (let r = 0; r < this.imgHeight_; r++) {
+      const row = []
+      for (let c = 0; c < this.imgWidth_; c++) {
+        const square = Blockly.utils.dom.createSvgElement(
+          'rect',
+          {
+            x: c * PIXEL_SIZE,
+            y: r * PIXEL_SIZE,
+            width: PIXEL_SIZE,
+            height: PIXEL_SIZE,
+            fill: EMPTY_PIXEL_COLOR,
+            fill_opacity: 1,
+          },
+          this.fieldGroup_,
+        )
+        row.push(square)
+      }
+      this.blockDisplayPixels_.push(row)
+    }
+  }
+
+  /**
+   * Updates the size of the block based on the size of the underlying image.
+   * @override
+   * @protected
+   */
+  updateSize_ () {
+    // {
+    const newWidth = PIXEL_SIZE * this.imgWidth_
+    const newHeight = PIXEL_SIZE * this.imgHeight_
+    if (this.borderRect_) {
+      this.borderRect_.setAttribute('width', String(newWidth))
+      this.borderRect_.setAttribute('height', String(newHeight))
+    }
+
+    this.size_.width = newWidth
+    this.size_.height = newHeight
+    // }
+  }
+
+  /**
+   *Create control button.
+   * @param {!HTMLElement} parent Parent HTML element to which
+   * control button will be added.
+   * @param {string} buttonText Text of the control button.
+   * @param {Function} onClick Callback that will be
+   * attached to the control button.
+   */
+  addControlButton_ (parent: any, buttonText: any, onClick: any) {
+    const button = this.createElementWithClassname_('button', 'controlButton')
+    button.innerHTML = buttonText
+    parent.appendChild(button)
+    this.bindEvent_(button, 'click', onClick)
+  }
+
+  /**
+   * Disposes of events belonging to the bitmap editor.
+   * @private
+   */
+  dropdownDispose_ () {
+    for (const event of this.boundEvents_) {
+      Blockly.browserEvents.unbind(event)
+    }
+    this.boundEvents_.length = 0
+    this.editorPixels_ = null
+  }
+
+  /**
+   * Constructs an array of zeros with the specified width and height.
+   * @return {!Array<!Array<number>>}The new value.
+   */
+  getEmptyArray_ () {
+    const newVal = [] as any
+    for (let r = 0; r < this.imgWidth_; r++) {
+      newVal.push([])
+      for (let c = 0; c < this.imgHeight_; c++) {
+        newVal[r].push(0)
+      }
+    }
+    return newVal
+  }
+
+  /**
+   * Called when a mousedown event occurs within the bounds of a pixel.
+   * @private
+   * @param {number} r Row number of grid.
+   * @param {number} c Column number of grid.
+   */
+  onMouseDownInPixel_ (r: any, c: any) {
+    // Toggle that pixel to the opposite of its value
+    const newPixelValue = 1 - this.getValue()[r][c]
+    this.setPixel_(r, c, newPixelValue)
+    this.mouseIsDown_ = true
+    this.valToPaintWith_ = newPixelValue
+  }
+
+  /**
+   * Called when the mouse drags over a pixel in the editor.
+   * @private
+   * @param {number} r Row number of grid.
+   * @param {number} c Column number of grid.
+   */
+  onMouseEnterPixel_ (r: any, c: any) {
+    if (!this.mouseIsDown_) {
+      return
+    }
+    if (this.getValue()[r][c] !== this.valToPaintWith_) {
+      this.setPixel_(r, c, this.valToPaintWith_)
+    }
+  }
+
+  /**
+   * Resets mouse state (e.g. After either a mouseup event or if the mouse
+   * leaves the editor area).
+   * @private
+   */
+  onMouseUp_ () {
+    this.mouseIsDown_ = false
+    this.valToPaintWith_ = undefined
+  }
+
+  /**
+   * Sets all the pixels in the image to a random value.
+   * @private
+   */
+  randomizePixels_ () {
+    const getRandBinary = () => Math.floor(Math.random() * 2)
+    const newVal = this.getEmptyArray_()
+    this.forAllCells_((r: any, c: any) => {
+      newVal[r][c] = getRandBinary()
+    })
+    this.setValue(newVal)
+  }
+
+  /**
+   * Sets all the pixels to 0.
+   * @private
+   */
+  clearPixels_ () {
+    const newVal = this.getEmptyArray_()
+    this.forAllCells_((r: any, c: any) => {
+      newVal[r][c] = 0
+    })
+    this.setValue(newVal)
+  }
+
+  /**
+   * Sets the value of a particular pixel.
+   * @param {number} r Row number of grid.
+   * @param {number} c Column number of grid.
+   * @param {number} newValue Value of the pixel.
+   * @private
+   */
+  setPixel_ (r: any, c: any, newValue: any) {
+    const newGrid = JSON.parse(JSON.stringify(this.getValue()))
+    newGrid[r][c] = newValue
+    this.setValue(newGrid)
+  }
+
+  /**
+   * Calls a given function for all cells in the image, with the cell
+   * coordinates as the arguments.
+   * @param {*} func A function to be applied.
+   */
+  forAllCells_ (func: any) {
+    for (let r = 0; r < this.imgHeight_; r++) {
+      for (let c = 0; c < this.imgWidth_; c++) {
+        func(r, c)
       }
     }
   }
 
-  // Saves the field's value to an XML node. Allows for custom serialization.
-  toXml (fieldElement: any) {
-    // The default implementation of this function creates a node that looks
-    // like this: (where value is returned by getValue())
-    // <field name="FIELDNAME">value</field>
-    // But this doesn't work for our field because it stores an /object/.
-    fieldElement.setAttribute('pattern', this.value_.pattern)
-    fieldElement.setAttribute('hat', this.value_.hat)
-    // The textContent usually contains whatever is closest to the field's
-    // 'value'. The textContent doesn't need to contain anything, but saving
-    // something to it does aid in readability.
-    fieldElement.textContent = this.value_.turtleName
-
-    // Always return the element!
-    return fieldElement
+  /**
+   * Creates a new element with the specified type and class.
+   * @param {string} elementType Type of html element.
+   * @param {string} className ClassName of html element.
+   * @return {!HTMLElement} The created element.
+   */
+  createElementWithClassname_ (elementType: any, className: any) {
+    const newElt = document.createElement(elementType)
+    newElt.className = className
+    return newElt
   }
 
-  // Sets the field's value based on an XML node. Allows for custom
-  // de-serialization.
-  fromXml (fieldElement: any) {
-    // Because we had to do custom serialization for this field, we also need
-    // to do custom de-serialization.
-    const value = {} as any
-    value.pattern = fieldElement.getAttribute('pattern')
-    value.hat = fieldElement.getAttribute('hat')
-    value.turtleName = fieldElement.textContent
-    // The end goal is to call this.setValue()
-    this.setValue(value)
-  }
-
-  // Called by initView to create all of the SVGs. This is just used to keep
-  // the code more organized.
-  createView_ () {
-    this.movableGroup_ = Blockly.utils.dom.createSvgElement('g',
-      {
-        transform: 'translate(0,5)',
-      }, this.fieldGroup_)
-    const scaleGroup = Blockly.utils.dom.createSvgElement('g',
-      {
-        transform: 'scale(1.5)',
-      }, this.movableGroup_) as any
-    this.turtleGroup_ = Blockly.utils.dom.createSvgElement('g',
-      {
-        // Makes the smaller turtle graphic align with the hats.
-        class: 'turtleBody',
-      }, scaleGroup)
-    const tail = Blockly.utils.dom.createSvgElement('path',
-      {
-        class: 'turtleBody',
-        d: 'M7,27.5H0.188c3.959-2,6.547-2.708,8.776-5.237',
-        transform: 'translate(0.312 -12.994)',
-      }, this.turtleGroup_)
-    const legLeft = Blockly.utils.dom.createSvgElement('rect',
-      {
-        class: 'turtleBody',
-        x: 8.812,
-        y: 12.506,
-        width: 4,
-        height: 10,
-      }, this.turtleGroup_)
-    const legRight = Blockly.utils.dom.createSvgElement('rect',
-      {
-        class: 'turtleBody',
-        x: 28.812,
-        y: 12.506,
-        width: 4,
-        height: 10,
-      }, this.turtleGroup_)
-    const head = Blockly.utils.dom.createSvgElement('path',
-      {
-        class: 'turtleBody',
-        d: 'M47.991,17.884c0,1.92-2.144,3.477-4.788,3.477a6.262,6.262,0,0,1-2.212-.392c-0.2-.077-1.995,2.343-4.866,3.112a17.019,17.019,0,0,1-6.01.588c-4.413-.053-2.5-3.412-2.745-3.819-0.147-.242,2.232.144,6.126-0.376a7.392,7.392,0,0,0,4.919-2.588c0-1.92,2.144-3.477,4.788-3.477S47.991,15.964,47.991,17.884Z',
-        transform: 'translate(0.312 -12.994)',
-      }, this.turtleGroup_)
-    const smile = Blockly.utils.dom.createSvgElement('path',
-      {
-        class: 'turtleBody',
-        d: 'M42.223,18.668a3.614,3.614,0,0,0,2.728,2.38',
-        transform: 'translate(0.312 -12.994)',
-      }, this.turtleGroup_)
-    const sclera = Blockly.utils.dom.createSvgElement('ellipse',
-      {
-        cx: 43.435,
-        cy: 2.61,
-        rx: 2.247,
-        ry: 2.61,
-        fill: '#fff',
-      }, this.turtleGroup_)
-    const pupil = Blockly.utils.dom.createSvgElement('ellipse',
-      {
-        cx: 44.166,
-        cy: 3.403,
-        rx: 1.318,
-        ry: 1.62,
-      }, this.turtleGroup_)
-    const shell = Blockly.utils.dom.createSvgElement('path',
-      {
-        class: 'turtleBody',
-        d: 'M33.4,27.5H7.193c0-6,5.866-13.021,13.1-13.021S33.4,21.5,33.4,27.5Z',
-        transform: 'translate(0.312 -12.994)',
-      }, this.turtleGroup_)
-    this.shellPattern_ = Blockly.utils.dom.createSvgElement('path',
-      {
-        d: 'M33.4,27.5H7.193c0-6,5.866-13.021,13.1-13.021S33.4,21.5,33.4,27.5Z',
-        transform: 'translate(0.312 -12.994)',
-      }, this.turtleGroup_)
-
-    this.stovepipe_ = Blockly.utils.dom.createSvgElement('image',
-      {
-        width: '50',
-        height: '18',
-      }, scaleGroup)
-    this.stovepipe_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      'media/stovepipe.svg')
-    this.crown_ = Blockly.utils.dom.createSvgElement('image',
-      {
-        width: '50',
-        height: '15',
-      }, scaleGroup)
-    this.crown_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      'media/crown.svg')
-    this.mask_ = Blockly.utils.dom.createSvgElement('image',
-      {
-        width: '50',
-        height: '24',
-      }, scaleGroup)
-    this.mask_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      'media/mask.svg')
-    this.propeller_ = Blockly.utils.dom.createSvgElement('image',
-      {
-        width: '50',
-        height: '11',
-      }, scaleGroup)
-    this.propeller_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      'media/propeller.svg')
-    this.fedora_ = Blockly.utils.dom.createSvgElement('image',
-      {
-        width: '50',
-        height: '12',
-      }, scaleGroup)
-    this.fedora_.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href',
-      'media/fedora.svg')
-
-    // Even if we're not going to display it right away, we want to create all
-    // of our DOM elements inside this function.
-    this.crown_.style.display = 'none'
-    this.mask_.style.display = 'none'
-    this.propeller_.style.display = 'none'
-    this.fedora_.style.display = 'none'
-
-    this.movableGroup_.appendChild(this.textElement_)
-    this.textElement_.setAttribute(
-      'transform', 'translate(' + this.TEXT_OFFSET_X + ',20)')
-
-    this.defs_ = Blockly.utils.dom.createSvgElement('defs', {}, this.fieldGroup_)
-    this.polkadotPattern_ = Blockly.utils.dom.createSvgElement('pattern',
-      {
-        id: 'polkadots',
-        patternUnits: 'userSpaceOnUse',
-        width: 10,
-        height: 10,
-      }, this.defs_)
-    this.polkadotGroup_ = Blockly.utils.dom.createSvgElement(
-      'g', {}, this.polkadotPattern_)
-    Blockly.utils.dom.createSvgElement('circle',
-      {
-        cx: 2.5,
-        cy: 2.5,
-        r: 2.5,
-        fill: '#000',
-        'fill-opacity': 0.3,
-      }, this.polkadotGroup_)
-    Blockly.utils.dom.createSvgElement('circle',
-      {
-        cx: 7.5,
-        cy: 7.5,
-        r: 2.5,
-        fill: '#000',
-        'fill-opacity': 0.3,
-      }, this.polkadotGroup_)
-
-    this.hexagonPattern_ = Blockly.utils.dom.createSvgElement('pattern',
-      {
-        id: 'hexagons',
-        patternUnits: 'userSpaceOnUse',
-        width: 10,
-        height: 8.68,
-        patternTransform: 'translate(2) rotate(45)',
-      }, this.defs_)
-    Blockly.utils.dom.createSvgElement('polygon',
-      {
-        id: 'hex',
-        points: '4.96,4.4 7.46,5.84 7.46,8.74 4.96,10.18 2.46,8.74 2.46,5.84',
-        stroke: '#000',
-        'stroke-opacity': 0.3,
-        'fill-opacity': 0,
-      }, this.hexagonPattern_)
-    let use = Blockly.utils.dom.createSvgElement('use',
-      {
-        x: 5,
-      }, this.hexagonPattern_) as any
-    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#hex')
-    use = Blockly.utils.dom.createSvgElement('use',
-      {
-        x: -5,
-      }, this.hexagonPattern_)
-    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#hex')
-    use = Blockly.utils.dom.createSvgElement('use',
-      {
-        x: 2.5,
-        y: -4.34,
-      }, this.hexagonPattern_)
-    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#hex')
-    use = Blockly.utils.dom.createSvgElement('use',
-      {
-        x: -2.5,
-        y: -4.34,
-      }, this.hexagonPattern_)
-    use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#hex')
-
-    this.stripesPattern_ = Blockly.utils.dom.createSvgElement('pattern',
-      {
-        id: 'stripes',
-        patternUnits: 'userSpaceOnUse',
-        width: 5,
-        height: 10,
-        patternTransform: 'rotate(45)',
-      }, this.defs_)
-    Blockly.utils.dom.createSvgElement('line',
-      {
-        x1: 0,
-        y1: 0,
-        x2: 0,
-        y2: 10,
-        'stroke-width': 4,
-        stroke: '#000',
-        'stroke-opacity': 0.3,
-      }, this.stripesPattern_)
+  /**
+   * Binds an event listener to the specified element.
+   * @param {!HTMLElement} element Specified element.
+   * @param {string} eventName Name of the event to bind.
+   * @param {Function} callback Function to be called on specified event.
+   */
+  bindEvent_ (element: any, eventName: any, callback: any) {
+    this.boundEvents_.push(
+      Blockly.browserEvents
+        .conditionalBind(element, eventName, this, callback),
+    )
   }
 }
 
-// (LightField as any).fromJson = function (options: any) {
-//   const value = Blockly.utils.replaceMessageReferences(
-//     options.value)
-//   return new CustomFields.GenericField(value)
-// }
-Blockly.fieldRegistry.register('field_turtle', FieldLight as any)
+Blockly.fieldRegistry.register('field_light', FieldLight)
 
-// CustomFields.FieldLight = FieldLight
-
-// Blockly.fieldRegistry.register('field_light', LightField as any)
+/**
+ * CSS for bitmap field.
+ */
+Blockly.Css.register(`
+.dropdownEditor {
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.pixelContainer {
+  margin: 20px;
+}
+.pixelRow {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  margin: 0;
+  height: ${PIXEL_SIZE}
+}
+.pixelButton {
+  width: ${PIXEL_SIZE}px;
+  height: ${PIXEL_SIZE}px;
+  border: 1px solid black;
+}
+.pixelDisplay {
+  white-space:pre-wrap;
+}
+.controlButton {
+  margin: 5px 0;
+}
+`)
