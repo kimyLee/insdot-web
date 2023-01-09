@@ -135,6 +135,8 @@ import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 import { setLocale } from '@/lib/blockly/i18n'
 import { useStore } from 'vuex'
 import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeVariable'
+import { CrossTabCopyPaste } from '@blockly/plugin-cross-tab-copy-paste'
+import { WorkspaceSvg } from 'blockly/core'
 
 const CustomZh = {
   PROCEDURES_DEFNORETURN_TITLE: '函数',
@@ -504,6 +506,23 @@ export default defineComponent({
       reRenderCanvas()
     }
 
+    function initBlocklyPlugins (workspace: WorkspaceSvg) {
+      // TODO: 解决重复注册的问题
+      try {
+        // init copyPaste
+        const CrossTabCopyPastePlugin = new CrossTabCopyPaste()
+        CrossTabCopyPastePlugin.init({
+          contextMenu: true,
+          shortcut: true,
+        })
+
+        // optional: Remove the duplication command from Blockly's context menu.
+        Blockly.ContextMenuRegistry.registry.unregister('blockDuplicate')
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
     // 路由守卫
     onBeforeRouteLeave((to, from) => {
       const uuid = route.query?.uuid as string
@@ -545,6 +564,11 @@ export default defineComponent({
 
       } as any)
 
+      // customToolBoxCategory
+      registerCustomToolboxCategory(workspace)
+
+      initBlocklyPlugins(workspace)
+
       // function handleWorkspaceChange (event: any) {
       //   if (event.type === Blockly.Events.BLOCK_CHANGE) {
       //     const block = workspace.getBlockById(event.blockId)
@@ -558,9 +582,6 @@ export default defineComponent({
       // playPreviewMusic
 
       // registerToolboxCategoryCallback(workspace)
-
-      // Blockly.JavaScript.addReservedWords('code') // 获取js代码
-      registerCustomToolboxCategory(workspace)
 
       javascriptGenerator.addReservedWords('code') // 获取js代码
 

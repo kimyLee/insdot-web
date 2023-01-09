@@ -8,3 +8,7 @@ declare module '*.vue' {
 declare module 'blockly/msg/zh-hans'
 declare module 'blockly/msg/en'
 
+declare module '*.xml' {
+  const content: string;
+  export default content;
+}

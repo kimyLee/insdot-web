@@ -19,11 +19,11 @@ export default {
     },
     {
       kind: 'block',
-      type: 'controls_for',
+      type: 'custom_controls_for',
     },
     {
       kind: 'block',
-      type: 'controls_forEach',
+      type: 'custom_controls_forEach',
     },
     {
       kind: 'block',

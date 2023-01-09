@@ -6,8 +6,8 @@ import './audio'
 import './joyo-oid'
 import './math'
 import './list'
-
-// import './variable'
+import './loop'
+import './variable'
 
 // 多语言
 import '../i18n/index'
