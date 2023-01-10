@@ -4,12 +4,18 @@
     <HeaderNav title="Design tool"
                sub-title="for JOYO Design"
                @back="navigatorBack">
-      <a-button @click="handleLangClick">
-        {{ lang === 'zh' ? '中/En': 'En/中' }}
+      <a-button v-if="lang === LocaleEnum.EN"
+                @click="setLocale(LocaleEnum.ZH)">
+        En/中
+      </a-button>
+
+      <a-button v-else
+                @click="setLocale(LocaleEnum.EN)">
+        中/En
       </a-button>
 
       <a-button @click="toggleVariableDrawerVisible">
-        变量
+        {{ $t("VARIABLE_DRAWER.VARIABLE") }}
       </a-button>
       <a-button>
         clear
@@ -110,41 +116,30 @@ import {
   computed,
   useAttrs,
 } from 'vue'
+
 import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/api/joyo-ble/index'
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
+import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
+
 import * as Blockly from 'blockly/core'
+import { WorkspaceSvg } from 'blockly/core'
 import { javascriptGenerator } from 'blockly/javascript'
+import { CrossTabCopyPaste } from '@blockly/plugin-cross-tab-copy-paste'
+import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeVariable'
 import basicCategories from '@/lib/blockly/category-toolbox/toolbox'
 import { pureCanvas, runSample } from '@/lib/blockly/blocks/preBlock'
 import '@/lib/blockly/blocks/index'
-import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
+import { locale, LocaleEnum } from '@/locale/index'
 
 import HeaderNav from '@/components/HeaderNav.vue'
-
 import VariableDrawer from '@/components/VariableDrawer.vue'
-
-import * as Zh from 'blockly/msg/zh-hans'
-import * as En from 'blockly/msg/en'
 
 import '@/style/blockly-category.scss'
 import '@/style/blockly.scss'
 
-import { registerToolboxCategoryCallback } from '@/lib/blockly/category-toolbox/list'
 import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 
-import { setLocale } from '@/lib/blockly/i18n'
 import { useStore } from 'vuex'
-import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeVariable'
-import { CrossTabCopyPaste } from '@blockly/plugin-cross-tab-copy-paste'
-import { WorkspaceSvg } from 'blockly/core'
-
-const CustomZh = {
-  PROCEDURES_DEFNORETURN_TITLE: '函数',
-  PROCEDURES_DEFRETURN_TITLE: '函数',
-  LISTS_REPEAT_TITLE: '使用重复%2个%1建立列表',
-}
-
-// import 'blockly/blocks'
 
 // 引入解释器
 // import '@/lib/acorn.js' // todo ts
@@ -165,7 +160,7 @@ declare global {
       setUp: any;
       Interpreter: any;
       javascriptGenerator: any,
-      Blockly: any
+      blockly: any
     }
 }
 
@@ -182,7 +177,7 @@ export default defineComponent({
     let myInterpreter: any = markRaw({})
     const preserveVar = ['window', 'self', 'print', 'getDateNow', 'sleepFn', 'blePlayMusic', 'bleSetLight', 'clearAllLight', 'bleSetLightAnimation', 'value', 'When_JOYO_Read', 'setUp']
     const state = reactive({
-      lang: 'en',
+      lang: locale.getLocale(),
       workspace: null,
       connectStatus: false,
       recoverFlag: false,
@@ -481,32 +476,14 @@ export default defineComponent({
 
     // 重新绘制当前页面，切换多语言时候使用
     function reRenderCanvas () {
-      const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
-      workspace.clear()
-      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml || '') as any, workspace)
+      // // 重新渲染 workspace
+      Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.workspaceToDom(workspace), workspace)
+
+      // 更新文本
+      state.lang = locale.getLocale()
     }
 
-    // 更改blockly语言
-    function toggleLang (lang: string) {
-      if (lang === 'zh') {
-        setLocale(lang);
-        (Blockly as any).setLocale(Zh);
-        (Blockly as any).setLocale(CustomZh)
-      } else {
-        setLocale(lang);
-        (Blockly as any).setLocale(En)
-      }
-      state.lang = lang
-      localStorage.setItem('lang', lang)
-    }
-
-    // 切换语言事件
-    function handleLangClick () {
-      toggleLang(state.lang === 'zh' ? 'en' : 'zh')
-      reRenderCanvas()
-    }
-
-    function initBlocklyPlugins (workspace: WorkspaceSvg) {
+    function initBlocklyPlugins () {
       // TODO: 解决重复注册的问题
       try {
         // init copyPaste
@@ -544,9 +521,6 @@ export default defineComponent({
     })
 
     onMounted(() => {
-      // 切换语言
-      toggleLang(localStorage.getItem('lang') || 'en')
-
       Blockly.zelos.ConstantProvider.prototype.FIELD_COLOUR_FULL_BLOCK = false
 
       workspace = Blockly.inject('blocklyDiv', {
@@ -567,7 +541,7 @@ export default defineComponent({
       // customToolBoxCategory
       registerCustomToolboxCategory(workspace)
 
-      initBlocklyPlugins(workspace)
+      initBlocklyPlugins()
 
       // function handleWorkspaceChange (event: any) {
       //   if (event.type === Blockly.Events.BLOCK_CHANGE) {
@@ -581,11 +555,12 @@ export default defineComponent({
 
       // playPreviewMusic
 
-      // registerToolboxCategoryCallback(workspace)
-
       javascriptGenerator.addReservedWords('code') // 获取js代码
 
-      window.Blockly = Blockly
+      // 切换多语言
+      locale.$on('change', reRenderCanvas)
+
+      window.blockly = Blockly
       window.workspace = workspace
       window.javascriptGenerator = javascriptGenerator
 
@@ -631,7 +606,6 @@ export default defineComponent({
     return {
       // testColorCode,
       ...toRefs(state),
-      handleLangClick,
       runCode,
       generateCode,
       saveCode,
@@ -640,6 +614,8 @@ export default defineComponent({
       loadCode,
       navigatorBack,
       toggleVariableDrawerVisible,
+      LocaleEnum,
+      setLocale: locale.setLocale,
     }
   },
 })

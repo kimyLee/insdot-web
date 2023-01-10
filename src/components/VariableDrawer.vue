@@ -9,7 +9,7 @@
             :get-container="getContainer"
             placement="right">
     <h3 style="text-align: center;margin-bottom: 18px;">
-      变量管理
+      {{ $t("VARIABLE_DRAWER.VARIABLE_MGR") }}
     </h3>
 
     <div>
@@ -19,13 +19,13 @@
                   ghost
                   shape="round"
                   @click="changeCreateKey(tabs.variable.key)">
-          新建变量
+          {{ $t("VARIABLE_DRAWER.CREATE_NEW_VARIABLE") }}
         </a-button>
         <a-button type="primary"
                   ghost
                   shape="round"
                   @click="changeCreateKey(tabs.list.key)">
-          新建列表
+          {{ $t("VARIABLE_DRAWER.CREATE_NEW_LIST") }}
         </a-button>
       </a-row>
       <a-card v-if="!!createKey"
@@ -47,11 +47,11 @@
         <a-row justify="space-around">
           <a-button type="text"
                     @click="createCancel">
-            取消
+            {{ $t("VARIABLE_DRAWER.CREATE_CANCEL") }}
           </a-button>
           <a-button type="link"
                     @click="createConfirm">
-            确认
+            {{ $t("VARIABLE_DRAWER.CREATE_CONFIRM") }}
           </a-button>
         </a-row>
       </a-card>
@@ -66,8 +66,8 @@
           <template #renderItem="{ item }">
             <a-list-item :key="`${item.id_}`">
               <template #actions>
-                <a @click="renameVariable(item)">rename</a>
-                <a @click="deleteVariableById(item.id_)">del</a>
+                <a @click="renameVariable(item)">{{ $t("VARIABLE_DRAWER.RENAME") }}</a>
+                <a @click="deleteVariableById(item.id_)">  {{ $t("VARIABLE_DRAWER.DELETE") }}</a>
               </template>
               <a-list-item-meta style="white-space: nowrap;"
                                 :description="item.name" />
@@ -85,8 +85,8 @@
           <template #renderItem="{ item }">
             <a-list-item :key="`${item.id_}`">
               <template #actions>
-                <a @click="renameVariable(item)">rename</a>
-                <a @click="deleteVariableById(item.id_)">del</a>
+                <a @click="renameVariable(item)"> {{ $t("VARIABLE_DRAWER.RENAME") }}</a>
+                <a @click="deleteVariableById(item.id_)"> {{ $t("VARIABLE_DRAWER.DELETE") }}</a>
               </template>
               <a-list-item-meta style="white-space: nowrap;"
                                 :description="item.name" />
@@ -111,6 +111,7 @@ import { message } from 'ant-design-vue'
 import { defineComponent, nextTick, reactive, ref, toRefs } from 'vue'
 
 import * as Blockly from 'blockly/core'
+import { useI18n } from 'vue-i18n'
 
 export default defineComponent({
   name: 'VariableDrawer',
@@ -124,20 +125,23 @@ export default defineComponent({
 
   setup () {
     const refInput = ref(null)
+    const { t } = useI18n()
     const tabs: any = {
       variable: {
         key: 'variable',
-        context: '变量',
-        placeholder: '请输入变量名',
+        context: t('VARIABLE_DRAWER.VARIABLE'),
+        placeholder: t('VARIABLE_DRAWER.VARIABLE_INPUT'),
         variableType: 'VAR',
       },
       list: {
         key: 'list',
-        context: '列表',
-        placeholder: '请输入列表名',
+        context: t('VARIABLE_DRAWER.LIST'),
+        placeholder: t('VARIABLE_DRAWER.LIST_INPUT'),
         variableType: 'LIST',
       },
     }
+
+    console.log(tabs, 233)
 
     const state = reactive({
       activeTabKey: tabs.variable.key,
