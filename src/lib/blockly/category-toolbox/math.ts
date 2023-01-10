@@ -1,5 +1,3 @@
-import CONSTANT from './constant'
-
 export default {
   kind: 'category',
   name: '运算',
@@ -36,6 +34,38 @@ export default {
         },
       },
     },
+    {
+      kind: 'block',
+      type: 'math_single',
+      inputs: { // 选项为value的name，input有三种，value，state,dummy
+        NUM: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 9,
+            },
+          },
+        },
+      },
+    },
+    {
+      kind: 'block',
+      type: 'math_trig',
+      inputs: {
+        NUM: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 45,
+            },
+          },
+        },
+      },
+    },
+    {
+      kind: 'block',
+      type: 'math_constant',
+    },
 
     {
       kind: 'block',
@@ -71,27 +101,16 @@ export default {
       inputs: {
         LIST: {
           block: {
-            type: 'variables_get',
+            type: 'variables_get_list',
             fields: {
               VAR: {
-                id: CONSTANT.VALUE_ID, // VALUE
+                type: 'LIST',
+                name: 'list',
               },
             },
           },
         },
       },
-      // inputs: {
-      //   VALUE: {
-      //     block: {
-      //       type: 'variables_get',
-      //       fields: { // item
-      //         VAR: {
-      //           id: '?3U;%e-F`beKTnGkyWPA',
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
     },
     {
       kind: 'block',
@@ -100,7 +119,6 @@ export default {
         DIVIDEND: {
           shadow: {
             type: 'math_number',
-            id: 'E*QWH5A_i!9V2;vN/eAh',
             fields: {
               NUM: 64,
             },
@@ -109,7 +127,6 @@ export default {
         DIVISOR: {
           shadow: {
             type: 'math_number',
-            id: '~G:]~@TG}v|UL@lt;Yp_',
             fields: {
               NUM: 10,
             },
@@ -124,7 +141,6 @@ export default {
         VALUE: {
           shadow: {
             type: 'math_number',
-            id: 'Ut;,*.qh%?774AQwosI!',
             fields: {
               NUM: 50,
             },
@@ -133,7 +149,6 @@ export default {
         LOW: {
           shadow: {
             type: 'math_number',
-            id: ']$AglcKWPhTvr=r7{OeR',
             fields: {
               NUM: 1,
             },
@@ -142,7 +157,6 @@ export default {
         HIGH: {
           shadow: {
             type: 'math_number',
-            id: '=2!I=o!cSNgYsv9juc%C',
             fields: {
               NUM: 100,
             },
@@ -157,7 +171,6 @@ export default {
         FROM: {
           shadow: {
             type: 'math_number',
-            id: '1+;rp@wm=]|iJ+@D45-_',
             fields: {
               NUM: 1,
             },
@@ -166,7 +179,6 @@ export default {
         TO: {
           shadow: {
             type: 'math_number',
-            id: 'ONYHVTB{~MGet#pOPW#]',
             fields: {
               NUM: 100,
             },
@@ -179,41 +191,10 @@ export default {
       kind: 'block',
       type: 'math_random_float',
     },
-    // {
-    //   kind: 'block',
-    //   type: 'math_atan2',
-    // },
     {
       kind: 'block',
-      type: 'math_single',
-      inputs: { // 选项为value的name，input有三种，value，state,dummy
-        NUM: {
-          shadow: {
-            type: 'math_number',
-            fields: {
-              NUM: 9,
-            },
-          },
-        },
-      },
+      type: 'math_atan2',
     },
-    {
-      kind: 'block',
-      type: 'math_trig',
-      inputs: {
-        NUM: {
-          shadow: {
-            type: 'math_number',
-            fields: {
-              NUM: 45,
-            },
-          },
-        },
-      },
-    },
-    {
-      kind: 'block',
-      type: 'math_constant',
-    },
+
   ],
 }

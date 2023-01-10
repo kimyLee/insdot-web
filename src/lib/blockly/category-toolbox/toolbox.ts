@@ -24,10 +24,8 @@ const basicCategories = {
     loop,
     math,
     text,
-    list,
-
     variables,
-    listCustom,
+    list,
     procedures,
   ],
 }

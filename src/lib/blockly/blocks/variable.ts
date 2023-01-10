@@ -1,6 +1,6 @@
 import { defineBlocksWithJsonArray } from 'blockly/core'
 
-import { javascriptGenerator } from 'blockly/javascript'
+import '../block-js-code/variable'
 
 defineBlocksWithJsonArray([
   // Block for variable getter.
@@ -11,15 +11,15 @@ defineBlocksWithJsonArray([
     args0: [{
       type: 'field_variable',
       name: 'VAR',
-      // variable: '%{BKY_VARIABLES_DEFAULT_NAME}',
+      variable: '%{BKY_VARIABLES_DEFAULT_NAME}',
       variableTypes: ['VAR'],
       defaultType: 'VAR',
     }],
     output: null,
     style: 'variable_blocks',
-    helpUrl: '%{BKY_VARIABLES_GET_HELPURL}',
-    tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
-    extensions: ['contextMenu_variableSetterGetter'],
+    // helpUrl: '%{BKY_VARIABLES_GET_HELPURL}',
+    // tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
+    // extensions: ['contextMenu_variableSetterGetter'],
   },
 
   // Block for adding to a variable in place.
@@ -30,7 +30,7 @@ defineBlocksWithJsonArray([
       {
         type: 'field_variable',
         name: 'VAR',
-        // variable: '%{BKY_MATH_CHANGE_TITLE_ITEM}',
+        variable: '%{BKY_MATH_CHANGE_TITLE_ITEM}',
         variableTypes: ['VAR'],
         defaultType: 'VAR',
       },
@@ -43,7 +43,7 @@ defineBlocksWithJsonArray([
     previousStatement: null,
     nextStatement: null,
     style: 'variable_blocks',
-    helpUrl: '%{BKY_MATH_CHANGE_HELPURL}',
+    // helpUrl: '%{BKY_MATH_CHANGE_HELPURL}',
     extensions: ['math_change_tooltip'],
   },
 
@@ -55,7 +55,7 @@ defineBlocksWithJsonArray([
       {
         type: 'field_variable',
         name: 'VAR',
-        // variable: '%{BKY_VARIABLES_DEFAULT_NAME}',
+        variable: '%{BKY_VARIABLES_DEFAULT_NAME}',
         variableTypes: ['VAR'],
         defaultType: 'VAR',
       },
@@ -67,15 +67,9 @@ defineBlocksWithJsonArray([
     previousStatement: null,
     nextStatement: null,
     style: 'variable_blocks',
-    helpUrl: '%{BKY_VARIABLES_GET_HELPURL}',
-    tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
-    extensions: ['contextMenu_variableSetterGetter'],
+    // helpUrl: '%{BKY_VARIABLES_GET_HELPURL}',
+    // tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
+    // extensions: ['contextMenu_variableSetterGetter'],
 
   },
 ])
-
-javascriptGenerator.variables_get_var = javascriptGenerator.variables_get
-
-javascriptGenerator.variables_get_var = javascriptGenerator.variables_get
-
-javascriptGenerator.custom_math_change = javascriptGenerator.math_change

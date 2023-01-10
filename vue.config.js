@@ -11,28 +11,14 @@ module.exports = {
       'Access-Control-Allow-Origin': '*',
     },
   },
-  // module: {
-  //   rules: [
-  //     {
-  //       test: /\.css$/,
-  //       use: ['style-loader', 'css-loader'],
-  //     },
-  //     {
-  //       test: /\.ttf$/,
-  //       use: ['file-loader'],
-  //     },
-  //   ],
-  // },
-  // chainWebpack: config => {
-  //   config.module
-  //     .rule('css')
-  //     .test(/\.css$/)
-  //     .use('style-loader')
-  //     .css('style-loader')
-  //     .rule('ttf')
-  //     .test(/\.ttf$/)
-  //     .use('file-loader')
-  // },
+  chainWebpack: config => {
+    config.module
+      .rule('.text')
+      .test(/\.xml$/)
+      .use('text-loader')
+      .loader('text-loader')
+      .end()
+  },
   configureWebpack: {
     plugins: [
       new MonacoWebpackPlugin(),

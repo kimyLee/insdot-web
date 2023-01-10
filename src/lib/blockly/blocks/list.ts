@@ -1,8 +1,8 @@
 
-import Blockly from 'blockly'
+import { defineBlocksWithJsonArray } from 'blockly/core'
 import '../block-js-code/list'
 
-Blockly.defineBlocksWithJsonArray([
+defineBlocksWithJsonArray([
   // Block for Panda variable getter.
   {
     type: 'variables_get_list',
@@ -16,7 +16,11 @@ Blockly.defineBlocksWithJsonArray([
         defaultType: 'LIST',
       },
     ],
-    output: 'LIST', // Returns a value of "Panda"
+    output: 'Array',
+    style: 'list_blocks',
+    // helpUrl: '%{BKY_VARIABLES_GET_HELPURL}',
+    // tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
+    // extensions: ['contextMenu_variableSetterGetter'],
   },
 
   // Block for Panda variable setter.
@@ -39,5 +43,9 @@ Blockly.defineBlocksWithJsonArray([
     ],
     previousStatement: null,
     nextStatement: null,
+    style: 'list_blocks',
+    // helpUrl: '%{BKY_VARIABLES_GET_HELPURL}',
+    // tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
+    // extensions: ['contextMenu_variableSetterGetter'],
   },
 ])

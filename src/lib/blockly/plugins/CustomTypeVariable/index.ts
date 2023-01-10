@@ -1,6 +1,6 @@
 
 import { Variables, Blocks, VariableModel, utils, Xml } from 'blockly'
-import type { FlyoutButton, WorkspaceSvg, Workspace } from 'blockly'
+import type { WorkspaceSvg, Workspace, FlyoutButton } from 'blockly'
 
 // 考虑下 plugin 关联的 block 是否直接在 插件内部管理
 
@@ -19,20 +19,9 @@ export enum CustomTypeVariableEnum {
 export const flyoutCategoryVar = (workspace: WorkspaceSvg): Element[] => {
   let xmlList: Element[] = []
 
-  const label = document.createElement('label')
-  label.setAttribute('text', 'Var')
-
-  xmlList.push(label)
-
-  // const button = document.createElement('button')
-  // button.setAttribute('text', 'Create Var Variable')
-  // button.setAttribute('callbackKey', 'CREATE_TYPED_VARIABLE_' + CustomTypeVariableEnum.VAR)
-
-  // xmlList.push(button)
-
-  // workspace.registerButtonCallback('CREATE_TYPED_VARIABLE_' + CustomTypeVariableEnum.VAR, (button: FlyoutButton) => {
-  //   Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, CustomTypeVariableEnum.VAR)
-  // })
+  workspace.registerButtonCallback('CREATE_TYPED_VARIABLE_' + CustomTypeVariableEnum.VAR, (button: FlyoutButton) => {
+    Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, CustomTypeVariableEnum.VAR)
+  })
 
   const blockList = flyoutCategoryBlocksVar(workspace)
   xmlList = xmlList.concat(blockList)
@@ -62,8 +51,9 @@ export function flyoutCategoryBlocksVar (workspace: Workspace): Element[] {
     if (Blocks.custom_math_change) {
       const block = utils.xml.createElement('block')
       block.setAttribute('type', 'custom_math_change')
-      block.setAttribute('gap', Blocks.variables_get ? '20' : '8')
+      block.setAttribute('gap', Blocks.variables_get_list ? '20' : '8')
       block.appendChild(Variables.generateVariableFieldDom(mostRecentVariable))
+      // 修改待定
       const value = Xml.textToDom(
         '<value name="DELTA">' +
           '<shadow type="math_number">' +
@@ -74,14 +64,11 @@ export function flyoutCategoryBlocksVar (workspace: Workspace): Element[] {
       xmlList.push(block)
     }
     if (Blocks.variables_get_var) {
-      variableModelList.sort(VariableModel.compareByName)
-      for (let i = 0, variable; (variable = variableModelList[i]); i++) {
-        const block = utils.xml.createElement('block')
-        block.setAttribute('type', 'variables_get_var')
-        block.setAttribute('gap', '8')
-        block.appendChild(Variables.generateVariableFieldDom(variable))
-        xmlList.push(block)
-      }
+      const block = utils.xml.createElement('block')
+      block.setAttribute('type', 'variables_get_var')
+      block.setAttribute('gap', '8')
+      block.appendChild(Variables.generateVariableFieldDom(mostRecentVariable))
+      xmlList.push(block)
     }
   }
   return xmlList
@@ -97,19 +84,9 @@ export function flyoutCategoryBlocksVar (workspace: Workspace): Element[] {
 export const flyoutCategoryList = (workspace: WorkspaceSvg): Element[] => {
   let xmlList: Element[] = []
 
-  const label = document.createElement('label')
-  label.setAttribute('text', 'List')
-  xmlList.push(label)
-
-  // const button = document.createElement('button')
-  // button.setAttribute('text', 'Create List Variable')
-  // button.setAttribute('callbackKey', 'CREATE_TYPED_VARIABLE_' + CustomTypeVariableEnum.LIST)
-
-  // xmlList.push(button)
-
-  // workspace.registerButtonCallback('CREATE_TYPED_VARIABLE_' + CustomTypeVariableEnum.LIST, (button: FlyoutButton) => {
-  //   Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, CustomTypeVariableEnum.LIST)
-  // })
+  workspace.registerButtonCallback('CREATE_TYPED_VARIABLE_' + CustomTypeVariableEnum.LIST, (button: FlyoutButton) => {
+    Variables.createVariableButtonHandler(button.getTargetWorkspace(), undefined, CustomTypeVariableEnum.LIST)
+  })
 
   const blockList = flyoutCategoryBlocksList(workspace)
 
@@ -139,23 +116,29 @@ export function flyoutCategoryBlocksList (workspace: Workspace): Element[] {
     }
 
     if (Blocks.variables_get_list) {
-      variableModelList.sort(VariableModel.compareByName)
-      for (let i = 0, variable; (variable = variableModelList[i]); i++) {
-        const block = utils.xml.createElement('block')
-        block.setAttribute('type', 'variables_get_list')
-        block.setAttribute('gap', '8')
-        block.appendChild(Variables.generateVariableFieldDom(variable))
-        xmlList.push(block)
-      }
+      const block = utils.xml.createElement('block')
+      block.setAttribute('type', 'variables_get_list')
+      block.setAttribute('gap', '8')
+      block.appendChild(Variables.generateVariableFieldDom(mostRecentVariable))
+      xmlList.push(block)
     }
   }
+  console.log(xmlList)
 
   // TODO: add list block
 
   return xmlList
 }
 
-export const registerCustomToolboxCategory = (workspace: WorkspaceSvg): void => {
+// 设置初始的 变量/列表
+export const CreateInitialVariable = (variables: {name: string, type: string}[] = [], workspace: WorkspaceSvg): void => {
+  variables.forEach(i => {
+    workspace.createVariable(i.name, i.type)
+  })
+}
+
+export const registerCustomToolboxCategory = (workspace: WorkspaceSvg, variables: {name: string, type: string}[] = [{ name: 'var', type: 'VAR' }, { name: 'list', type: 'LIST' }]): void => {
+  CreateInitialVariable(variables, workspace)
   workspace.registerToolboxCategoryCallback(CustomTypeVariableEnum.VAR, flyoutCategoryVar)
   workspace.registerToolboxCategoryCallback(CustomTypeVariableEnum.LIST, flyoutCategoryList)
 }
