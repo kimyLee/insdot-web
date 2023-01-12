@@ -10,7 +10,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'set_light_demo',
     // message0: 'set lights with array %1',
-    message0: 'set turtle %1',
+    message0: '设置灯效 %1',
     args0: [
       {
         type: 'field_light',

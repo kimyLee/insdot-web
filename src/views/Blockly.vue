@@ -142,7 +142,7 @@ import '@/style/blockly.scss'
 
 import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 
-import { setLocale } from '@/lib/blockly/i18n'
+// import { setLocale } from '@/lib/blockly/i18n'
 import { initBlocklyStore } from '@/lib/blockly/blockly-use-vuex/index'
 import { useStore } from 'vuex'
 
@@ -234,18 +234,18 @@ export default defineComponent({
 
     const clearCanvas = () => {
       workspace.clear()
-      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(pureCanvas || '') as any, workspace)
+      Blockly.serialization.workspaces.load(JSON.parse(pureCanvas), workspace)
     }
     const toggleVariableDrawerVisible = () => {
       state.variableDrawerVisible = !state.variableDrawerVisible
     }
     const saveCode = () => {
       // 保存代码
-      const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
+      const json = Blockly.serialization.workspaces.save(workspace)
+      console.log(json, 'json')
       const uuid = (route.query?.uuid as string) || 'temp'
-      // localStorage.setItem(`block-${uuid}`, xml)
       // 更新
-      store.dispatch('updateProject', { uuid, content: xml })
+      store.dispatch('updateProject', { uuid, content: JSON.stringify(json) })
 
       alert('save success')
     }
@@ -259,9 +259,9 @@ export default defineComponent({
 
     const loadCode = () => {
       // 保存代码
-      const xml = localStorage.getItem('temp')
+      const json = localStorage.getItem('temp') || '{}'
       workspace.clear()
-      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml || '') as any, workspace)
+      Blockly.serialization.workspaces.load(JSON.parse(json), workspace)
     }
 
     const generateCode = () => {
@@ -478,14 +478,19 @@ export default defineComponent({
 
     function getContentByUUID (uuid = '') {
       const content = localStorage.getItem(`block-${uuid}`) || runSample
-      Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(content) as any, workspace)
+      try {
+        // 加载json
+        Blockly.serialization.workspaces.load(JSON.parse(content), workspace)
+      } catch (error) {
+        console.log(error)
+      }
     }
 
     // 重新绘制当前页面，切换多语言时候使用
     function reRenderCanvas () {
-      // // 重新渲染 workspace
-      Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.workspaceToDom(workspace), workspace)
-
+      // 重新渲染 workspace
+      const json = Blockly.serialization.workspaces.save(workspace)
+      Blockly.serialization.workspaces.load(json, workspace)
       // 更新文本
       state.lang = locale.getLocale()
     }
@@ -510,10 +515,10 @@ export default defineComponent({
     // 路由守卫
     onBeforeRouteLeave((to, from) => {
       const uuid = route.query?.uuid as string
-      const xml = Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
+      const json = JSON.stringify(Blockly.serialization.workspaces.save(workspace))
       if (uuid) {
         const content = localStorage.getItem(`block-${uuid}`)
-        if (content !== xml) {
+        if (content !== json) {
           if (window.confirm('当前程序未保存，确认离开？')) {
             return true
           }
@@ -578,13 +583,6 @@ export default defineComponent({
 
       // 获取js代码
       // javascriptGenerator.workspaceToCode(workspace);
-
-      // get xml
-      // Blockly.Xml.domToText(Blockly.Xml.workspaceToDom(workspace))
-
-      // load xml
-      // Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(xml), workspace);
-      // state.OIDstatus = JSON.parse(localStorage.getItem('OIDstatus') || '[]')
 
       ;(window as any).handleNotifyEvent = (msg: number[]) => {
         if (msg.length === 11 && msg[2] === 0x05 && msg[3] === 0xB1 && msg[4] === 0x04) {

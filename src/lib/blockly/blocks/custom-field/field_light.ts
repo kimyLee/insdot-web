@@ -12,7 +12,7 @@
 import Blockly from 'blockly/core'
 import { openModalOfLightColor } from '@/lib/blockly/blockly-use-vuex/index'
 
-export const DEFAULT_HEIGHT = 5
+export const DEFAULT_HEIGHT = 4
 export const DEFAULT_WIDTH = 5
 const PIXEL_SIZE = 15
 const FILLED_PIXEL_COLOR = '#363d80'
@@ -32,47 +32,26 @@ export class FieldLight extends Blockly.Field {
    */
   imgHeight_ = 0
   imgWidth_ = 0
-  boundEvents_ = [] as any
-  editorPixels_ = null as any
   blockDisplayPixels_ = null as any
-  mouseIsDown_ = false
-  valToPaintWith_ = undefined as any
   constructor (value = undefined, validator = undefined, config: any = undefined) {
     super(value, validator, config)
 
     this.SERIALIZABLE = true
 
-    // Configure value, height, and width
-    if (this.getValue() !== null) {
-      this.imgHeight_ = this.getValue().length
-      this.imgWidth_ = this.getValue()[0].length || 0
-    } else {
-      this.imgHeight_ = (config && config.height) || DEFAULT_HEIGHT
-      this.imgWidth_ = (config && config.width) || DEFAULT_WIDTH
-    }
+    this.imgHeight_ = DEFAULT_HEIGHT
+    this.imgWidth_ = DEFAULT_WIDTH
 
     // Set a default empty value
+    console.log(this.getValue(), 'init')
     if (this.getValue() === null) {
       this.setValue(this.getEmptyArray_())
     }
 
-    /**
-     * Array holding info needed to unbind events.
-     * Used for disposing.
-     * Ex: [[node, name, func], [node, name, func]].
-     * @type {!Array<!Array<?>>}
-     * @private
-     */
-    this.boundEvents_ = []
-
     /** References to UI elements */
-    this.editorPixels_ = null
     this.fieldGroup_ = null
     this.blockDisplayPixels_ = null
 
     /** Stateful variables */
-    this.mouseIsDown_ = false
-    this.valToPaintWith_ = undefined
   }
 
   /**
@@ -83,23 +62,8 @@ export class FieldLight extends Blockly.Field {
    * @nocollapse
    */
   static fromJson (options: any) {
+    console.log(options, '????')
     return new FieldLight(options && options.value, undefined, options)
-  }
-
-  /**
-   * Returns the width of the image in pixels.
-   * @return {number} The width in pixels.
-   */
-  getImageWidth () {
-    return this.imgWidth_
-  }
-
-  /**
-   * Returns the height of the image in pixels.
-   * @return {number} The height in pixels.
-   */
-  getImageHeight () {
-    return this.imgHeight_
   }
 
   /**
@@ -108,6 +72,8 @@ export class FieldLight extends Blockly.Field {
    * @return {Object} The new value if it's valid, or null.
    */
   doClassValidation_ (newValue: any = undefined) {
+    // 检验数据格式数据
+    console.log('doClassValidation_', newValue)
     if (!newValue) {
       return null
     }
@@ -115,31 +81,10 @@ export class FieldLight extends Blockly.Field {
     if (!Array.isArray(newValue)) {
       return null
     }
-    const newHeight = newValue.length
-    // The empty list is not an acceptable bitmap
-    if (newHeight === 0) {
+    const newLength = newValue.length
+    // The empty list is not an acceptable
+    if (newLength !== 12) {
       return null
-    }
-
-    // Check that the width matches the existing width of the image if it
-    // already has a value
-    const newWidth = newValue[0].length
-    for (const row of newValue) {
-      if (!Array.isArray(row)) {
-        return null
-      }
-      if (row.length !== newWidth) {
-        return null
-      }
-    }
-
-    // Check if all contents of the arrays are either 0 or 1
-    for (const row of newValue) {
-      for (const cell of row) {
-        if (cell !== 0 && cell !== 1) {
-          return null
-        }
-      }
     }
     return newValue
   }
@@ -149,6 +94,7 @@ export class FieldLight extends Blockly.Field {
    * @param {*} newValue The value that's about to be set.
    */
   doValueUpdate_ (newValue: any) {
+    console.log('doValueUpdate_', 233)
     super.doValueUpdate_(newValue)
     if (newValue) {
       const newHeight = newValue.length
@@ -172,7 +118,10 @@ export class FieldLight extends Blockly.Field {
    */
   showEditor_ (e = undefined, _quietInput = undefined) {
     console.log('showEditor_')
-    openModalOfLightColor()
+    openModalOfLightColor(this.getValue(), (val: any) => {
+      this.setValue(val)
+    })
+    // 赋值调用 setValue
   }
 
   /**
@@ -181,27 +130,17 @@ export class FieldLight extends Blockly.Field {
    * @override
    */
   render_ () {
+    console.log('render')
     super.render_()
 
     if (!this.getValue()) {
       return
     }
 
-    if (this.blockDisplayPixels_) {
-      this.forAllCells_((r: any, c: any) => {
-        const pixel = this.getValue()[r][c]
+    const arr = this.getValue()
 
-        if (this.blockDisplayPixels_) {
-          (this.blockDisplayPixels_[r][c] as any).style.fill = pixel
-            ? FILLED_PIXEL_COLOR
-            : EMPTY_PIXEL_COLOR
-        }
-        if (this.editorPixels_) {
-          (this.editorPixels_[r][c] as any).style.background = pixel
-            ? FILLED_PIXEL_COLOR
-            : EMPTY_PIXEL_COLOR
-        }
-      })
+    for (let i = 0; i < this.blockDisplayPixels_.length; i++) {
+      this.blockDisplayPixels_[i].style.fill = arr[i]
     }
   }
 
@@ -219,71 +158,7 @@ export class FieldLight extends Blockly.Field {
    * @private
    */
   dropdownCreate_ () {
-    const dropdownEditor = this.createElementWithClassname_(
-      'div',
-      'dropdownEditor',
-    )
-    const pixelContainer = this.createElementWithClassname_(
-      'div',
-      'pixelContainer',
-    )
-    dropdownEditor.appendChild(pixelContainer)
-
-    this.bindEvent_(dropdownEditor, 'mouseup', this.onMouseUp_)
-    this.bindEvent_(dropdownEditor, 'mouseleave', this.onMouseUp_)
-    this.bindEvent_(dropdownEditor, 'dragstart', (e: any) => {
-      e.preventDefault()
-    })
-
-    this.editorPixels_ = []
-    for (let r = 0; r < this.imgHeight_; r++) {
-      this.editorPixels_.push([])
-      const rowDiv = this.createElementWithClassname_('div', 'pixelRow')
-      for (let c = 0; c < this.imgWidth_; c++) {
-        // Add the button to the UI and save a reference to it
-        const button = this.createElementWithClassname_('div', 'pixelButton')
-        this.editorPixels_[r].push(button)
-        rowDiv.appendChild(button)
-
-        // Load the current pixel color
-        const isOn = this.getValue()[r][c]
-        button.style.background = isOn ? FILLED_PIXEL_COLOR : EMPTY_PIXEL_COLOR
-
-        // Handle clicking a pixel
-        this.bindEvent_(button, 'mousedown', () => {
-          this.onMouseDownInPixel_(r, c)
-          return true
-        })
-
-        // Handle dragging into a pixel when mouse is down
-        this.bindEvent_(button, 'mouseenter', () => {
-          this.onMouseEnterPixel_(r, c)
-        })
-      }
-      pixelContainer.appendChild(rowDiv)
-    }
-
-    // Add control buttons below the pixel grid
-    this.addControlButton_(dropdownEditor, 'Randomize', this.randomizePixels_)
-    this.addControlButton_(dropdownEditor, 'Clear', this.clearPixels_)
-
-    if (this.blockDisplayPixels_) {
-      this.forAllCells_((r: any, c: any) => {
-        const pixel = this.getValue()[r][c]
-
-        // if (this.blockDisplayPixels_) {
-        //   this.blockDisplayPixels_[r][c].style.fill =
-        //     pixel ? FILLED_PIXEL_COLOR : EMPTY_PIXEL_COLOR;
-        // }
-        if (this.editorPixels_) {
-          this.editorPixels_[r][c].style.background = pixel
-            ? FILLED_PIXEL_COLOR
-            : EMPTY_PIXEL_COLOR
-        }
-      })
-    }
-
-    return dropdownEditor
+    console.log('dropdownCreate_') // ?
   }
 
   /**
@@ -291,26 +166,47 @@ export class FieldLight extends Blockly.Field {
    * @override
    */
   initView () {
+    console.log('initView', this.getValue())
     this.blockDisplayPixels_ = []
-    for (let r = 0; r < this.imgHeight_; r++) {
-      const row = []
-      for (let c = 0; c < this.imgWidth_; c++) {
-        const square = Blockly.utils.dom.createSvgElement(
-          'rect',
-          {
-            x: c * PIXEL_SIZE,
-            y: r * PIXEL_SIZE,
-            width: PIXEL_SIZE,
-            height: PIXEL_SIZE,
-            fill: EMPTY_PIXEL_COLOR,
-            fill_opacity: 1,
-          },
-          this.fieldGroup_,
-        )
-        row.push(square)
-      }
-      this.blockDisplayPixels_.push(row)
+    const position = [ // 单位距离参考 PIXEL_SIZE = 15
+      [15, 0], // 第一个为左上角
+      [35, 0],
+      [50, 15],
+      [50, 35],
+      [35, 50],
+      [15, 50],
+      [0, 35],
+      [0, 15],
+    ]
+    const positionCenter = [25, 25]
+    const row = []
+    for (let i = 0; i < position.length; i++) {
+      console.log(position[i][0])
+      const square = Blockly.utils.dom.createSvgElement(
+        'circle',
+        {
+          cx: position[i][0] + 5,
+          cy: position[i][1] + 5,
+          r: PIXEL_SIZE / 2,
+          fill: EMPTY_PIXEL_COLOR,
+          fill_opacity: 1,
+        },
+        this.fieldGroup_,
+      )
+      row.push(square)
     }
+    row.push(Blockly.utils.dom.createSvgElement(
+      'circle',
+      {
+        cx: positionCenter[0] + 5,
+        cy: positionCenter[1] + 5,
+        r: PIXEL_SIZE * 0.75,
+        fill: EMPTY_PIXEL_COLOR,
+        fill_opacity: 1,
+      },
+      this.fieldGroup_,
+    ))
+    this.blockDisplayPixels_ = row
   }
 
   /**
@@ -319,32 +215,14 @@ export class FieldLight extends Blockly.Field {
    * @protected
    */
   updateSize_ () {
-    // {
     const newWidth = PIXEL_SIZE * this.imgWidth_
     const newHeight = PIXEL_SIZE * this.imgHeight_
     if (this.borderRect_) {
       this.borderRect_.setAttribute('width', String(newWidth))
       this.borderRect_.setAttribute('height', String(newHeight))
     }
-
-    this.size_.width = newWidth
-    this.size_.height = newHeight
-    // }
-  }
-
-  /**
-   *Create control button.
-   * @param {!HTMLElement} parent Parent HTML element to which
-   * control button will be added.
-   * @param {string} buttonText Text of the control button.
-   * @param {Function} onClick Callback that will be
-   * attached to the control button.
-   */
-  addControlButton_ (parent: any, buttonText: any, onClick: any) {
-    const button = this.createElementWithClassname_('button', 'controlButton')
-    button.innerHTML = buttonText
-    parent.appendChild(button)
-    this.bindEvent_(button, 'click', onClick)
+    this.size_.width = 85
+    this.size_.height = 60 // todo，newHeight值
   }
 
   /**
@@ -352,11 +230,7 @@ export class FieldLight extends Blockly.Field {
    * @private
    */
   dropdownDispose_ () {
-    for (const event of this.boundEvents_) {
-      Blockly.browserEvents.unbind(event)
-    }
-    this.boundEvents_.length = 0
-    this.editorPixels_ = null
+    console.log('dropdownDispose_')
   }
 
   /**
@@ -364,104 +238,8 @@ export class FieldLight extends Blockly.Field {
    * @return {!Array<!Array<number>>}The new value.
    */
   getEmptyArray_ () {
-    const newVal = [] as any
-    for (let r = 0; r < this.imgWidth_; r++) {
-      newVal.push([])
-      for (let c = 0; c < this.imgHeight_; c++) {
-        newVal[r].push(0)
-      }
-    }
+    const newVal = Array(12).fill('#000000')
     return newVal
-  }
-
-  /**
-   * Called when a mousedown event occurs within the bounds of a pixel.
-   * @private
-   * @param {number} r Row number of grid.
-   * @param {number} c Column number of grid.
-   */
-  onMouseDownInPixel_ (r: any, c: any) {
-    // Toggle that pixel to the opposite of its value
-    const newPixelValue = 1 - this.getValue()[r][c]
-    this.setPixel_(r, c, newPixelValue)
-    this.mouseIsDown_ = true
-    this.valToPaintWith_ = newPixelValue
-  }
-
-  /**
-   * Called when the mouse drags over a pixel in the editor.
-   * @private
-   * @param {number} r Row number of grid.
-   * @param {number} c Column number of grid.
-   */
-  onMouseEnterPixel_ (r: any, c: any) {
-    if (!this.mouseIsDown_) {
-      return
-    }
-    if (this.getValue()[r][c] !== this.valToPaintWith_) {
-      this.setPixel_(r, c, this.valToPaintWith_)
-    }
-  }
-
-  /**
-   * Resets mouse state (e.g. After either a mouseup event or if the mouse
-   * leaves the editor area).
-   * @private
-   */
-  onMouseUp_ () {
-    this.mouseIsDown_ = false
-    this.valToPaintWith_ = undefined
-  }
-
-  /**
-   * Sets all the pixels in the image to a random value.
-   * @private
-   */
-  randomizePixels_ () {
-    const getRandBinary = () => Math.floor(Math.random() * 2)
-    const newVal = this.getEmptyArray_()
-    this.forAllCells_((r: any, c: any) => {
-      newVal[r][c] = getRandBinary()
-    })
-    this.setValue(newVal)
-  }
-
-  /**
-   * Sets all the pixels to 0.
-   * @private
-   */
-  clearPixels_ () {
-    const newVal = this.getEmptyArray_()
-    this.forAllCells_((r: any, c: any) => {
-      newVal[r][c] = 0
-    })
-    this.setValue(newVal)
-  }
-
-  /**
-   * Sets the value of a particular pixel.
-   * @param {number} r Row number of grid.
-   * @param {number} c Column number of grid.
-   * @param {number} newValue Value of the pixel.
-   * @private
-   */
-  setPixel_ (r: any, c: any, newValue: any) {
-    const newGrid = JSON.parse(JSON.stringify(this.getValue()))
-    newGrid[r][c] = newValue
-    this.setValue(newGrid)
-  }
-
-  /**
-   * Calls a given function for all cells in the image, with the cell
-   * coordinates as the arguments.
-   * @param {*} func A function to be applied.
-   */
-  forAllCells_ (func: any) {
-    for (let r = 0; r < this.imgHeight_; r++) {
-      for (let c = 0; c < this.imgWidth_; c++) {
-        func(r, c)
-      }
-    }
   }
 
   /**
@@ -476,18 +254,29 @@ export class FieldLight extends Blockly.Field {
     return newElt
   }
 
-  /**
-   * Binds an event listener to the specified element.
-   * @param {!HTMLElement} element Specified element.
-   * @param {string} eventName Name of the event to bind.
-   * @param {Function} callback Function to be called on specified event.
-   */
-  bindEvent_ (element: any, eventName: any, callback: any) {
-    this.boundEvents_.push(
-      Blockly.browserEvents
-        .conditionalBind(element, eventName, this, callback),
-    )
-  }
+  // saveState (doFullSerialization) {
+  //   const state = { lights: this.getValue() }
+  //   // if (doFullSerialization) {
+  //   //   // state.name = this.variable_.name
+  //   //   // state.type = this.variable_.type
+  //   // }
+  //   console.log('saveState', state)
+  //   return state
+  // }
+
+  // loadState (state) {
+  //   console.log('loadState', state)
+  //   // const variable = Blockly.Variables.getOrCreateVariablePackage(
+  //   //   this.getSourceBlock().workspace,
+  //   //   state.id,
+  //   //   state.name, // May not exist.
+  //   //   state.type) // May not exist.
+  //   this.setValue(state.lights)
+  // }
+
+  // fromXml (fieldElement: any) { // 重要，用来还原变量
+  //   this.setValue(fieldElement.textContent.split(','))
+  // }
 }
 
 Blockly.fieldRegistry.register('field_light', FieldLight)
@@ -495,33 +284,33 @@ Blockly.fieldRegistry.register('field_light', FieldLight)
 /**
  * CSS for bitmap field.
  */
-Blockly.Css.register(`
-.dropdownEditor {
-  align-items: center;
-  flex-direction: column;
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-.pixelContainer {
-  margin: 20px;
-}
-.pixelRow {
-  display: flex;
-  flex-direction: row;
-  padding: 0;
-  margin: 0;
-  height: ${PIXEL_SIZE}
-}
-.pixelButton {
-  width: ${PIXEL_SIZE}px;
-  height: ${PIXEL_SIZE}px;
-  border: 1px solid black;
-}
-.pixelDisplay {
-  white-space:pre-wrap;
-}
-.controlButton {
-  margin: 5px 0;
-}
-`)
+// Blockly.Css.register(`
+// .dropdownEditor {
+//   align-items: center;
+//   flex-direction: column;
+//   display: flex;
+//   justify-content: center;
+//   margin-bottom: 20px;
+// }
+// .pixelContainer {
+//   margin: 20px;
+// }
+// .pixelRow {
+//   display: flex;
+//   flex-direction: row;
+//   padding: 0;
+//   margin: 0;
+//   height: ${PIXEL_SIZE}
+// }
+// .pixelButton {
+//   width: ${PIXEL_SIZE}px;
+//   height: ${PIXEL_SIZE}px;
+//   border: 1px solid black;
+// }
+// .pixelDisplay {
+//   white-space:pre-wrap;
+// }
+// .controlButton {
+//   margin: 5px 0;
+// }
+// `)

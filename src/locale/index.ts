@@ -15,7 +15,7 @@ export enum LocaleEnum {
   'EN' = 'EN'
 }
 
-export const defaultLang = localStorage.getItem('lang') || LocaleEnum.EN
+export const defaultLang = localStorage.getItem('lang')?.toUpperCase() || LocaleEnum.EN
 
 export const blocklyMsgs = {
   [LocaleEnum.EN]: BlocklyEn,
@@ -47,6 +47,7 @@ export const locale = (function () {
     _private.locale = locale
 
     // 更新 blockly Msg
+    console.log(blocklyMsgs[locale], locale)
     blocklySetLocale(blocklyMsgs[locale])
 
     // 更新 vue i18n

@@ -101,7 +101,7 @@
     </a-modal>
 
     <!-- JOYO版本信息及更新 -->
-    <UpdateProcess v-model="visibleOfJOYOUpdate" />
+    <!-- <UpdateProcess v-model="visibleOfJOYOUpdate" /> -->
     <!-- <a-modal
              :width="360"
              ok-text="更新版本"
@@ -158,7 +158,7 @@ export default defineComponent({
     PlusOutlined,
     DeleteOutlined,
     HeaderNav,
-    UpdateProcess,
+    // UpdateProcess,
   },
 
   setup () {
