@@ -48,8 +48,17 @@ export default defineComponent({
 .header-nav::v-deep {
   width: 100%;
   background: #fff;
+  .ant-page-header {
+    background-color: #002253;
+    color: #fff;
+  }
+  .ant-page-header-heading-title {
+    color: #fff;
+  }
   .ant-page-header-heading-sub-title {
-      color: rgba(0, 0, 0, 0.85)
-    }
+    color: rgba(255, 255, 255, .8);
+    margin-left: 70px;
+    font-weight: bold;
+  }
 }
 </style>

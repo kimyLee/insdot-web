@@ -1,9 +1,11 @@
 <template>
   <div class="project-list page">
-    <HeaderNav :title="$t(LANG.HOME_HEADER.TITLE)"
-               :sub-title="$t(LANG.HOME_HEADER.SUBTITLE)">
+    <HeaderNav
+      :sub-title="$t(LANG.HOME_HEADER.SUBTITLE)">
       <!-- 显示JOYO ICON -->
+      <div class="logo" />
       <a-button shape="circle"
+                class="header-btn"
                 @click="visibleOfJOYOUpdate = true">
         <a-badge v-show="hasNewVersion"
                  dot
@@ -19,6 +21,7 @@
              src="~@/assets/joyo.png" />
       </a-button>
       <a-button key="2"
+                class="header-btn"
                 @click="connectJoyo">
         <span class="connect-text">
           <span class="connect-dot"
@@ -29,6 +32,7 @@
                                   @click.stop="visibleOfConnectTip = true" />
       </a-button>
       <a-button key="2"
+                class="header-btn"
                 @click.stop="createProjectPop">
         {{ $t(LANG.HOME_HEADER.NEW_GAME) }}
         <template #icon>
@@ -51,7 +55,7 @@
                     placement="bottomRight"
                     :cancel-text="$t(LANG.COMMON.CANCEL)"
                     @confirm="exportAllProgram">
-        <a-button>
+        <a-button class="header-btn">
           <vertical-align-bottom-outlined class="bottom-icon download-icon" />
           {{ $t(LANG.HOME_HEADER.EXPORT_ALL) }}
         </a-button>
@@ -71,7 +75,7 @@
             </a-menu-item>
           </a-menu>
         </template>
-        <a-button>
+        <a-button class="header-btn">
           {{ $t(LANG.HOME_HEADER.CHOOSE_LANG) }}
           <DownOutlined />
         </a-button>
@@ -97,7 +101,7 @@
             </a-menu-item>
           </a-menu>
         </template>
-        <a-button>
+        <a-button class="header-btn">
           更多
           <DownOutlined />
         </a-button>
@@ -515,6 +519,16 @@ export default defineComponent({
 </style>
 <style lang="scss" scoped>
 .project-list {
+
+  .header-btn {
+      color: #fff;
+      background: rgba(255, 255, 255, .2);
+      border-color: rgba(255, 255, 255, .2);
+      &:hover {
+        background: rgba(255, 255, 255, .5);
+        border-color: rgba(255, 255, 255, .5);
+      }
+    }
   .head-btn {
     line-height: 1.5715;
     position: relative;
@@ -536,8 +550,14 @@ export default defineComponent({
     font-size: 14px;
     border-radius: 2px;
     color: rgba(0, 0, 0, 0.85);
-    background: #fff;
-    border-color: #d9d9d9;
+    color: #fff;
+    background: rgba(255, 255, 255, .2);
+    border-color: rgba(255, 255, 255, .2);
+
+    &:hover {
+      background: rgba(255, 255, 255, .5);
+      border-color: rgba(255, 255, 255, .5);
+    }
     #listFileInput {
       opacity: 0;
     }
@@ -572,6 +592,7 @@ export default defineComponent({
     overflow-y: scroll;
     overflow-y: overlay;
     -webkit-overflow-scrolling: touch;
+    background: #D2D6DB;
 
     .list-view {
       position: relative;
@@ -585,7 +606,13 @@ export default defineComponent({
         width: 300px;
         height: 200px;
         border-radius: 20px;
-        background-color: rgba(125, 125, 125, 0.16);
+        // background-color: rgba(125, 125, 125, 0.16);
+        // background-color: #fff;
+        background: linear-gradient(0deg, #c4c7ce 20.79%, rgb(232 235 244) 100%);
+        // background-image:url("~@/assets/card-bg.png");
+        // background-repeat: no-repeat;
+        // background-position: 70% 50%;
+
         box-shadow: 9px 13px 22px rgba(0, 0, 0, 0.25);
         overflow: hidden;
         color: transparent;
@@ -593,6 +620,7 @@ export default defineComponent({
         transition: transform 0.3s ease;
         margin: 20px 20px;
         cursor: pointer;
+
         &:active {
           background-size: 110% 110%;
         }

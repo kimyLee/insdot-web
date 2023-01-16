@@ -19,7 +19,7 @@ const obj = {
       en: 'JOYO',
     } as unknown as string,
     SUBTITLE: {
-      zh: '游戏创作工具',
+      zh: '智能桌游创作工具 Beta',
       en: 'Game Design Tool',
     } as unknown as string,
     NEW_GAME: {

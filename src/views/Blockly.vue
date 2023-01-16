@@ -1,18 +1,21 @@
 
 <template>
   <div class="blockly-editor page">
-    <HeaderNav :title="$t(LANG.HOME_HEADER.TITLE)"
-               :sub-title="$t(LANG.HOME_HEADER.SUBTITLE)"
-               @back="navigatorBack">
+    <HeaderNav
+      :sub-title="$t(LANG.HOME_HEADER.SUBTITLE)"
+      @back="navigatorBack">
+      <div class="logo" />
       <a-button class="rule-btn"
                 shape="round"
                 @click="visibleOfGameRule = true">
         玩法规则
       </a-button>
-      <a-button @click="saveCode">
+      <a-button class="header-btn"
+                @click="saveCode">
         {{ $t(LANG.BLOCKLY_MENU.SAVE) }}
       </a-button>
       <a-button key="2"
+                class="header-btn"
                 @click="connectJoyo">
         <span class="connect-text">
           <span class="connect-dot"
@@ -21,6 +24,7 @@
         </span>
       </a-button>
       <a-button type="primary"
+                class="header-btn"
                 @click="runCode">
         {{ !runStatus ? $t(LANG.BLOCKLY_MENU.RUN) : $t(LANG.BLOCKLY_MENU.STOP) }}
       </a-button>
@@ -45,12 +49,12 @@
       <div class="blockly-info">
         <!-- <p>调试信息台：</p> -->
         <div class="info-card">
-          <a-form-item label="连传模式">
+          <!-- <a-form-item label="连传模式">
             <a-switch :checked="false"
                       disabled="disabled" />
-          </a-form-item>
+          </a-form-item> -->
           <div style="margin-bottom: 10px;">
-            <InfoCircleOutlined style="color:#faad14" />
+            <InfoCircleOutlined style="color:#faad14;vertical-align: middle;" />
             <span style="color:#faad14;font-size: 14px;margin-left: 10px;">当前暂未支持连续识别同一ID值</span>
           </div>
         </div>
@@ -718,6 +722,22 @@ export default defineComponent({
   height: 100vh;
   overflow: hidden;
 
+  .logo {
+    left: 50px;
+  }
+  .ant-page-header-back-button {
+    color: #fff;
+  }
+  .header-btn {
+    color: #fff;
+    background: rgba(255, 255, 255, .2);
+    border-color: rgba(255, 255, 255, .2);
+    &:hover {
+      background: rgba(255, 255, 255, .5);
+      border-color: rgba(255, 255, 255, .5);
+    }
+  }
+
   .blocklyToolboxDiv {
     background-color: #fff;
     border-right: 1px solid #eee;
@@ -810,7 +830,8 @@ export default defineComponent({
     background: #fff;
     padding: 20px;
     box-sizing: border-box;
-    border-left: 1px solid #ccc;
+    // border-left: 1px solid #ccc;
+    // box-shadow: -9px 0px 10px 0px rgba(0, 0, 0, 0.25);
 
     // 连接点
     .info-card::v-deep {
