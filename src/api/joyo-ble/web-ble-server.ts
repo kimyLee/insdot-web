@@ -11,7 +11,7 @@ let commandService = null as any
 let DFUControlCharacteristic = null as any // 可notify、可写
 let DFUPackCharacteristic = null as any
 let DFUService = null as any
-const underDFU = false
+let underDFU = false
 const tempBuffer = null as any
 
 export const bleState = reactive({
@@ -31,7 +31,11 @@ declare global {
 const naviga: any = window.navigator
 
 function handleDisconnect () { // TODO：这里同一设备会重复两次
+  // if (underDFU) {
+  //   return
+  // }
   console.log('断开连接')
+
   writeCharacteristic = null
   bleDevice = null
   notifyCharacteristic = null
@@ -56,6 +60,10 @@ export function disconnectJoyo () {
     console.log('already disconnect')
   }
 }
+
+// export function reConnectJoyo () { // 重连
+//   //
+// }
 
 export function connectJoyo () {
   console.log('Connecting...')
@@ -145,6 +153,7 @@ export function DFUUpgrade (buffer: any, progressCb: any): Promise<any> { // DFU
   //     console.log('开始writeMode')
   //     return dfu.writeMode(bleDevice)
   //   })
+  underDFU = true
   const dfu = window.dfu
   return dfu.writeMode(bleDevice)
     .then((device: any) => {
@@ -152,6 +161,7 @@ export function DFUUpgrade (buffer: any, progressCb: any): Promise<any> { // DFU
       return transfer(device, buffer, progressCb)
     })
     .catch((err: any) => {
+      underDFU = false
       console.log(err)
     })
 }
@@ -166,10 +176,19 @@ function transfer (device: any, buffer: any, progressCb: any) {
       .then(() => {
         console.log('dfu complete')
         resolve(true)
+        underDFU = false
       })
       .catch((error: any) => {
         console.log(error)
         reject(error)
+        underDFU = false
+        // setTimeout(() => {
+        //   if (bleDevice) {
+        //     bleDevice.gatt.connect()
+        //   } else {
+        //     console.log('找不到bleDevice')
+        //   }
+        // }, 2000)
       })
   })
 }

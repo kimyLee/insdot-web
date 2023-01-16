@@ -1,20 +1,18 @@
 <template>
-  <a-drawer v-model:visible="$props.variableDrawerVisible"
+  <a-drawer v-model:visible="popVisible"
             class="variable-drawer"
             :wrap-style="{ position: 'absolute' }"
-            :closable="false"
             :keyboard="false"
-            :mask-closable="false"
             :mask="false"
             :get-container="getContainer"
-            placement="right">
+            placement="right"
+            @close="handleClose">
     <h3 style="text-align: center;margin-bottom: 18px;">
       {{ $t("VARIABLE_DRAWER.VARIABLE_MGR") }}
     </h3>
 
     <div>
-      <a-row
-        justify="space-between">
+      <a-row justify="space-between">
         <a-button type="primary"
                   ghost
                   shape="round"
@@ -61,13 +59,12 @@
             @change="getVariables">
       <a-tab-pane :key="tabs.variable.key"
                   :tab="tabs.variable.context">
-        <a-list
-          :data-source="variables">
+        <a-list :data-source="variables">
           <template #renderItem="{ item }">
             <a-list-item :key="`${item.id_}`">
               <template #actions>
                 <a @click="renameVariable(item)">{{ $t("VARIABLE_DRAWER.RENAME") }}</a>
-                <a @click="deleteVariableById(item.id_)">  {{ $t("VARIABLE_DRAWER.DELETE") }}</a>
+                <a @click="deleteVariableById(item.id_)"> {{ $t("VARIABLE_DRAWER.DELETE") }}</a>
               </template>
               <a-list-item-meta style="white-space: nowrap;"
                                 :description="item.name" />
@@ -77,11 +74,10 @@
       </a-tab-pane>
       <a-tab-pane :key="tabs.list.key"
                   :tab="tabs.list.context">
-        <a-list
-          :data-source="list"
-          :locale="{
-            emptyText: ' '
-          }">
+        <a-list :data-source="list"
+                :locale="{
+                  emptyText: ' '
+                }">
           <template #renderItem="{ item }">
             <a-list-item :key="`${item.id_}`">
               <template #actions>
@@ -96,10 +92,9 @@
       </a-tab-pane>
 
       <template #renderTabBar="{ DefaultTabBar, ...props }">
-        <component
-          :is="DefaultTabBar"
-          v-bind="props"
-          :style="{textAlign: 'center' }" />
+        <component :is="DefaultTabBar"
+                   v-bind="props"
+                   :style="{textAlign: 'center' }" />
       </template>
     </a-tabs>
   </a-drawer>
@@ -108,7 +103,7 @@
 <script lang="ts">
 
 import { message } from 'ant-design-vue'
-import { defineComponent, nextTick, reactive, ref, toRefs } from 'vue'
+import { defineComponent, nextTick, reactive, ref, toRefs, watch } from 'vue'
 
 import * as Blockly from 'blockly/core'
 import { useI18n } from 'vue-i18n'
@@ -121,9 +116,9 @@ export default defineComponent({
       default: false,
     },
   },
-  emits: [],
+  emits: ['close'],
 
-  setup () {
+  setup (props, { emit }) {
     const refInput = ref(null)
     const { t } = useI18n()
     const tabs: any = {
@@ -141,15 +136,25 @@ export default defineComponent({
       },
     }
 
-    console.log(tabs, 233)
-
     const state = reactive({
       activeTabKey: tabs.variable.key,
       createKey: '',
       createValue: '',
       variables: [] as any,
       list: [] as any,
+      popVisible: false,
     })
+
+    watch(() => props.variableDrawerVisible, () => {
+      if (props.variableDrawerVisible) {
+        // 初次打开弹窗：获取固件版本
+        state.popVisible = true
+      }
+    })
+
+    const handleClose = () => {
+      emit('close')
+    }
 
     const createCancel = () => {
       state.createKey = ''
@@ -226,6 +231,9 @@ export default defineComponent({
     const changeCreateKey = (key: string) => {
       state.createValue = ''
       state.createKey = key
+      if (state.activeTabKey !== state.createKey) {
+        state.activeTabKey = state.createKey
+      }
 
       nextTick(() => {
         // @ts-ignore
@@ -249,6 +257,7 @@ export default defineComponent({
       changeCreateKey,
       deleteVariableById,
       renameVariable,
+      handleClose,
     }
   },
   mounted () {
@@ -259,10 +268,13 @@ export default defineComponent({
 })
 </script>
 
-<style scoped lang="scss">
-.variable-drawer{
+<style  lang="scss">
+.variable-drawer {
   z-index: 99999;
-  width: 256px;
+  //width: 256px;
   background: #fff;
+  .ant-drawer-content-wrapper {
+    width: 300px !important;
+  }
 }
 </style>

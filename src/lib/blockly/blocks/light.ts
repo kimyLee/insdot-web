@@ -5,16 +5,18 @@ import * as Blockly from 'blockly/core'
 // import { defineBlocksWithJsonArray, Blocks, Msg, Mutator } from 'blockly/core'
 import { javascriptGenerator } from 'blockly/javascript'
 import './custom-field/field_light'
+import '../block-js-code/light'
+import { customKey } from '@/lib/blockly/i18n/zh'
 
 Blockly.defineBlocksWithJsonArray([
   {
-    type: 'set_light_demo',
+    type: 'set_light_by_ui',
     // message0: 'set lights with array %1',
-    message0: '设置灯效 %1',
+    message0: customKey.LIGHT_SET_BY_UI,
     args0: [
       {
         type: 'field_light',
-        name: 'Light',
+        name: 'light',
       },
     ],
     colour: 230,
@@ -26,7 +28,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'set_light',
     // message0: 'set lights with array %1',
-    message0: 'set light with array %1',
+    message0: customKey.LIGHT_SET_BY_ARRAY,
     args0: [
       {
         type: 'field_variable',
@@ -43,12 +45,12 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'set_all_light',
     // message0: 'set lights with color %1',
-    message0: 'set all light with color %1',
+    message0: customKey.LIGHT_SET_ALL_BY_COLOR,
     args0: [
       {
-        type: 'field_input',
+        type: 'input_value',
         name: 'color',
-        text: '0xffffff',
+        // text: '0xffffff',
       },
     ],
     previousStatement: null,
@@ -60,31 +62,32 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'set_all_light_color',
     // message0: 'set lights with color R: %1 G: %2 B: %3',
-    message0: 'use color R: %1 G: %2 B: %3 to set all light',
+    message0: customKey.LIGHT_SET_ALL_BY_RGB,
     args0: [
       {
-        type: 'field_number',
+        // type: 'field_number',
+        type: 'input_value',
         name: 'R',
-        value: 0,
-        min: 0,
-        max: 255,
-        precision: 1,
+        // value: 0,
+        // min: 0, // todo: 在输入端做限制
+        // max: 255,
+        // precision: 1,
       },
       {
-        type: 'field_number',
+        type: 'input_value',
         name: 'G',
-        value: 0,
-        min: 0,
-        max: 255,
-        precision: 1,
+        // value: 0,
+        // min: 0,
+        // max: 255,
+        // precision: 1,
       },
       {
-        type: 'field_number',
+        type: 'input_value',
         name: 'B',
-        value: 0,
-        min: 0,
-        max: 255,
-        precision: 1,
+        // value: 0,
+        // min: 0,
+        // max: 255,
+        // precision: 1,
       },
     ],
     previousStatement: null,
@@ -94,47 +97,28 @@ Blockly.defineBlocksWithJsonArray([
     helpUrl: '',
   },
   {
-    type: 'list_include',
-    // message0: 'list %1 including item %2',
-    message0: '列表 %1 包含 %2 ？',
-    args0: [
-      {
-        type: 'input_value',
-        name: 'LIST',
-      },
-      {
-        type: 'input_value',
-        name: 'NAME',
-      },
-    ],
-    output: 'Boolean',
-    colour: 230,
-    tooltip: '',
-    helpUrl: '',
-  },
-  {
     type: 'set_light_animation',
     // message0: 'set light animation %1 last %2 seconds with color %3',
-    message0: 'play animation %1 last %2 second，color with %3',
+    message0: customKey.LIGHT_SET_ANIMATION,
     args0: [
       {
         type: 'field_dropdown',
         name: 'animation',
         options: [
           [
-            '跑马灯',
+            customKey.LIGHT_RUN,
             'run',
           ],
           [
-            '呼吸',
+            customKey.LIGHT_BREATH,
             'breath',
           ],
           [
-            '闪烁',
+            customKey.LIGHT_BLINK,
             'star',
           ],
           [
-            '炸弹',
+            customKey.LIGHT_BOOM,
             'boom',
           ],
           // [
@@ -144,13 +128,15 @@ Blockly.defineBlocksWithJsonArray([
         ],
       },
       {
-        type: 'field_number',
-        name: 'NAME',
+        // type: 'field_number',
+        type: 'input_value',
+        name: 'time',
         value: 0,
         min: 0,
       },
       {
-        type: 'field_input',
+        // type: 'field_input',
+        type: 'input_value',
         name: 'color',
         text: '0xffffff',
       },
@@ -164,7 +150,7 @@ Blockly.defineBlocksWithJsonArray([
   {
     type: 'clear_light',
     // message0: 'clear all light',
-    message0: 'clear all light',
+    message0: customKey.LIGHT_CLEAR_ALL,
     previousStatement: null,
     nextStatement: null,
     colour: 230,
@@ -316,64 +302,70 @@ Blockly.Blocks.lists_create_with_row = {
   },
 }
 
-javascriptGenerator.set_light = function (block: any) {
-  const variable_light = javascriptGenerator.nameDB_.getName(block.getFieldValue('light'), 'VARIABLE')
+// javascriptGenerator.set_light_by_ui = function (block: any) {
+//   const arr_light = block.getFieldValue('light')
+//   return 'bleSetLight(JSON.stringify({colors:' + JSON.stringify(arr_light) + ',bright:1}));\n'
+//   // return '\n'
+// }
 
-  return 'bleSetLight(JSON.stringify({colors:' + variable_light + ',bright:1}));\n'
-  // return 'bleSetLight(JSON.stringify({colors:' + variable_light + '.map(function (e) {' +
-  //   "if (typeof (e) === 'string') {" +
-  //   "e = e.replace('#', '')" +
-  //   '}' +
-  //   'return Number(e);' +
-  //   '}),bright:1}));\n'
-}
+// javascriptGenerator.set_light = function (block: any) {
+//   const variable_light = javascriptGenerator.nameDB_.getName(block.getFieldValue('light'), 'VARIABLE')
 
-javascriptGenerator.set_all_light = function (block: any) {
-  const number_color = block.getFieldValue('color')
-  console.log(number_color)
-  const arr = JSON.parse(JSON.stringify(Array(12).fill(Number(number_color))))
+//   return 'bleSetLight(JSON.stringify({colors:' + variable_light + ',bright:1}));\n'
+//   // return 'bleSetLight(JSON.stringify({colors:' + variable_light + '.map(function (e) {' +
+//   //   "if (typeof (e) === 'string') {" +
+//   //   "e = e.replace('#', '')" +
+//   //   '}' +
+//   //   'return Number(e);' +
+//   //   '}),bright:1}));\n'
+// }
 
-  return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
-}
+// javascriptGenerator.set_all_light = function (block: any) {
+//   const number_color = block.getFieldValue('color')
+//   console.log(number_color)
+//   const arr = JSON.parse(JSON.stringify(Array(12).fill(Number(number_color))))
 
-javascriptGenerator.lists_create_with_row = function (block: any) {
-  // Create a list with any number of elements of any type.
-  const elements = new Array(block.itemCount_)
-  for (let i = 0; i < block.itemCount_; i++) {
-    elements[i] =
-      javascriptGenerator.valueToCode(block, 'ADD' + i, javascriptGenerator.ORDER_NONE) ||
-      'null'
-  }
-  const code = '[' + elements.join(', ') + ']'
-  return [code, javascriptGenerator.ORDER_ATOMIC]
-}
+//   return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
+// }
 
-javascriptGenerator.list_include = function (block: any) {
-  const variable_list = javascriptGenerator.nameDB_.getName(block.getFieldValue('list'), 'VARIABLE')
-  const variable_name = javascriptGenerator.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
-  // TODO: Assemble JavaScript into code variable.
-  const code = `${variable_list}.indexOf(${variable_name}) >= 0`
-  // TODO: Change ORDER_NONE to the correct strength.
-  return [code, javascriptGenerator.ORDER_NONE]
-}
+// javascriptGenerator.lists_create_with_row = function (block: any) {
+//   // Create a list with any number of elements of any type.
+//   const elements = new Array(block.itemCount_)
+//   for (let i = 0; i < block.itemCount_; i++) {
+//     elements[i] =
+//       javascriptGenerator.valueToCode(block, 'ADD' + i, javascriptGenerator.ORDER_NONE) ||
+//       'null'
+//   }
+//   const code = '[' + elements.join(', ') + ']'
+//   return [code, javascriptGenerator.ORDER_ATOMIC]
+// }
 
-javascriptGenerator.set_all_light_color = function (block: any) {
-  const number_r = block.getFieldValue('R')
-  const number_g = block.getFieldValue('G')
-  const number_b = block.getFieldValue('B')
+// javascriptGenerator.list_include = function (block: any) {
+//   const variable_list = javascriptGenerator.nameDB_.getName(block.getFieldValue('list'), 'VARIABLE')
+//   const variable_name = javascriptGenerator.nameDB_.getName(block.getFieldValue('NAME'), 'VARIABLE')
+//   // TODO: Assemble JavaScript into code variable.
+//   const code = `${variable_list}.indexOf(${variable_name}) >= 0`
+//   // TODO: Change ORDER_NONE to the correct strength.
+//   return [code, javascriptGenerator.ORDER_NONE]
+// }
 
-  const arr = JSON.parse(JSON.stringify(Array(12).fill(number_r * 256 * 256 + number_g * 256 + number_b)))
+// javascriptGenerator.set_all_light_color = function (block: any) {
+//   const number_r = block.getFieldValue('R')
+//   const number_g = block.getFieldValue('G')
+//   const number_b = block.getFieldValue('B')
 
-  return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
-}
+//   const arr = JSON.parse(JSON.stringify(Array(12).fill(number_r * 256 * 256 + number_g * 256 + number_b)))
 
-javascriptGenerator.set_light_animation = function (block: any) {
-  const dropdown_animation = block.getFieldValue('animation')
-  const number_name = block.getFieldValue('NAME')
-  const text_color = block.getFieldValue('color')
-  // TODO: Assemble JavaScript into code variable.
-  return `bleSetLightAnimation('${dropdown_animation}', ${number_name}, ${text_color});\n`
-}
-javascriptGenerator.clear_light = function (block: any) {
-  return 'clearAllLight();\n'
-}
+//   return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
+// }
+
+// javascriptGenerator.set_light_animation = function (block: any) {
+//   const dropdown_animation = block.getFieldValue('animation')
+//   const number_name = block.getFieldValue('NAME')
+//   const text_color = block.getFieldValue('color')
+//   // TODO: Assemble JavaScript into code variable.
+//   return `bleSetLightAnimation('${dropdown_animation}', ${number_name}, ${text_color});\n`
+// }
+// javascriptGenerator.clear_light = function (block: any) {
+//   return 'clearAllLight();\n'
+// }

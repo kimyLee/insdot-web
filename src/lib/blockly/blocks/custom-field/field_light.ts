@@ -42,7 +42,6 @@ export class FieldLight extends Blockly.Field {
     this.imgWidth_ = DEFAULT_WIDTH
 
     // Set a default empty value
-    console.log(this.getValue(), 'init')
     if (this.getValue() === null) {
       this.setValue(this.getEmptyArray_())
     }
@@ -62,7 +61,6 @@ export class FieldLight extends Blockly.Field {
    * @nocollapse
    */
   static fromJson (options: any) {
-    console.log(options, '????')
     return new FieldLight(options && options.value, undefined, options)
   }
 
@@ -73,7 +71,6 @@ export class FieldLight extends Blockly.Field {
    */
   doClassValidation_ (newValue: any = undefined) {
     // 检验数据格式数据
-    console.log('doClassValidation_', newValue)
     if (!newValue) {
       return null
     }
@@ -94,7 +91,6 @@ export class FieldLight extends Blockly.Field {
    * @param {*} newValue The value that's about to be set.
    */
   doValueUpdate_ (newValue: any) {
-    console.log('doValueUpdate_', 233)
     super.doValueUpdate_(newValue)
     if (newValue) {
       const newHeight = newValue.length
@@ -117,7 +113,6 @@ export class FieldLight extends Blockly.Field {
    * @protected
    */
   showEditor_ (e = undefined, _quietInput = undefined) {
-    console.log('showEditor_')
     openModalOfLightColor(this.getValue(), (val: any) => {
       this.setValue(val)
     })
@@ -130,7 +125,6 @@ export class FieldLight extends Blockly.Field {
    * @override
    */
   render_ () {
-    console.log('render')
     super.render_()
 
     if (!this.getValue()) {
@@ -157,16 +151,14 @@ export class FieldLight extends Blockly.Field {
    * @return {!Element} The newly created dropdown menu.
    * @private
    */
-  dropdownCreate_ () {
-    console.log('dropdownCreate_') // ?
-  }
+  // dropdownCreate_ () {
+  // }
 
   /**
    * Initializes the on-block display.
    * @override
    */
   initView () {
-    console.log('initView', this.getValue())
     this.blockDisplayPixels_ = []
     const position = [ // 单位距离参考 PIXEL_SIZE = 15
       [15, 0], // 第一个为左上角
@@ -181,7 +173,6 @@ export class FieldLight extends Blockly.Field {
     const positionCenter = [25, 25]
     const row = []
     for (let i = 0; i < position.length; i++) {
-      console.log(position[i][0])
       const square = Blockly.utils.dom.createSvgElement(
         'circle',
         {
@@ -229,9 +220,8 @@ export class FieldLight extends Blockly.Field {
    * Disposes of events belonging to the bitmap editor.
    * @private
    */
-  dropdownDispose_ () {
-    console.log('dropdownDispose_')
-  }
+  // dropdownDispose_ () {
+  // }
 
   /**
    * Constructs an array of zeros with the specified width and height.
@@ -253,30 +243,6 @@ export class FieldLight extends Blockly.Field {
     newElt.className = className
     return newElt
   }
-
-  // saveState (doFullSerialization) {
-  //   const state = { lights: this.getValue() }
-  //   // if (doFullSerialization) {
-  //   //   // state.name = this.variable_.name
-  //   //   // state.type = this.variable_.type
-  //   // }
-  //   console.log('saveState', state)
-  //   return state
-  // }
-
-  // loadState (state) {
-  //   console.log('loadState', state)
-  //   // const variable = Blockly.Variables.getOrCreateVariablePackage(
-  //   //   this.getSourceBlock().workspace,
-  //   //   state.id,
-  //   //   state.name, // May not exist.
-  //   //   state.type) // May not exist.
-  //   this.setValue(state.lights)
-  // }
-
-  // fromXml (fieldElement: any) { // 重要，用来还原变量
-  //   this.setValue(fieldElement.textContent.split(','))
-  // }
 }
 
 Blockly.fieldRegistry.register('field_light', FieldLight)

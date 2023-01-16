@@ -1,6 +1,7 @@
 
 import { defineBlocksWithJsonArray } from 'blockly/core'
 import '../block-js-code/list'
+import { customKey } from '@/lib/blockly/i18n/zh'
 
 defineBlocksWithJsonArray([
   // Block for Panda variable getter.
@@ -38,7 +39,7 @@ defineBlocksWithJsonArray([
       {
         type: 'input_value',
         name: 'VALUE',
-        check: 'LIST', // Checks that the input value is of type "Panda"
+        check: 'Array', // Checks that the input value is of type "Panda"
       },
     ],
     previousStatement: null,
@@ -48,4 +49,44 @@ defineBlocksWithJsonArray([
     // tooltip: '%{BKY_VARIABLES_GET_TOOLTIP}',
     // extensions: ['contextMenu_variableSetterGetter'],
   },
+  {
+    type: 'list_include',
+    // message0: 'list %1 including item %2',
+    message0: customKey.LIST_INCLUDE,
+    args0: [
+      {
+        type: 'input_value',
+        name: 'LIST',
+      },
+      {
+        type: 'input_value',
+        name: 'NAME',
+      },
+    ],
+    output: 'Boolean',
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
+  {
+    type: 'list_push',
+    // message0: 'list %1 including item %2',
+    message0: customKey.LIST_PUSH,
+    args0: [
+      {
+        type: 'input_value',
+        name: 'LIST',
+      },
+      {
+        type: 'input_value',
+        name: 'NAME',
+      },
+    ],
+    previousStatement: null,
+    nextStatement: null,
+    colour: 230,
+    tooltip: '',
+    helpUrl: '',
+  },
+
 ])

@@ -35,16 +35,26 @@ function sleep (ms: number) {
 
 // 控制灯效
 export async function bleSetLight (data: { colors: number[], bright: number }) { // todo: params ide提示
-  data.colors = data.colors.map((e: any) => {
-    if (typeof (e) === 'string' && e.indexOf('#') >= 0) {
-      e = e.replace('#', '0x')
+  try {
+    data.colors = data.colors.map((e: any) => {
+      if (typeof (e) === 'string' && e.indexOf('#') >= 0) {
+        e = e.replace('#', '0x')
+      }
+      return Number(e)
+    })
+    const len = data.colors.length
+    if (len < 12) {
+      for (let i = 0; i < (12 - len); i++) {
+        data.colors.push(0)
+      }
     }
-    return Number(e)
-  })
-  const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, data)
-  // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
-  // handleSendCommandWithoutRsp(params)
-  sendCommand(params)
+    const params = generateReqParams(CommandType.CONTROL, CommandOrder.CONTROL_LIGHT, data)
+    // const params = [85, 161, 44, 178, 54, 0, 40, 207, 0, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 240, 241, 242, 243, 244, 245, 246, 205, 204, 204, 61]
+    // handleSendCommandWithoutRsp(params)
+    sendCommand(params)
+  } catch (err) {
+    console.log(err)
+  }
 }
 
 export async function clearAllLight () { // todo: params ide提示

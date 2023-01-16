@@ -1,6 +1,8 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '变量',
+  name: customKey.TOOLBOX_VAR,
   // custom: 'VAR',
   cssConfig: {
     container: 'category-var',
@@ -12,7 +14,7 @@ export default {
       fields: {
         VAR: {
           type: 'VAR',
-          name: 'var',
+          name: 'value_1',
         },
       },
     },
@@ -22,7 +24,7 @@ export default {
       fields: {
         VAR: {
           type: 'VAR',
-          name: 'var',
+          name: 'value_1',
         },
       },
       inputs: {
@@ -43,7 +45,7 @@ export default {
       fields: {
         VAR: {
           type: 'VAR',
-          name: 'var',
+          name: 'value_1',
         },
       },
       inputs: {
@@ -51,7 +53,7 @@ export default {
           block: {
             type: 'math_number',
             fields: {
-              NUM: 0,
+              NUM: 1,
             },
           },
         },

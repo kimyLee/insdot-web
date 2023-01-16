@@ -10,6 +10,7 @@ import procedures from './procedures'
 import joyoLight from './joyo-light'
 import joyoAudio from './joyo-audio'
 import joyoOid from './joyo-oid'
+import tool from './tool'
 // import joyo from './joyo'
 // import joyo from './joyo'
 // import joyo from './joyo'
@@ -23,10 +24,11 @@ const basicCategories = {
     logic,
     loop,
     math,
-    text,
+    // text,
     variables,
     list,
     procedures,
+    tool,
   ],
 }
 

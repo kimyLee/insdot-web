@@ -1,5 +1,6 @@
 
 import CONSTANT from './constant'
+import { customKey } from '@/lib/blockly/i18n/zh'
 
 export function registerToolboxCategoryCallback (myWorkspace: any) {
   myWorkspace.registerButtonCallback('myFirstButtonPressed', () => {
@@ -12,7 +13,7 @@ export function registerToolboxCategoryCallback (myWorkspace: any) {
 
 export default {
   kind: 'category',
-  name: '列表',
+  name: customKey.TOOLBOX_LIST,
   cssConfig: {
     container: 'category-list',
   },
@@ -28,7 +29,7 @@ export default {
       fields: {
         VAR: {
           type: 'LIST',
-          name: 'list',
+          name: 'list_1',
         },
       },
     },
@@ -38,7 +39,7 @@ export default {
       fields: {
         VAR: {
           type: 'LIST',
-          name: 'list',
+          name: 'list_1',
         },
       },
     },
@@ -49,6 +50,35 @@ export default {
     {
       kind: 'block',
       type: 'lists_create_with', //  lists_create_with_row
+      inputs: {
+        ADD0: {
+          block: {
+            type: 'math_number',
+            id: 'Rf7_0x9O?,U4xs4g:P.2',
+            fields: {
+              NUM: 0,
+            },
+          },
+        },
+        ADD1: {
+          block: {
+            type: 'math_number',
+            id: 'h.CMI#o%3XqY1#QWPzay',
+            fields: {
+              NUM: 1,
+            },
+          },
+        },
+        ADD2: {
+          block: {
+            type: 'math_number',
+            id: '%1^c%D7r).a@vKC#LLLU',
+            fields: {
+              NUM: 2,
+            },
+          },
+        },
+      },
     },
     {
       kind: 'block',
@@ -61,7 +91,7 @@ export default {
           //   fields: {
           //     VAR: {
           //       type: 'LIST',
-          //       name: 'list',
+          //       name: 'list_1',
           //     },
           //   },
           // },
@@ -86,7 +116,7 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },
@@ -104,7 +134,7 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },
@@ -121,7 +151,7 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },
@@ -145,31 +175,31 @@ export default {
     //   kind: 'block',
     //   type: 'lists_create_with_item',
     // },
-    // {
-    //   kind: 'block',
-    //   type: 'list_include',
-    //   inputs: { // 选项为value的name，input有三种，value，state,dummy
-    //     LIST: {
-    //       block: {
-    //         type: 'variables_get_list',
-    //         fields: {
-    //           VAR: {
-    //             type: 'LIST',
-    //             name: 'list',
-    //           },
-    //         },
-    //       },
-    //     },
-    //     NAME: {
-    //       shadow: {
-    //         type: 'math_number',
-    //         fields: {
-    //           NUM: 1,
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
+    {
+      kind: 'block',
+      type: 'list_include',
+      inputs: { // 选项为value的name，input有三种，value，state,dummy
+        LIST: {
+          block: {
+            type: 'variables_get_list',
+            fields: {
+              VAR: {
+                type: 'LIST',
+                name: 'list_1',
+              },
+            },
+          },
+        },
+        NAME: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 1,
+            },
+          },
+        },
+      },
+    },
     {
       kind: 'block',
       type: 'lists_getIndex',
@@ -180,13 +210,38 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },
         },
         AT: {
           block: {
+            type: 'math_number',
+            fields: {
+              NUM: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      kind: 'block',
+      type: 'list_push',
+      inputs: { // 选项为value的name，input有三种，value，state,dummy
+        LIST: {
+          block: {
+            type: 'variables_get_list',
+            fields: {
+              VAR: {
+                type: 'LIST',
+                name: 'list_1',
+              },
+            },
+          },
+        },
+        NAME: {
+          shadow: {
             type: 'math_number',
             fields: {
               NUM: 1,
@@ -205,7 +260,7 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },
@@ -238,7 +293,7 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },
@@ -268,6 +323,12 @@ export default {
       type: 'lists_split',
       inputs: {
         INPUT: {
+          shadow: {
+            type: 'text',
+            fields: {
+              TEXT: '1,2,3',
+            },
+          },
         },
         DELIM: {
           shadow: {
@@ -290,7 +351,7 @@ export default {
             fields: {
               VAR: {
                 type: 'LIST',
-                name: 'list',
+                name: 'list_1',
               },
             },
           },

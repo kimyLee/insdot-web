@@ -1,16 +1,17 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '函数',
+  name: customKey.TOOLBOX_FUNC,
   custom: 'PROCEDURE',
   cssConfig: {
     container: 'category-func',
   },
   contents: [
-    // {
-    //   kind: 'block',
-    //   type: 'procedures_defnoreturn',
-    //   blockxml: '',
-    // },
+    {
+      kind: 'block',
+      type: 'procedures_defnoreturn',
+    },
     // {
     //   kind: 'block',
     //   type: 'procedures_defreturn',

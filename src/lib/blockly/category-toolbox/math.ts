@@ -1,6 +1,8 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '运算',
+  name: customKey.TOOLBOX_MATH,
   cssConfig: {
     container: 'category-math',
   },
@@ -34,53 +36,21 @@ export default {
         },
       },
     },
-    {
-      kind: 'block',
-      type: 'math_single',
-      inputs: { // 选项为value的name，input有三种，value，state,dummy
-        NUM: {
-          shadow: {
-            type: 'math_number',
-            fields: {
-              NUM: 9,
-            },
-          },
-        },
-      },
-    },
-    {
-      kind: 'block',
-      type: 'math_trig',
-      inputs: {
-        NUM: {
-          shadow: {
-            type: 'math_number',
-            fields: {
-              NUM: 45,
-            },
-          },
-        },
-      },
-    },
-    {
-      kind: 'block',
-      type: 'math_constant',
-    },
+    // {
+    //   kind: 'block',
+    //   type: 'math_single',
+    //   inputs: { // 选项为value的name，input有三种，value，state,dummy
+    //     NUM: {
+    //       shadow: {
+    //         type: 'math_number',
+    //         fields: {
+    //           NUM: 9,
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
 
-    {
-      kind: 'block',
-      type: 'math_number_property',
-      inputs: {
-        NUMBER_TO_CHECK: {
-          shadow: {
-            type: 'math_number',
-            fields: {
-              NUM: 0,
-            },
-          },
-        },
-      },
-    },
     {
       kind: 'block',
       type: 'math_round',
@@ -95,23 +65,7 @@ export default {
         },
       },
     },
-    {
-      kind: 'block',
-      type: 'math_on_list',
-      inputs: {
-        LIST: {
-          block: {
-            type: 'variables_get_list',
-            fields: {
-              VAR: {
-                type: 'LIST',
-                name: 'list',
-              },
-            },
-          },
-        },
-      },
-    },
+
     {
       kind: 'block',
       type: 'math_modulo',
@@ -187,13 +141,62 @@ export default {
       },
 
     },
+    // {
+    //   kind: 'block',
+    //   type: 'math_random_float',
+    // },
+    // {
+    //   kind: 'block',
+    //   type: 'math_atan2',
+    // },
     {
       kind: 'block',
-      type: 'math_random_float',
+      type: 'math_on_list',
+      inputs: {
+        LIST: {
+          block: {
+            type: 'variables_get_list',
+            fields: {
+              VAR: {
+                type: 'LIST',
+                name: 'list_1',
+              },
+            },
+          },
+        },
+      },
     },
     {
       kind: 'block',
-      type: 'math_atan2',
+      type: 'math_trig',
+      inputs: {
+        NUM: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 45,
+            },
+          },
+        },
+      },
+    },
+    {
+      kind: 'block',
+      type: 'math_constant',
+    },
+    {
+      kind: 'block',
+      type: 'math_number_property',
+      inputs: {
+        NUMBER_TO_CHECK: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 0,
+            },
+          },
+        },
+      },
     },
 
   ],

@@ -3,7 +3,8 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 
 module.exports = {
   productionSourceMap: false,
-  publicPath: '/insdot-web/dist/',
+  // publicPath: '/insdot-web/dist/',
+  publicPath: '/',
   devServer: {
     https: true,
     disableHostCheck: true,
@@ -15,6 +16,7 @@ module.exports = {
     config.module
       .rule('.text')
       .test(/\.xml$/)
+      .test(/\.jo$/)
       .use('text-loader')
       .loader('text-loader')
       .end()

@@ -1,6 +1,8 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '字符串',
+  name: customKey.TOOLBOX_STRING,
   cssConfig: {
     container: 'category-string',
   },

@@ -1,52 +1,88 @@
 
 <template>
   <div class="blockly-editor page">
-    <HeaderNav title="Design tool"
-               sub-title="for JOYO Design"
+    <HeaderNav :title="$t(LANG.HOME_HEADER.TITLE)"
+               :sub-title="$t(LANG.HOME_HEADER.SUBTITLE)"
                @back="navigatorBack">
-      <a-button v-if="lang === LocaleEnum.EN"
-                @click="setLocale(LocaleEnum.ZH)">
-        En/中
-      </a-button>
-
-      <a-button v-else
-                @click="setLocale(LocaleEnum.EN)">
-        中/En
-      </a-button>
-
-      <a-button @click="toggleVariableDrawerVisible">
-        {{ $t("VARIABLE_DRAWER.VARIABLE") }}
-      </a-button>
-      <a-button>
-        clear
+      <a-button class="rule-btn"
+                shape="round"
+                @click="visibleOfGameRule = true">
+        玩法规则
       </a-button>
       <a-button @click="saveCode">
-        Save
+        {{ $t(LANG.BLOCKLY_MENU.SAVE) }}
       </a-button>
-      <!-- <a-button @click="loadCode">
-        Load
-      </a-button> -->
-      <a-button type="primary"
-                @click="connect">
-        {{ connectStatus ? 'Connected' : 'connect' }}
+      <a-button key="2"
+                @click="connectJoyo">
+        <span class="connect-text">
+          <span class="connect-dot"
+                :class="{'active': connectStatus}" />
+          {{ connectStatus? $t(LANG.BLOCKLY_MENU.DISCONNECT) : $t(LANG.BLOCKLY_MENU.CONNECT) }}
+        </span>
       </a-button>
       <a-button type="primary"
                 @click="runCode">
-        {{ !runStatus ? 'Run' : 'Stop' }}
+        {{ !runStatus ? $t(LANG.BLOCKLY_MENU.RUN) : $t(LANG.BLOCKLY_MENU.STOP) }}
       </a-button>
     </HeaderNav>
 
     <VariableDrawer :workspace="workspace"
-                    :variable-drawer-visible="variableDrawerVisible" />
+                    :variable-drawer-visible="variableDrawerVisible"
+                    @close="variableDrawerVisible = false" />
 
     <div class="block-box container">
-      <div id="blocklyDiv" />
+      <div id="blocklyDiv">
+        <a-popconfirm :title="$t(LANG.BLOCKLY_MENU.CLEAR_CANVAS_CONFIRM)"
+                      :ok-text="$t(LANG.COMMON.CONFIRM)"
+                      :cancel-text="$t(LANG.COMMON.CANCEL)"
+                      @confirm="clearCanvas()">
+          <a-button class="clear-canvas"
+                    shape="round">
+            {{ $t(LANG.BLOCKLY_MENU.CLEAR_CANVAS) }}
+          </a-button>
+        </a-popconfirm>
+      </div>
       <div class="blockly-info">
-        <p>调试信息台：</p>
+        <!-- <p>调试信息台：</p> -->
+        <div class="info-card">
+          <a-form-item label="连传模式">
+            <a-switch :checked="false"
+                      disabled="disabled" />
+          </a-form-item>
+          <div style="margin-bottom: 10px;">
+            <InfoCircleOutlined style="color:#faad14" />
+            <span style="color:#faad14;font-size: 14px;margin-left: 10px;">当前暂未支持连续识别同一ID值</span>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-header">
+            {{ $t(LANG.VARIABLE_DRAWER.VARIABLE_MSG) }}
+            <div class="text-right">
+              <a-button shape="round"
+                        class="create-var"
+                        @click="toggleVariableDrawerVisible">
+                {{ $t (LANG.VARIABLE_DRAWER.VARIABLE_MGR) }}
+              </a-button>
+            </div>
+          </div>
+          <p v-show="!varInfo.length"
+             class="placeholder-text">
+            {{ $t(LANG.VARIABLE_DRAWER.VARIABLE_EMPTY) }}
+          </p>
+          <div class="var-info-box">
+            <p v-for="(item,key) in varInfo"
+               :key="key"
+               class="var-info">
+              <span class="var-label"
+                    :title="key">{{ key }}</span>
+              <span class="var-value">{{ (item || item === 0) ?item : '--' }}</span>
+            </p>
+          </div>
+        </div>
         <!-- 基础信息 -->
         <div class="info-card">
           <div class="info-header">
-            基本信息
+            状态信息
           </div>
           <a-form-item label="连接状态">
             <div v-show="connectStatus">
@@ -56,7 +92,7 @@
               <span class="connected offline" />未连接
             </div>
           </a-form-item>
-          <a-form-item label="识别码值">
+          <a-form-item label="ID值">
             {{ lastOID }}
           </a-form-item>
         </div>
@@ -75,23 +111,16 @@
             </a-timeline-item> -->
           </a-timeline>
         </div>
-        <div class="info-card">
-          <div class="info-header">
-            变量信息
-          </div>
-          <p v-for="(item,key) in varInfo"
-             :key="key"
-             class="var-info">
-            <span class="var-label">{{ key }}</span>
-            <span class="var-value">{{ (item || '--') }}</span>
-          </p>
-        </div>
       </div>
     </div>
 
     <!-- <BlocklyDoc v-model:visible="visible" />
     <GameDoc v-model:visible="gameVisible" /> -->
     <BlocklyModal />
+    <!-- 玩法说明弹窗 -->
+    <GameRule v-model="visibleOfGameRule"
+              :rule-book="ruleBook"
+              @updateRuleBook="updateRuleBook" />
   </div>
 </template>
 
@@ -103,6 +132,8 @@ import {
 } from '@/api/common-type'
 import router from '@/router'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
+import { InfoCircleOutlined } from '@ant-design/icons-vue'
+import GameRule from '@/components/GameRule.vue'
 
 import {
   defineComponent,
@@ -120,7 +151,7 @@ import {
 
 import { blePlayMusic, bleSetLight, bleSetSingleLight, clearAllLight } from '@/api/joyo-ble/index'
 import { bleSetLightAnimation, clearAnimation } from '@/api/joyo-ble/light-animation'
-import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
+// import { connectJoyo, bleState } from '@/api/joyo-ble/web-ble-server'
 
 import * as Blockly from 'blockly/core'
 import { WorkspaceSvg } from 'blockly/core'
@@ -128,7 +159,7 @@ import { javascriptGenerator } from 'blockly/javascript'
 import { CrossTabCopyPaste } from '@blockly/plugin-cross-tab-copy-paste'
 import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeVariable'
 import basicCategories from '@/lib/blockly/category-toolbox/toolbox'
-import { pureCanvas, runSample } from '@/lib/blockly/blocks/preBlock'
+import preSet from '@/lib/blockly/blocks/preBlock'
 import '@/lib/blockly/blocks/index'
 import { locale, LocaleEnum } from '@/locale/index'
 
@@ -139,6 +170,8 @@ import VariableDrawer from '@/components/VariableDrawer.vue'
 
 import '@/style/blockly-category.scss'
 import '@/style/blockly.scss'
+
+import LANG from '@/i18n/type'
 
 import { playPreviewMusic } from '@/lib/blockly/blocks/audio'
 
@@ -156,7 +189,7 @@ const Interpreter = window.Interpreter
 declare global {
     interface Window {
       oidChange: any;
-      When_JOYO_Read: any;
+      JOYO_identify: any;
       // lastOID: any;
       workspace: any;
       blePlayMusic: any;
@@ -175,17 +208,18 @@ export default defineComponent({
     HeaderNav,
     VariableDrawer,
     BlocklyModal,
+    InfoCircleOutlined,
+    GameRule,
   },
 
   setup () {
     // @ts-ignore
     const { proxy } = getCurrentInstance()
     let myInterpreter: any = markRaw({})
-    const preserveVar = ['window', 'self', 'print', 'getDateNow', 'sleepFn', 'blePlayMusic', 'bleSetLight', 'clearAllLight', 'bleSetLightAnimation', 'value', 'When_JOYO_Read', 'setUp']
+    const preserveVar = ['window', 'self', 'print', 'getDateNow', 'sleepFn', 'blePlayMusic', 'bleSetLight', 'clearAllLight', 'bleSetLightAnimation', 'value', 'JOYO_identify', 'setUp']
     const state = reactive({
       lang: locale.getLocale(),
       workspace: null,
-      connectStatus: false,
       recoverFlag: false,
       runStatus: false,
       currentState: 'local',
@@ -203,6 +237,11 @@ export default defineComponent({
       sandBoxMaxSetupTime: 5000,
       sandBoxMaxSetupBegin: 0,
       lastOID: 0,
+      visibleOfGameRule: false,
+      ruleBook: {
+        tokenList: '',
+        gamePlay: '',
+      },
     })
     let timer = null as any
     let workspace = null as any
@@ -212,10 +251,11 @@ export default defineComponent({
     const store = useStore()
     initBlocklyStore(store)
 
-    console.log('attrs,', attrs)
+    const connectStatus = computed(() => { // 看下行否
+      return store.getters['ble/connectStatus']
+    })
 
-    watch(() => bleState.connectStatus, (val) => {
-      state.connectStatus = val
+    watch(() => connectStatus.value, (val) => {
       if (!val) {
         debugLog('断开连接！', 'system')
       } else {
@@ -227,22 +267,35 @@ export default defineComponent({
       router.push({ name: 'Home' })
     }
 
-    const connect = () => {
-      heartBeat()
-      connectJoyo()
+    function connectJoyo () {
+      if (!connectStatus.value) {
+        store.dispatch('ble/bleConnect')
+      } else {
+        store.dispatch('ble/bleDisconnect')
+      }
     }
+
+    // const connect = () => {
+    //   heartBeat()
+    //   connectJoyo()
+    // }
 
     const clearCanvas = () => {
       workspace.clear()
-      Blockly.serialization.workspaces.load(JSON.parse(pureCanvas), workspace)
+      Blockly.serialization.workspaces.load(JSON.parse(preSet.pureCanvas), workspace)
     }
     const toggleVariableDrawerVisible = () => {
       state.variableDrawerVisible = !state.variableDrawerVisible
     }
+    const updateRuleBook = (data: {tokenList: string, gamePlay: string}) => {
+      state.ruleBook = data
+      saveCode()
+    }
     const saveCode = () => {
       // 保存代码
       const json = Blockly.serialization.workspaces.save(workspace)
-      console.log(json, 'json')
+      json.ruleBook = state.ruleBook
+
       const uuid = (route.query?.uuid as string) || 'temp'
       // 更新
       store.dispatch('updateProject', { uuid, content: JSON.stringify(json) })
@@ -257,21 +310,22 @@ export default defineComponent({
       })
     }
 
-    const loadCode = () => {
-      // 保存代码
-      const json = localStorage.getItem('temp') || '{}'
-      workspace.clear()
-      Blockly.serialization.workspaces.load(JSON.parse(json), workspace)
-    }
+    // const loadCode = () => {
+    //   // 保存代码
+    //   const json = localStorage.getItem('temp') || '{}'
+    //   try {
+    //     workspace.clear()
+    //     Blockly.serialization.workspaces.load(JSON.parse(json), workspace)
+    //   } catch (err) {
+    //     console.log(err)
+    //   }
+    // }
 
     const generateCode = () => {
-      // runCode
       const code = javascriptGenerator.workspaceToCode(workspace)
-      console.log(code)
     }
 
     const handleOIDVal = (num: number) => { // 预先处理下OID码, 将8010 ···值映射到 1···
-      console.log('origin', num)
       if (num >= 301 && num <= 314) {
         return num - 300
       }
@@ -304,7 +358,11 @@ export default defineComponent({
       // 执行内置灯光动画
       const bleSetLightAnimationFn = (type: string, time: number, color: number) => {
         // console.log(str)
+        if (!time) {
+          return
+        }
         bleSetLightAnimation(type, time, color)
+        // sleepFn(time)
         // return
       }
 
@@ -318,7 +376,7 @@ export default defineComponent({
       //   return window.alert(arguments.length ? text : '')
       // }
       var wrapper = function print () {
-        debugLog(arguments[0], 'log')
+        debugLog(Array.prototype.slice.call(arguments).join(), 'log')
         return console.log(...arguments)
       }
       var wrapperDate = function getDateNow () {
@@ -369,7 +427,8 @@ export default defineComponent({
         const e = vars[i]
         // state.varInfoOrigin = obj[e]
         if (typeof obj[e] === 'object') {
-          state.varInfo[e] = (obj[e]?.properties)
+          console.log(obj[e])
+          state.varInfo[e] = Object.values(obj[e]?.properties)
         } else {
           state.varInfo[e] = obj[e]
         }
@@ -377,11 +436,10 @@ export default defineComponent({
     }
 
     function handleInterpreterOIDEvt (val: number) {
-      console.log('识别到', val)
       // state.lastOID = val
       state.sandBoxStepCount = 0
       if (myInterpreter && myInterpreter?.appendCode) {
-        myInterpreter.appendCode(`When_JOYO_Read(${val})`)
+        myInterpreter.appendCode(`JOYO_identify(${val})`)
         // nextStep()
         myInterpreter.run()
         // 获取参数状态
@@ -411,7 +469,6 @@ export default defineComponent({
     function heartBeat () {
       clearInterval(timer)
       timer = setInterval(() => { // 定时防止休眠
-        console.log('beat')
         bleSetSingleLight(11, 0x000000)
       }, 20000)
     }
@@ -430,7 +487,7 @@ export default defineComponent({
       // state.OIDstatus = []
       state.debugInfo = []
 
-      if (!bleState.connectStatus) {
+      if (!connectStatus.value) {
         debugLog('JOYO未连接', 'system')
       }
       if (workspace) {
@@ -477,10 +534,14 @@ export default defineComponent({
     }
 
     function getContentByUUID (uuid = '') {
-      const content = localStorage.getItem(`block-${uuid}`) || runSample
+      const content = localStorage.getItem(`block-${uuid}`) || preSet.runSample
       try {
         // 加载json
-        Blockly.serialization.workspaces.load(JSON.parse(content), workspace)
+        const json = JSON.parse(content)
+        if (json.ruleBook) {
+          state.ruleBook = JSON.parse(JSON.stringify(json.ruleBook))
+        }
+        Blockly.serialization.workspaces.load(json, workspace)
       } catch (error) {
         console.log(error)
       }
@@ -515,15 +576,20 @@ export default defineComponent({
     // 路由守卫
     onBeforeRouteLeave((to, from) => {
       const uuid = route.query?.uuid as string
-      const json = JSON.stringify(Blockly.serialization.workspaces.save(workspace))
-      if (uuid) {
-        const content = localStorage.getItem(`block-${uuid}`)
-        if (content !== json) {
-          if (window.confirm('当前程序未保存，确认离开？')) {
-            return true
+      try {
+        const json = Blockly.serialization.workspaces.save(workspace)
+        json.ruleBook = state.ruleBook
+        if (uuid) {
+          const content = localStorage.getItem(`block-${uuid}`)
+          if (content !== JSON.stringify(json)) {
+            if (window.confirm('当前程序未保存，确认离开？')) {
+              return true
+            }
+            return false
           }
-          return false
         }
+      } catch (err) {
+        console.log(err)
       }
       return true
     })
@@ -552,20 +618,19 @@ export default defineComponent({
 
       // customToolBoxCategory
       registerCustomToolboxCategory(workspace)
+      locale.setLocale(locale.getLocale())
 
       initBlocklyPlugins()
 
-      // function handleWorkspaceChange (event: any) {
-      //   if (event.type === Blockly.Events.BLOCK_CHANGE) {
-      //     const block = workspace.getBlockById(event.blockId)
-      //     if (block.type === 'play_audio') {
-      //       playPreviewMusic(event)
-      //     }
-      //   }
-      // }
-      // workspace.addChangeListener(handleWorkspaceChange)
-
-      // playPreviewMusic
+      function handleWorkspaceChange (event: any) { // playPreviewMusic
+        if (event.type === Blockly.Events.BLOCK_CHANGE) {
+          const block = workspace.getBlockById(event.blockId)
+          if (block.type === 'play_audio') {
+            playPreviewMusic(event)
+          }
+        }
+      }
+      workspace.addChangeListener(handleWorkspaceChange)
 
       javascriptGenerator.addReservedWords('code') // 获取js代码
 
@@ -609,24 +674,45 @@ export default defineComponent({
     })
 
     return {
+      connectStatus,
       // testColorCode,
       ...toRefs(state),
       runCode,
       generateCode,
       saveCode,
       clearCanvas,
-      connect,
-      loadCode,
+      connectJoyo,
+      // loadCode,
       navigatorBack,
       toggleVariableDrawerVisible,
-      LocaleEnum,
-      setLocale: locale.setLocale,
+      LANG,
+      updateRuleBook,
+      // LocaleEnum,
+      // setLocale: locale.setLocale,
     }
   },
 })
 </script>
 
 <style lang="scss" scoped>
+.connect-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  margin-top: -4px;
+  vertical-align: middle;
+  background: #ccc;
+  border-radius: 50%;
+  &.active {
+    background: #52c41a;
+  }
+}
+.rule-btn {
+  background-color: #faad14;
+  color: #fff;
+  border: none;
+}
 .blockly-editor::v-deep {
   width: 100%;
   height: 100vh;
@@ -728,11 +814,29 @@ export default defineComponent({
 
     // 连接点
     .info-card::v-deep {
+
+      .create-var {
+        background-color: #faad14;
+        color: #fff;
+        border: none;
+      }
+      .placeholder-text {
+        color: #aaa;
+        font-size: 14px;
+      }
       .info-header {
         color: #000000d9;
         font-weight: 700;
         font-size: 16px;
         margin-bottom: 12px;
+        line-height: 32px;
+        position: relative;
+        height: 32px;
+        .text-right {
+          position: absolute;
+          right: 0;
+          top: 0;
+        }
       }
       .ant-form-item {
         margin-bottom: 0;
@@ -757,6 +861,12 @@ export default defineComponent({
         background: red;
       }
     }
+    .var-info-box {
+      max-height: calc(35vh);
+      overflow-y: auto;
+      overflow-x: hidden;
+
+    }
     .var-info {
       width: 100%;
       overflow: auto;
@@ -767,13 +877,18 @@ export default defineComponent({
         border-bottom: 1px solid #ccc;
       }
       .var-label {
-        width: 100px;
+        width: 50%;
         padding: 10px;
         box-sizing: border-box;
         border-right: 1px solid #ccc;
+        overflow: hidden;
+        text-overflow: ellipsis;
         // background-color: #6c6c6c;
       }
       .var-value {
+        // overflow: hidden;
+        // text-overflow: ellipsis;
+        width: 50%;
         padding: 10px;
         box-sizing: border-box;
       }
@@ -784,5 +899,12 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   flex: 1;
+  position: relative;
+  .clear-canvas {
+    position: absolute;
+    right: 20px;
+    top: 10px;
+    z-index: 1000;
+  }
 }
 </style>

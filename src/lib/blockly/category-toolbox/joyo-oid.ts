@@ -1,7 +1,9 @@
 
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '识别',
+  name: customKey.TOOLBOX_IDENTIFY,
   cssConfig: {
     container: 'category-joyo',
   },
@@ -24,27 +26,50 @@ export default {
     },
     {
       kind: 'block',
+      type: 'receive_card_num',
+      inputs: {
+        NAME: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      kind: 'block',
+      type: 'receive_sticker',
+      inputs: {
+        NAME: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 1,
+            },
+          },
+        },
+      },
+    },
+    {
+      kind: 'block',
       type: 'receive_color',
     },
     {
       kind: 'block',
-      type: 'consolelog',
+      type: 'receive_ID',
+      inputs: {
+        NAME: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 1801, // 1-128
+            },
+          },
+        },
+      },
     },
-    {
-      kind: 'block',
-      type: 'printany',
-    },
-    {
-      kind: 'block',
-      type: 'wait_second',
-    },
-    {
-      kind: 'block',
-      type: 'date_now',
-    },
-    {
-      kind: 'block',
-      type: 'setUp',
-    },
+
   ],
 }

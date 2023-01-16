@@ -76,8 +76,6 @@ for (let i = audioArray.length; i--;) {
   audioMap[audioArray[i]] = new Audio(`audio/${audioArray[i]}.mp3`)
 }
 
-console.log(audioMap)
-
 // 如果发生音效选择事件，则播放对应音效
 export function playPreviewMusic (evt: any) {
   if (audioMap[evt.newValue]) {
@@ -107,12 +105,12 @@ defineBlocksWithJsonArray([
             '%{BKY_AUDIO_GAME_BEGIN_1}',
             'gbeg',
           ],
+          // [
+          //   '%{BKY_AUDIO_GAME_BEGIN_2}',
+          //   'pbgn',
+          // ],
           [
             '%{BKY_AUDIO_GAME_BEGIN_2}',
-            'pbgn',
-          ],
-          [
-            '%{BKY_AUDIO_GAME_BEGIN_3}',
             'stat',
           ],
           [
@@ -167,10 +165,10 @@ defineBlocksWithJsonArray([
             '%{BKY_AUDIO_MATCH_5}',
             'mat5',
           ],
-          [
-            '%{BKY_AUDIO_HRED}',
-            'hred',
-          ],
+          // [
+          //   '%{BKY_AUDIO_HRED}',
+          //   'hred',
+          // ],
           [
             '%{BKY_AUDIO_FIND_NOTHING}',
             'fnon',
@@ -210,6 +208,10 @@ defineBlocksWithJsonArray([
           [
             '%{BKY_AUDIO_LA}',
             '06la',
+          ],
+          [
+            '%{BKY_AUDIO_XI}',
+            '07xi',
           ],
         ],
       },

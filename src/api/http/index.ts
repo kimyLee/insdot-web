@@ -7,7 +7,7 @@ export function fetchOriginVersion (): Promise<string> {
       return response // todo: 其他信息
     })
     .catch(function (error) {
-      message.error('获取版本信息失败')
+      message.error('获取最新版本信息失败')
       console.log(error)
     })
 }

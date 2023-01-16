@@ -7,8 +7,9 @@ import BlocklyZh from '@/lib/blockly/i18n/zh'
 import BlocklyEn from '@/lib/blockly/i18n/en'
 
 import { createI18n } from 'vue-i18n'
-import vueEn from '@/i18n/en'
-import vueZh from '@/i18n/zh'
+// import vueEn from '@/i18n/en'
+// import vueZh from '@/i18n/zh'
+import { zh as vueZh, en as vueEn } from '@/i18n/index'
 
 export enum LocaleEnum {
   'ZH' = 'ZH',
@@ -47,7 +48,6 @@ export const locale = (function () {
     _private.locale = locale
 
     // 更新 blockly Msg
-    console.log(blocklyMsgs[locale], locale)
     blocklySetLocale(blocklyMsgs[locale])
 
     // 更新 vue i18n

@@ -1,6 +1,8 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '循环',
+  name: customKey.TOOLBOX_LOOP,
   cssConfig: {
     container: 'category-loop',
   },
@@ -8,11 +10,21 @@ export default {
     {
       kind: 'block',
       type: 'controls_repeat_ext',
+      inputs: {
+        TIMES: {
+          shadow: {
+            type: 'math_number',
+            fields: {
+              NUM: 5,
+            },
+          },
+        },
+      },
     },
-    {
-      kind: 'block',
-      type: 'controls_repeat',
-    },
+    // {
+    //   kind: 'block',
+    //   type: 'controls_repeat',
+    // },
     {
       kind: 'block',
       type: 'controls_whileUntil',

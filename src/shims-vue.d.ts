@@ -9,3 +9,8 @@ declare module '*.xml' {
   const content: string;
   export default content;
 }
+
+declare module '*.jo' {
+  const content: string;
+  export default content;
+}

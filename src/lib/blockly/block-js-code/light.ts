@@ -3,24 +3,25 @@
 import Blockly from 'blockly'
 import { javascriptGenerator } from 'blockly/javascript'
 
+javascriptGenerator.set_light_by_ui = function (block: any) {
+  const arr_light = block.getFieldValue('light')
+  return 'bleSetLight(JSON.stringify({colors:' + JSON.stringify(arr_light) + ',bright:1}));\n'
+  // return '\n'
+}
+
 javascriptGenerator.set_light = function (block: any) {
   const variable_light = javascriptGenerator.nameDB_.getName(block.getFieldValue('light'), 'VARIABLE')
 
   return 'bleSetLight(JSON.stringify({colors:' + variable_light + ',bright:1}));\n'
-  // return 'bleSetLight(JSON.stringify({colors:' + variable_light + '.map(function (e) {' +
-  //   "if (typeof (e) === 'string') {" +
-  //   "e = e.replace('#', '')" +
-  //   '}' +
-  //   'return Number(e);' +
-  //   '}),bright:1}));\n'
 }
 
 javascriptGenerator.set_all_light = function (block: any) {
-  const number_color = block.getFieldValue('color')
-  console.log(number_color)
-  const arr = JSON.parse(JSON.stringify(Array(12).fill(Number(number_color))))
+  // const number_color = block.getFieldValue('color')
+  const number_color = javascriptGenerator.valueToCode(block, 'color', javascriptGenerator.ORDER_ATOMIC)
+  const number = parseInt(number_color.replace(/'/g, '')) || 0
+  const arr = JSON.stringify(Array(12).fill(number))
 
-  return 'bleSetLight(JSON.stringify({colors:[' + arr + '],bright:1}));\n'
+  return 'bleSetLight(JSON.stringify({colors:' + arr + ',bright:1}));\n'
 }
 
 javascriptGenerator.lists_create_with_row = function (block: any) {
@@ -48,9 +49,12 @@ javascriptGenerator.list_include = function (block: any) {
 }
 
 javascriptGenerator.set_all_light_color = function (block: any) {
-  const number_r = block.getFieldValue('R')
-  const number_g = block.getFieldValue('G')
-  const number_b = block.getFieldValue('B')
+  const number_r = javascriptGenerator.valueToCode(block, 'R', javascriptGenerator.ORDER_ATOMIC) - 0
+  const number_g = javascriptGenerator.valueToCode(block, 'G', javascriptGenerator.ORDER_ATOMIC) - 0
+  const number_b = javascriptGenerator.valueToCode(block, 'B', javascriptGenerator.ORDER_ATOMIC) - 0
+  // const number_r = block.getFieldValue('R')
+  // const number_g = block.getFieldValue('G')
+  // const number_b = block.getFieldValue('B')
 
   const arr = JSON.parse(JSON.stringify(Array(12).fill(number_r * 256 * 256 + number_g * 256 + number_b)))
 
@@ -59,8 +63,10 @@ javascriptGenerator.set_all_light_color = function (block: any) {
 
 javascriptGenerator.set_light_animation = function (block: any) {
   const dropdown_animation = block.getFieldValue('animation')
-  const number_name = block.getFieldValue('NAME')
-  const text_color = block.getFieldValue('color')
+  // const number_name = block.getFieldValue('NAME')
+  const number_name = javascriptGenerator.valueToCode(block, 'time', javascriptGenerator.ORDER_ATOMIC) - 0
+  // const text_color = block.getFieldValue('color')
+  const text_color = javascriptGenerator.valueToCode(block, 'color', javascriptGenerator.ORDER_ATOMIC)
   // TODO: Assemble JavaScript into code variable.
   return `bleSetLightAnimation('${dropdown_animation}', ${number_name}, ${text_color});\n`
 }

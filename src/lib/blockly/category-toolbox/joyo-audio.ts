@@ -1,6 +1,8 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '音效',
+  name: customKey.TOOLBOX_AUDIO,
   cssConfig: {
     container: 'category-joyo',
   },

@@ -8,7 +8,9 @@ javascriptGenerator.setUp = function (block: any) {
 }
 
 javascriptGenerator.wait_second = function (block: any) {
-  const number_name = block.getFieldValue('NAME')
+  // const number_name = block.getFieldValue('NAME')
+  const number_name = javascriptGenerator.valueToCode(block, 'NAME', javascriptGenerator.ORDER_ATOMIC)
+
   return 'sleepFn(' + number_name + ');\n'
 }
 javascriptGenerator.consolelog = function (block: any) {

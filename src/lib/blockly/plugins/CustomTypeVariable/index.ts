@@ -38,7 +38,7 @@ export const flyoutCategoryVar = (workspace: WorkspaceSvg): Element[] => {
 export function flyoutCategoryBlocksVar (workspace: Workspace): Element[] {
   const variableModelList = workspace.getVariablesOfType(CustomTypeVariableEnum.VAR)
 
-  const xmlList:Element[] = []
+  const xmlList: Element[] = []
   if (variableModelList.length > 0) {
     const mostRecentVariable = variableModelList[variableModelList.length - 1]
     if (Blocks.variables_set_var) {
@@ -56,10 +56,10 @@ export function flyoutCategoryBlocksVar (workspace: Workspace): Element[] {
       // 修改待定
       const value = Xml.textToDom(
         '<value name="DELTA">' +
-          '<shadow type="math_number">' +
-          '<field name="NUM">1</field>' +
-          '</shadow>' +
-          '</value>')
+        '<shadow type="math_number">' +
+        '<field name="NUM">1</field>' +
+        '</shadow>' +
+        '</value>')
       block.appendChild(value)
       xmlList.push(block)
     }
@@ -104,7 +104,7 @@ export const flyoutCategoryList = (workspace: WorkspaceSvg): Element[] => {
 export function flyoutCategoryBlocksList (workspace: Workspace): Element[] {
   const variableModelList = workspace.getVariablesOfType(CustomTypeVariableEnum.LIST)
 
-  const xmlList:Element[] = []
+  const xmlList: Element[] = []
   if (variableModelList.length > 0) {
     const mostRecentVariable = variableModelList[variableModelList.length - 1]
     if (Blocks.variables_set_list) {
@@ -131,14 +131,15 @@ export function flyoutCategoryBlocksList (workspace: Workspace): Element[] {
 }
 
 // 设置初始的 变量/列表
-export const CreateInitialVariable = (variables: {name: string, type: string}[] = [], workspace: WorkspaceSvg): void => {
+export const CreateInitialVariable = (variables: { name: string, type: string }[] = [], workspace: WorkspaceSvg): void => {
   variables.forEach(i => {
     workspace.createVariable(i.name, i.type)
   })
 }
 
-export const registerCustomToolboxCategory = (workspace: WorkspaceSvg, variables: {name: string, type: string}[] = [{ name: 'var', type: 'VAR' }, { name: 'list', type: 'LIST' }]): void => {
-  CreateInitialVariable(variables, workspace)
-  workspace.registerToolboxCategoryCallback(CustomTypeVariableEnum.VAR, flyoutCategoryVar)
-  workspace.registerToolboxCategoryCallback(CustomTypeVariableEnum.LIST, flyoutCategoryList)
+export const registerCustomToolboxCategory = (workspace: WorkspaceSvg, variables: { name: string, type: string }[] = [{ name: 'value', type: 'VAR' }, { name: 'list_1', type: 'LIST' }]): void => {
+  // CreateInitialVariable(variables, workspace)
+  // 触发动态事件
+  // workspace.registerToolboxCategoryCallback(CustomTypeVariableEnum.VAR, flyoutCategoryVar)
+  // workspace.registerToolboxCategoryCallback(CustomTypeVariableEnum.LIST, flyoutCategoryList)
 }

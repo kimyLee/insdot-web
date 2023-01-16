@@ -20,6 +20,9 @@ export function clearAnimation () {
 }
 
 export const bleSetLightAnimation = (type: string, time: number, color: number) => {
+  clearTimeout(animationTimer)
+  console.log(type, time, color)
+
   if (isNaN(color as any)) { // 不是数字
     color = Number(color)
   }
@@ -35,10 +38,10 @@ export const bleSetLightAnimation = (type: string, time: number, color: number) 
     const step = 100
     let count = 0
     const loop = () => {
-      if (stopFlag) { // 退出animation
-        clearAllLight()
-        return
-      }
+      // if (stopFlag) { // 退出animation
+      //   clearAllLight()
+      //   return
+      // }
       const index = count % 8
       for (let i = 0; i < 8; i++) {
         arr[i] = 0
@@ -49,7 +52,6 @@ export const bleSetLightAnimation = (type: string, time: number, color: number) 
       arr[(index - 3) < 0 ? (index + 8 - 3) : (index - 3)] = hexBrightness(color, 50)
       arr[(index - 4) < 0 ? (index + 8 - 4) : (index - 4)] = hexBrightness(color, 10)
       animationTimer = setTimeout(() => {
-        // sendCommand(`set_led 1,2,3,4,5,6,7,8 ${arr.join()}`)
         bleSetLight({
           colors: arr,
           bright: 1,

@@ -1,6 +1,8 @@
+import { customKey } from '@/lib/blockly/i18n/zh'
+
 export default {
   kind: 'category',
-  name: '判断',
+  name: customKey.TOOLBOX_LOGIC,
   cssConfig: {
     container: 'category-logic',
   },
@@ -29,10 +31,10 @@ export default {
       kind: 'block',
       type: 'logic_negate',
     },
-    {
-      kind: 'block',
-      type: 'logic_null',
-    },
+    // {
+    //   kind: 'block',
+    //   type: 'logic_null',
+    // },
     // {
     //   kind: 'block',
     //   type: 'logic_ternary',

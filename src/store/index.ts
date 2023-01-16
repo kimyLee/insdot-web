@@ -3,12 +3,16 @@ import { InjectionKey } from 'vue'
 import { createStore, useStore as baseUseStore, Store } from 'vuex'
 import type State from '@/store/interface'
 
-import { runSample } from '@/lib/blockly/blocks/preBlock'
+import preSet from '@/lib/blockly/blocks/preBlock'
 
 import ble from './ble'
 import blockly from './blockly'
 import type { BleStateType } from './ble'
 import type { BlocklyStateType } from './blockly'
+
+import guessNum from '@/lib/preset-game/guess-num.jo'
+import piano from '@/lib/preset-game/piano.jo'
+import randomLight from '@/lib/preset-game/random.jo'
 
 export const key: InjectionKey<Store<State>> = Symbol('key')
 
@@ -34,14 +38,23 @@ export default createStore({
   mutations: {
   },
   actions: {
+    async createPresetGame ({ commit, state, dispatch }) { // 创建预设程序
+      const ver = localStorage.getItem('version')
+      if (!ver) { // todo: 发布版本号
+        // 获取预制程序
+        await dispatch('createProject', { name: '猜数字', content: guessNum })
+        await dispatch('createProject', { name: '弹钢琴', content: piano })
+        await dispatch('createProject', { name: '随机数', content: randomLight })
+        localStorage.setItem('version', '1')
+        return Promise.resolve()
+      } else {
+        return Promise.resolve()
+      }
+    },
     getProject ({ commit, state }) {
       state.projectList = JSON.parse(localStorage.getItem('projectList') || '[]')
     },
-    // getProjectByUuid ({ commit, state }) {
-    //   state.projectList = JSON.parse(localStorage.getItem('projectList') || '[]')
-    // },
-    // todo: 结合TS优化store
-    createProject ({ commit, state }, { name, content }) {
+    async createProject ({ commit, state }, { name, content }) {
       // 确保名称唯一
       const project = {} as any
       project.name = name
@@ -57,7 +70,18 @@ export default createStore({
       localStorage.setItem('projectList', JSON.stringify(state.projectList))
 
       // 生成初始代码
-      localStorage.setItem(`block-${project.uuid}`, content || runSample)
+      localStorage.setItem(`block-${project.uuid}`, content || preSet.runSample)
+      setTimeout(() => {
+        return Promise.resolve()
+      })
+    },
+    renameProject ({ commit, state }, { name, id }) {
+      for (let i = state.projectList.length; i--;) {
+        if (state.projectList[i].uuid === id) {
+          state.projectList[i].name = name
+        }
+      }
+      localStorage.setItem('projectList', JSON.stringify(state.projectList))
     },
 
     // 保存程序
@@ -72,6 +96,8 @@ export default createStore({
         }
       }
     },
+
+    // 游戏玩法说明相关
 
     deleteProject ({ commit, state }, uuid) {
       localStorage.removeItem(`block-${uuid}`)

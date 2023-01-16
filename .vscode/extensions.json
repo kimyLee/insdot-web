@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "octref.vetur",
+    "Vue.volar",
     "dbeaumer.vscode-eslint",
     "mrmlnc.vscode-scss",
     "streetsidesoftware.code-spell-checker",

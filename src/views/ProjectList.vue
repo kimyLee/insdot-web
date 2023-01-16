@@ -1,11 +1,21 @@
 <template>
   <div class="project-list page">
-    <HeaderNav title="Design tool"
-               sub-title="for JOYO Design">
+    <HeaderNav :title="$t(LANG.HOME_HEADER.TITLE)"
+               :sub-title="$t(LANG.HOME_HEADER.SUBTITLE)">
       <!-- 显示JOYO ICON -->
       <a-button shape="circle"
                 @click="visibleOfJOYOUpdate = true">
-        <img class="joyo-icon"
+        <a-badge v-show="hasNewVersion"
+                 dot
+                 :number-style="{width: '12px', height: '12px'}"
+                 :offset="[3, 0]"
+                 color="yellow">
+          <img class="joyo-icon"
+               src="~@/assets/joyo.png" />
+        </a-badge>
+
+        <img v-show="!hasNewVersion"
+             class="joyo-icon"
              src="~@/assets/joyo.png" />
       </a-button>
       <a-button key="2"
@@ -13,13 +23,14 @@
         <span class="connect-text">
           <span class="connect-dot"
                 :class="{'active': connectStatus}" />
-          {{ connectStatus ? '断开连接' : '连接JOYO' }}
+          {{ connectStatus? $t (LANG.BLOCKLY_MENU.DISCONNECT) : $t(LANG.BLOCKLY_MENU.CONNECT) }}
         </span>
+        <question-circle-outlined style="fontSize: 20px;color: #aaa;vertical-align: middle;"
+                                  @click.stop="visibleOfConnectTip = true" />
       </a-button>
-
       <a-button key="2"
                 @click.stop="createProjectPop">
-        新建程序
+        {{ $t(LANG.HOME_HEADER.NEW_GAME) }}
         <template #icon>
           <PlusOutlined />
         </template>
@@ -28,27 +39,47 @@
       <label class="head-btn"
              for="listFileInput">
         <delivered-procedure-outlined />
-        导入程序
+        {{ $t(LANG.HOME_HEADER.IMPORT) }}
         <input id="listFileInput"
+               hidden
                type="file"
-               accept=".jo"
-               hidden="" />
+               accept=".jo" />
       </label>
 
-      <a-popconfirm title="确定导出所有程序文件到zip吗，此过程较耗时"
-                    ok-text="确定"
+      <a-popconfirm :title="$t(LANG.HOME_HEADER.EXPORT_CONFIRM)"
+                    :ok-text="$t(LANG.COMMON.CONFIRM)"
                     placement="bottomRight"
-                    cancel-text="取消"
+                    :cancel-text="$t(LANG.COMMON.CANCEL)"
                     @confirm="exportAllProgram">
         <a-button>
           <vertical-align-bottom-outlined class="bottom-icon download-icon" />
-          一键导出
+          {{ $t(LANG.HOME_HEADER.EXPORT_ALL) }}
         </a-button>
       </a-popconfirm>
+
+      <!-- 语言选项 -->
+      <a-dropdown>
+        <template #overlay>
+          <a-menu>
+            <a-menu-item key="1"
+                         @click="setLocale(LocaleEnum.ZH)">
+              {{ $t(LANG.HOME_HEADER.ZH) }}
+            </a-menu-item>
+            <a-menu-item key="2"
+                         @click="setLocale(LocaleEnum.EN)">
+              {{ $t(LANG.HOME_HEADER.EN) }}
+            </a-menu-item>
+          </a-menu>
+        </template>
+        <a-button>
+          {{ $t(LANG.HOME_HEADER.CHOOSE_LANG) }}
+          <DownOutlined />
+        </a-button>
+      </a-dropdown>
     </HeaderNav>
     <div class="container">
       <div class="warning-tip">
-        <a-alert message="请及时导出程序文件保存到本地，当前数据使用浏览器缓存，避免因不稳定因素而丢失程序"
+        <a-alert :message="$t(LANG.HOME_HEADER.PROGRAM_WARN)"
                  show-icon
                  type="warning" />
       </div>
@@ -69,17 +100,21 @@
             <!-- 更多选择 -->
             <div class="bottom-line"
                  @click.stop>
+              <!-- 重命名 -->
+              <HighlightOutlined class="bottom-icon"
+                                 title="重命名"
+                                 @click="renameGamePop(v.name, v.uuid)" />
               <!-- 下载 -->
               <vertical-align-bottom-outlined class="bottom-icon download-icon"
-                                              title="下载程序"
+                                              :title="$t(LANG.GAME_LIST.DOWNLOAD)"
                                               @click="exportProgram(v.name, v.uuid)" />
               <!-- 删除 -->
-              <a-popconfirm title="确定要删除该程序吗?"
-                            ok-text="确定"
-                            cancel-text="取消"
+              <a-popconfirm :title="$t(LANG.GAME_LIST.DELETE_CONFIRM)"
+                            :ok-text="$t(LANG.COMMON.CONFIRM)"
+                            :cancel-text="$t(LANG.COMMON.CANCEL)"
                             @confirm="handleDelete(v.uuid)">
                 <span class="bottom-icon del-icon">
-                  <delete-outlined title="删除程序" />
+                  <delete-outlined :title="$t(LANG.GAME_LIST.DELETE)" />
                 </span>
               </a-popconfirm>
             </div>
@@ -91,17 +126,31 @@
     <!-- 输入新建程序名弹窗 -->
     <a-modal v-model:visible="visibleOfCreateProject"
              :width="360"
-             ok-text="确定"
-             cancel-text="取消"
-             title="创建新程序"
+             :ok-text="$t(LANG.COMMON.CONFIRM)"
+             :cancel-text="$t(LANG.COMMON.CANCEL)"
+             :title="$t(LANG.GAME_LIST.CREATE_NEW_GAME)"
              @ok="handleOk">
       <a-input ref="refCreatePopBox"
                v-model:value="programName"
-               placeholder="程序名" />
+               :placeholder="$t(LANG.GAME_LIST.GAME_NAME)" />
+    </a-modal>
+
+    <!-- 重命名程序弹窗 -->
+    <a-modal v-model:visible="visibleOfRenameProject"
+             :width="360"
+             :ok-text="$t(LANG.COMMON.CONFIRM)"
+             :cancel-text="$t(LANG.COMMON.CANCEL)"
+             :title="$t(LANG.GAME_LIST.RENAME_GAME)"
+             @cancel="programName = ''"
+             @ok="handleRenameOk">
+      <a-input ref="refCreatePopBox"
+               v-model:value="programName"
+               :placeholder="$t(LANG.GAME_LIST.GAME_NAME)" />
     </a-modal>
 
     <!-- JOYO版本信息及更新 -->
-    <!-- <UpdateProcess v-model="visibleOfJOYOUpdate" /> -->
+    <UpdateProcess v-model="visibleOfJOYOUpdate" />
+    <ConnectTip v-model="visibleOfConnectTip" />
     <!-- <a-modal
              :width="360"
              ok-text="更新版本"
@@ -136,11 +185,14 @@ import { message } from 'ant-design-vue'
 // import { useStore } from '@/store'
 import HeaderNav from '@/components/HeaderNav.vue'
 import UpdateProcess from '@/components/update-pop/UpdateProcess.vue'
-import { PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined, DeliveredProcedureOutlined } from '@ant-design/icons-vue'
+import ConnectTip from '@/components/update-pop/ConnectTip.vue'
+import { HighlightOutlined, DownOutlined, QuestionCircleOutlined, PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined, DeliveredProcedureOutlined } from '@ant-design/icons-vue'
 import { useStore } from 'vuex'
 import { exportFile } from '@/lib/project/common'
 
 import { bleState } from '@/api/joyo-ble/web-ble-server'
+import { locale, LocaleEnum } from '@/locale/index'
+import LANG from '@/i18n/type'
 
 declare global {
     interface Window {
@@ -158,7 +210,11 @@ export default defineComponent({
     PlusOutlined,
     DeleteOutlined,
     HeaderNav,
-    // UpdateProcess,
+    UpdateProcess,
+    ConnectTip,
+    QuestionCircleOutlined,
+    DownOutlined,
+    HighlightOutlined,
   },
 
   setup () {
@@ -174,8 +230,11 @@ export default defineComponent({
 
     const state: any = reactive({
       programName: '',
+      programId: '',
       visibleOfJOYOUpdate: false,
+      visibleOfConnectTip: false,
       visibleOfCreateProject: false,
+      visibleOfRenameProject: false,
       visibleOfExportProject: false,
     })
 
@@ -187,6 +246,12 @@ export default defineComponent({
       return store.getters['ble/connectStatus']
     })
 
+    watch(() => connectStatus.value, (val) => {
+      if (val) {
+        store.dispatch('ble/bleGetCurrentVersion')
+      }
+    })
+
     const fetchProjectList = async () => {
       store.dispatch('getProject')
     }
@@ -194,6 +259,16 @@ export default defineComponent({
     // 创建程序
     const createProjectPop = () => {
       state.visibleOfCreateProject = true
+      nextTick(() => {
+        refCreatePopBox.value.focus()
+      })
+    }
+
+    // 重命名程序
+    const renameGamePop = (name: string, id: string) => {
+      state.visibleOfRenameProject = true
+      state.programId = id
+      state.programName = name
       nextTick(() => {
         refCreatePopBox.value.focus()
       })
@@ -214,6 +289,28 @@ export default defineComponent({
         createProject(state.programName)
         state.programName = ''
         state.visibleOfCreateProject = false
+      } else {
+        message.warning('程序名不能为空')
+      }
+    }
+    const handleRenameOk = () => {
+      if (state.programName) {
+        const list = projectList.value
+        // 检查名字是否重复
+        for (let i = list.length; i--;) {
+          if (list[i].name === state.programName) {
+            message.warning('程序名已存在')
+            return
+          }
+        }
+        // createProject(state.programName)
+        store.dispatch('renameProject', {
+          name: state.programName,
+          id: state.programId,
+        })
+        state.programName = ''
+        state.programId = ''
+        state.visibleOfRenameProject = false
       } else {
         message.warning('程序名不能为空')
       }
@@ -310,23 +407,14 @@ export default defineComponent({
       }
     }
 
-    function handleUpdateJOYO () { // 升级JOYO
-      // try {
-      //   const res = await bleUpgrade({
-      //     version: state.versionInfo.lastVersion,
-      //   }) // todo: 异常处理
-      //   if (res.result.status === 1) {
-      //     // 可以升级
-      //     (window as any).handleDFUProgress(0)
-      //     BleApi.DFUUpgrade()
-      //   } else {
-      //     // 升级失败处理
-      //     updateJoyoDialog.value.updateFail()
-      //   }
-      // } catch (error) {
-      //   updateJoyoDialog.value.updateFail()
-      // }
-    }
+    // 比较版本号
+    const hasNewVersion = computed(() => {
+      if (store.state.ble.lastVersion && store.state.ble.currentVersion) {
+        return store.state.ble.lastVersion !== store.state.ble.currentVersion
+      } else {
+        return false
+      }
+    })
 
     onBeforeMount(async () => {
       // await fetchProjectList(state.tabType)
@@ -337,9 +425,12 @@ export default defineComponent({
     })
 
     onMounted(async () => {
+      await store.dispatch('createPresetGame')
       fetchProjectList()
       initFileEvt()
-      //
+
+      // 获取最新版本
+      store.dispatch('ble/bleGetOriginVersion')
     })
 
     return {
@@ -350,9 +441,13 @@ export default defineComponent({
       fileList,
       connectStatus,
 
+      hasNewVersion,
+
       createProjectPop,
+      renameGamePop,
       createProject,
       handleOk,
+      handleRenameOk,
 
       handleDelete,
 
@@ -364,6 +459,10 @@ export default defineComponent({
       handleItemClass,
 
       connectJoyo,
+
+      LocaleEnum,
+      LANG,
+      setLocale: locale.setLocale,
     }
   },
 })
@@ -401,6 +500,9 @@ export default defineComponent({
     color: rgba(0, 0, 0, 0.85);
     background: #fff;
     border-color: #d9d9d9;
+    #listFileInput {
+      opacity: 0;
+    }
   }
   .joyo-icon {
     width: 22px;

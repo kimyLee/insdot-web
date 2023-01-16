@@ -7,14 +7,21 @@
              ok-text="更新版本"
              cancel-text="我知道了"
              title="设备信息"
+             :ok-button-props="{disabled: disabledOK}"
              @cancel="handleCancel"
              @ok="handleUpdateJOYO">
-      <div>当前版本号：{{ currentVersion }}</div>
-      <div>最新版本: {{ lastVersion }}</div>
+      <div v-show="connectStatus">
+        当前版本号：{{ currentVersion || '--' }}
+      </div>
+      <div v-show="!connectStatus">
+        当前版本号：<span style="color:#faad14">设备未连接</span>
+      </div>
+      <div>最新版本: {{ lastVersion || '--' }}</div>
       <div v-show="updateStep > 0">
-        <loading-outlined />
+        <a-spin />
         {{ updateStatusMap[updateStep] }}
         <span v-show="updateStep === 2">({{ transferProgress }}%)</span>
+        <span v-show="updateStep === 2">，请勿关闭窗口</span>
       </div>
     </a-modal>
   </div>
@@ -28,7 +35,7 @@ import { loadingOutlined } from '@ant-design/icons-vue'
 
 export default defineComponent({
   components: {
-    loadingOutlined,
+    // loadingOutlined,
     // ContainerDialog,
   },
   props: {
@@ -42,6 +49,7 @@ export default defineComponent({
     const containerDialog = ref()
     const state = reactive({
       versionPopVisible: false,
+      disabledOK: false,
       // lastVersion: '',
       step: 1,
       title: [
@@ -55,12 +63,34 @@ export default defineComponent({
       updateStatusMap: [
         '升级完成',
         '下载固件',
-        '传输固件',
-        '升级中，等待设备重启',
+        '固件下载完成，传输中',
+        '升级完成，请等待设备重启后，重新连接JOYO',
       ],
     })
 
     const store = useStore()
+
+    const connectStatus = computed(() => { // 看下行否
+      return store.getters['ble/connectStatus']
+    })
+    const updateStep = computed(() => { // 升级步骤
+      return store.state.ble.updateStep
+    })
+
+    watch(() => connectStatus.value, (val) => {
+      if (val) {
+        store.commit('ble/resetUpgradeStatus')
+      } else {
+        state.disabledOK = true
+      }
+    })
+    watch(() => updateStep.value, (val) => {
+      if (val > 0) {
+        state.disabledOK = true
+      } else {
+        state.disabledOK = false
+      }
+    })
 
     const lastVersion = computed(() => {
       return store.state.ble.lastVersion
@@ -68,15 +98,12 @@ export default defineComponent({
     const currentVersion = computed(() => {
       return store.state.ble.currentVersion
     })
-    const updateStep = computed(() => { // 升级步骤
-      return store.state.ble.updateStep
-    })
+
     const transferProgress = computed(() => { // 升级步骤
       return store.state.ble.transferProgress
     })
 
     watch(() => props.modelValue, () => {
-      console.log(props.modelValue)
       if (props.modelValue) {
         // 初次打开弹窗：获取固件版本
         state.versionPopVisible = true
@@ -94,32 +121,32 @@ export default defineComponent({
       containerDialog.value.open()
     }
     // step 1 的操作
-    const resetUpdate = () => {
-      state.step = 1
-    }
-    const startUpdate = () => {
-      emit('start-upgrade')
-      state.step = 2
-    }
-    const updateSuccess = () => {
-      state.step = 3
-    }
-    const updateFail = () => {
-      state.step = 4
-    }
-    const updateTimeout = () => {
-      state.step = 6
-    }
-    const updateHandle = () => {
-      state.step = 5
-    }
-    const finishUpdate = () => {
-      containerDialog.value.close()
-    }
-    const closeToReConnect = () => {
-      containerDialog.value.close()
-      emit('re-connect')
-    }
+    // const resetUpdate = () => {
+    //   state.step = 1
+    // }
+    // const startUpdate = () => {
+    //   emit('start-upgrade')
+    //   state.step = 2
+    // }
+    // const updateSuccess = () => {
+    //   state.step = 3
+    // }
+    // const updateFail = () => {
+    //   state.step = 4
+    // }
+    // const updateTimeout = () => {
+    //   state.step = 6
+    // }
+    // const updateHandle = () => {
+    //   state.step = 5
+    // }
+    // const finishUpdate = () => {
+    //   containerDialog.value.close()
+    // }
+    // const closeToReConnect = () => {
+    //   containerDialog.value.close()
+    //   emit('re-connect')
+    // }
 
     function handleCancel () {
       emit('update:modelValue', false)
@@ -141,20 +168,22 @@ export default defineComponent({
       handleUpdateJOYO,
       handleCancel,
 
+      connectStatus,
+
       lastVersion,
       currentVersion,
       updateStep,
       transferProgress,
 
       open,
-      resetUpdate,
-      startUpdate,
-      finishUpdate,
-      updateSuccess,
-      updateFail,
-      updateHandle,
-      updateTimeout,
-      closeToReConnect,
+      // resetUpdate,
+      // startUpdate,
+      // finishUpdate,
+      // updateSuccess,
+      // updateFail,
+      // updateHandle,
+      // updateTimeout,
+      // closeToReConnect,
     }
   },
 })
