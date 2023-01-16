@@ -76,6 +76,32 @@
           <DownOutlined />
         </a-button>
       </a-dropdown>
+      <!-- 更多：文档、官网、联系我们 -->
+      <a-dropdown>
+        <template #overlay>
+          <a-menu>
+            <a-menu-item key="1"
+                         @click="newTabs('https://cubyfun.com/#/')">
+              <HomeOutlined />
+              官网
+            </a-menu-item>
+            <a-menu-item key="1"
+                         @click="newTabs('https://docs.cubyfun.com/')">
+              <FileSearchOutlined />
+              文档
+            </a-menu-item>
+            <a-menu-item key="1"
+                         @click="newTabs('https://docs.cubyfun.com/ContactUs.html')">
+              <MessageOutlined />
+              联系我们
+            </a-menu-item>
+          </a-menu>
+        </template>
+        <a-button>
+          更多
+          <DownOutlined />
+        </a-button>
+      </a-dropdown>
     </HeaderNav>
     <div class="container">
       <div class="warning-tip">
@@ -186,7 +212,10 @@ import { message } from 'ant-design-vue'
 import HeaderNav from '@/components/HeaderNav.vue'
 import UpdateProcess from '@/components/update-pop/UpdateProcess.vue'
 import ConnectTip from '@/components/update-pop/ConnectTip.vue'
-import { HighlightOutlined, DownOutlined, QuestionCircleOutlined, PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined, DeliveredProcedureOutlined } from '@ant-design/icons-vue'
+import {
+  HomeOutlined, MessageOutlined, FileSearchOutlined,
+  HighlightOutlined, DownOutlined, QuestionCircleOutlined, PlusOutlined, DeleteOutlined, EllipsisOutlined, VerticalAlignBottomOutlined, DeliveredProcedureOutlined,
+} from '@ant-design/icons-vue'
 import { useStore } from 'vuex'
 import { exportFile } from '@/lib/project/common'
 
@@ -215,6 +244,9 @@ export default defineComponent({
     QuestionCircleOutlined,
     DownOutlined,
     HighlightOutlined,
+    HomeOutlined,
+    MessageOutlined,
+    FileSearchOutlined,
   },
 
   setup () {
@@ -416,6 +448,10 @@ export default defineComponent({
       }
     })
 
+    const newTabs = (link: string) => {
+      window.open(link)
+    }
+
     onBeforeMount(async () => {
       // await fetchProjectList(state.tabType)
     })
@@ -463,6 +499,8 @@ export default defineComponent({
       LocaleEnum,
       LANG,
       setLocale: locale.setLocale,
+
+      newTabs,
     }
   },
 })
