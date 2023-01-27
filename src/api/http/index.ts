@@ -16,7 +16,6 @@ export function fetchFirmware (url: string): Promise<void> {
   return axios.get(url, { responseType: 'arraybuffer' })
     .then(function (response: any) {
       // 处理成功情况
-      console.log(response)
       return response // todo: 其他信息
     })
     .catch(function (error) {

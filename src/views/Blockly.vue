@@ -431,7 +431,6 @@ export default defineComponent({
         const e = vars[i]
         // state.varInfoOrigin = obj[e]
         if (typeof obj[e] === 'object') {
-          console.log(obj[e])
           state.varInfo[e] = Object.values(obj[e]?.properties)
         } else {
           state.varInfo[e] = obj[e]

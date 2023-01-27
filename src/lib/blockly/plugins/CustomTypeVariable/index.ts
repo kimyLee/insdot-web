@@ -123,7 +123,6 @@ export function flyoutCategoryBlocksList (workspace: Workspace): Element[] {
       xmlList.push(block)
     }
   }
-  console.log(xmlList)
 
   // TODO: add list block
 

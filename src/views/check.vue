@@ -603,7 +603,6 @@ export default defineComponent({
     }
 
     const handleOIDVal = (num: number) => { // 预先处理下OID码, 将8010 ···值映射到 1···
-      console.log('origin', num)
       // if (num >= 301 && num <= 314) {
       //   return num - 300
       // }

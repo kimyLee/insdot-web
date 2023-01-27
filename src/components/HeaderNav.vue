@@ -47,9 +47,11 @@ export default defineComponent({
 <style scoped lang="scss">
 .header-nav::v-deep {
   width: 100%;
-  background: #fff;
+  // background: #fff;
+  background-color: #002253;
   .ant-page-header {
     background-color: #002253;
+    border: none!important;
     color: #fff;
   }
   .ant-page-header-heading-title {

@@ -101,7 +101,6 @@ export default defineComponent({
       }
       event.preventDefault()
       event.stopPropagation()
-      console.log(event, 'event')
       const ele:any = document.elementFromPoint(event.pageX, event.pageY)
 
       // 有 panel-center 这个类名
@@ -155,7 +154,6 @@ export default defineComponent({
     })
 
     onBeforeUnmount(() => {
-      console.log('onBeforeUnmount')
       window.onresize = null
       onTouchMoveDestroy()
     })

@@ -21,7 +21,6 @@ export function clearAnimation () {
 
 export const bleSetLightAnimation = (type: string, time: number, color: number) => {
   clearTimeout(animationTimer)
-  console.log(type, time, color)
 
   if (isNaN(color as any)) { // 不是数字
     color = Number(color)

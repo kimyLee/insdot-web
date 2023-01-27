@@ -132,7 +132,6 @@ const evtSet = {} as Record<string, any>
 // 检测蓝牙广播，接收消息回包
 (window as any).webBleNotify = (val: number[]) => {
   const res = generateRspResult(val)
-  console.log(res)
   if (res.cmd && evtSet[res.cmd]) evtSet[res.cmd](res)
 }
 

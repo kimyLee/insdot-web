@@ -34,7 +34,6 @@ function handleDisconnect () { // TODO：这里同一设备会重复两次
   // if (underDFU) {
   //   return
   // }
-  console.log('断开连接')
 
   writeCharacteristic = null
   bleDevice = null
@@ -157,7 +156,6 @@ export function DFUUpgrade (buffer: any, progressCb: any): Promise<any> { // DFU
   const dfu = window.dfu
   return dfu.writeMode(bleDevice)
     .then((device: any) => {
-      console.log('开始transfer')
       return transfer(device, buffer, progressCb)
     })
     .catch((err: any) => {

@@ -25,7 +25,6 @@ javascriptGenerator.receive_card = function (block: any) {
 }
 javascriptGenerator.receive_card_num = function (block: any) {
   const value = javascriptGenerator.valueToCode(block, 'NAME', javascriptGenerator.ORDER_ATOMIC)
-  console.log(value)
   // TODO: Assemble JavaScript into code variable.
   return [value - 0 + 2230, javascriptGenerator.ORDER_NONE]
 }

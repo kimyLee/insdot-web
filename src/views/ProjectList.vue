@@ -90,12 +90,12 @@
               官网
             </a-menu-item>
             <a-menu-item key="1"
-                         @click="newTabs('https://docs.cubyfun.com/')">
+                         @click="newTabs('https://docs.cubyfun.com/zh/')">
               <FileSearchOutlined />
               文档
             </a-menu-item>
             <a-menu-item key="1"
-                         @click="newTabs('https://docs.cubyfun.com/ContactUs.html')">
+                         @click="newTabs('https://docs.cubyfun.com/zh/ContactUs.html')">
               <MessageOutlined />
               联系我们
             </a-menu-item>
