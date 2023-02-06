@@ -2,7 +2,11 @@ import axios from '@/utils/axios'
 import { message } from 'ant-design-vue'
 
 export function fetchOriginVersion (): Promise<string> {
-  return axios.get('https://cuby-joyo.oss-cn-hongkong.aliyuncs.com/firmware.json')
+  let url = 'https://cuby-joyo.oss-cn-hongkong.aliyuncs.com/firmware.json'
+  if (location.href.indexOf('code.cubyfun.com') < 0) {
+    url = 'https://cuby-joyo-test.oss-cn-hongkong.aliyuncs.com/firmware.json'
+  }
+  return axios.get(url + '?t=' + Date.now())
     .then(function (response: any) {
       return response // todo: 其他信息
     })

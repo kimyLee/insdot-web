@@ -329,6 +329,7 @@ export default defineComponent({
       const code = javascriptGenerator.workspaceToCode(workspace)
     }
 
+    // todo: 移除
     const handleOIDVal = (num: number) => { // 预先处理下OID码, 将8010 ···值映射到 1···
       if (num >= 301 && num <= 314) {
         return num - 300

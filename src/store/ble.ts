@@ -95,9 +95,9 @@ const bleModule: Module<BleStateType, State> = {
 
     async bleUpgradeDevice ({ commit, state }) {
       state.updateStep = 1 // 准备下载固件
-      // const buffer = await fetchFirmware(state.downloadLink)
+      const buffer = await fetchFirmware(state.downloadLink)
       // 测试固件
-      const buffer = await fetchFirmware('https://cuby-joyo.oss-cn-hongkong.aliyuncs.com/joyo_v4_1223_01_UUID2530.zip')
+      // const buffer = await fetchFirmware('https://cuby-joyo.oss-cn-hongkong.aliyuncs.com/joyo_v4_1223_01_UUID2530.zip')
       const SecureDfuPackage = window.SecureDfuPackage
       const myPackage = new SecureDfuPackage(buffer)
       let firmware

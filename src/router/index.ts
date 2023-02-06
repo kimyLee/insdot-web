@@ -27,6 +27,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Blockly',
     component: () => import(/* webpackChunkName: "art" */ '@/views/Blockly.vue'),
   },
+  // {
+  //   path: '/blockly',
+  //   name: 'Blockly',
+  //   component: () => import(/* webpackChunkName: "art" */ '@/views/Blockly.vue'),
+  // },
   // todo: 后续删除，临时用途
   // {
   //   path: '/check',
