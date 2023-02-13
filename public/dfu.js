@@ -243,7 +243,7 @@
                     versionChar: versionChar
                 });
             }
-
+            // console.log('ready to connect', device)
             device.gatt.connect()
             .then(function(gattServer) {
                 log("connected to device");

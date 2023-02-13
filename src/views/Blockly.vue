@@ -331,9 +331,9 @@ export default defineComponent({
 
     // todo: 移除
     const handleOIDVal = (num: number) => { // 预先处理下OID码, 将8010 ···值映射到 1···
-      if (num >= 301 && num <= 314) {
-        return num - 300
-      }
+      // if (num >= 301 && num <= 314) {
+      //   return num - 300
+      // }
       // return Math.round(num / 10) - 800
       return num
     }
