@@ -8,7 +8,7 @@
       <a-button class="rule-btn"
                 shape="round"
                 @click="visibleOfGameRule = true">
-        玩法规则
+        {{ $t(LANG.BLOCKLY_MENU.GAME_RULE) }}
       </a-button>
       <a-button class="header-btn"
                 @click="saveCode">
@@ -55,7 +55,10 @@
           </a-form-item> -->
           <div style="margin-bottom: 10px;">
             <InfoCircleOutlined style="color:#faad14;vertical-align: middle;" />
-            <span style="color:#faad14;font-size: 14px;margin-left: 10px;">当前暂未支持连续识别同一ID值</span>
+            <span style="color:#faad14;font-size: 14px;margin-left: 10px;">
+
+              {{ $t(LANG.BLOCKLY_MENU.NOT_SUPPORT_MODE) }}
+            </span>
           </div>
         </div>
         <div class="info-card">
@@ -86,17 +89,17 @@
         <!-- 基础信息 -->
         <div class="info-card">
           <div class="info-header">
-            状态信息
+            {{ $t(LANG.BLOCKLY_MENU.STATUS_INFO) }}
           </div>
-          <a-form-item label="连接状态">
+          <a-form-item :label="$t(LANG.BLOCKLY_MENU.CONNECT_STATUS)">
             <div v-show="connectStatus">
-              <span class="connected" />已连接
+              <span class="connected" />{{ $t(LANG.BLOCKLY_MENU.HAS_CONNECT) }}
             </div>
             <div v-show="!connectStatus">
-              <span class="connected offline" />未连接
+              <span class="connected offline" />{{ $t(LANG.BLOCKLY_MENU.NOT_CONNECT) }}
             </div>
           </a-form-item>
-          <a-form-item label="ID值">
+          <a-form-item :label="$t(LANG.BLOCKLY_MENU.ID_VAL)">
             {{ lastOID }}
           </a-form-item>
         </div>
@@ -165,7 +168,7 @@ import { registerCustomToolboxCategory } from '@/lib/blockly/plugins/CustomTypeV
 import basicCategories from '@/lib/blockly/category-toolbox/toolbox'
 import preSet from '@/lib/blockly/blocks/preBlock'
 import '@/lib/blockly/blocks/index'
-import { locale, LocaleEnum } from '@/locale/index'
+import { locale, LocaleEnum, vueI18n } from '@/locale/index'
 
 import HeaderNav from '@/components/HeaderNav.vue'
 import BlocklyModal from '@/components/blockly-modal/index.vue'
@@ -261,9 +264,9 @@ export default defineComponent({
 
     watch(() => connectStatus.value, (val) => {
       if (!val) {
-        debugLog('断开连接！', 'system')
+        debugLog('Disconnect', 'system')
       } else {
-        debugLog('Joyo已连接', 'system')
+        debugLog('Connected!', 'system')
       }
     })
 
@@ -331,9 +334,9 @@ export default defineComponent({
 
     // todo: 移除
     const handleOIDVal = (num: number) => { // 预先处理下OID码, 将8010 ···值映射到 1···
-      if (num >= 301 && num <= 314) {
-        return num - 300
-      }
+      // if (num >= 301 && num <= 314) {
+      //   return num - 300
+      // }
       // return Math.round(num / 10) - 800
       return num
     }
@@ -492,7 +495,7 @@ export default defineComponent({
       state.debugInfo = []
 
       if (!connectStatus.value) {
-        debugLog('JOYO未连接', 'system')
+        debugLog('Not connected', 'system')
       }
       if (workspace) {
         let code = javascriptGenerator.workspaceToCode(workspace) as string
@@ -586,7 +589,8 @@ export default defineComponent({
         if (uuid) {
           const content = localStorage.getItem(`block-${uuid}`)
           if (content !== JSON.stringify(json)) {
-            if (window.confirm('当前程序未保存，确认离开？')) {
+            // if (window.confirm('当前程序未保存，确认离开？')) {
+            if (window.confirm((vueI18n.global as any).t(LANG.BLOCKLY_MENU.NOT_SAVE_TIP))) {
               return true
             }
             return false

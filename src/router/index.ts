@@ -38,11 +38,11 @@ const routes: Array<RouteRecordRaw> = [
   //   name: 'Check',
   //   component: () => import(/* webpackChunkName: "art" */ '@/views/check.vue'),
   // },
-  // {
-  //   path: '/js-editor',
-  //   name: 'JsEditor',
-  //   component: () => import(/* webpackChunkName: "art" */ '@/views/Monaco.vue'),
-  // },
+  {
+    path: '/js-editor',
+    name: 'JsEditor',
+    component: () => import(/* webpackChunkName: "art" */ '@/views/Monaco.vue'),
+  },
 ]
 
 const router = createRouter({

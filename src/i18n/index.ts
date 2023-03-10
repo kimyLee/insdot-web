@@ -54,6 +54,80 @@ const obj = {
       zh: '请及时导出游戏文件保存到本地，当前数据使用浏览器缓存，避免因不稳定因素而丢失程序',
       en: 'Please export the game files in time to save them locally. we use browser cache for current data, save often to avoid losing the game program.',
     } as unknown as string,
+    HOME: {
+      zh: '首页',
+      en: 'Home',
+    } as unknown as string,
+    DOC: {
+      zh: '文档',
+      en: 'Docs',
+    } as unknown as string,
+    CONTACT: {
+      zh: '联系我们',
+      en: 'Contact us',
+    } as unknown as string,
+    MORE: {
+      zh: '更多',
+      en: 'More',
+    } as unknown as string,
+    HAS_NAME: {
+      zh: '程序名已存在',
+      en: 'Program name already exists',
+    } as unknown as string,
+    CAN_NOT_EMPTY: {
+      zh: '程序名不能为空',
+      en: 'Program name cannot be empty',
+    } as unknown as string,
+    EXPORT_ERROR: {
+      zh: '导出出错',
+      en: 'export error',
+    } as unknown as string,
+    EXPORT_FAIL: {
+      zh: '导出失败',
+      en: 'export fail',
+    } as unknown as string,
+  },
+  UPDATE_PROCESS: {
+    UPDATE_VERSION: {
+      zh: '更新版本',
+      en: 'Update version',
+    } as unknown as string,
+    DEVICE_INFO: {
+      zh: '设备信息',
+      en: 'Device info',
+    } as unknown as string,
+    CURRENT_VERSION: {
+      zh: '当前版本号：',
+      en: 'current version: ',
+    } as unknown as string,
+    DEVICE_NOT_CONNECT: {
+      zh: '设备未连接',
+      en: 'device not connected',
+    } as unknown as string,
+    LATEST_VERSION: {
+      zh: '最新版本',
+      en: 'latest version',
+    } as unknown as string,
+    NOT_CLOSE: {
+      zh: '，请勿关闭窗口',
+      en: ', please do not close the window.',
+    } as unknown as string,
+    UPGRADE_FINISH: {
+      zh: '升级完成',
+      en: 'Upgrade completed',
+    } as unknown as string,
+    DOWNLOAD_FIRMWARE: {
+      zh: '下载固件',
+      en: 'Downloading firmware',
+    } as unknown as string,
+    SEND_FIRMWARE: {
+      zh: '固件下载完成，传输中',
+      en: 'Transferring firmware',
+    } as unknown as string,
+    UPGRADE_FINISH_WAIT: {
+      zh: '升级完成，请等待设备重启后，重新连接JOYO',
+      en: 'Upgrade completed, wait for the device to reboot and then reconnect to JOYO',
+    } as unknown as string,
   },
   GAME_LIST: {
     DOWNLOAD: {
@@ -165,9 +239,41 @@ const obj = {
       zh: '清空画布',
       en: 'Clear Canvas',
     } as unknown as string,
+    GAME_RULE: {
+      zh: '玩法规则',
+      en: 'Game Rule',
+    } as unknown as string,
+    NOT_SUPPORT_MODE: {
+      zh: '当前暂未支持连续识别同一ID值',
+      en: 'Continuous identification of the same ID value has not support yet',
+    } as unknown as string,
+    STATUS_INFO: {
+      zh: '状态信息',
+      en: 'Status Info',
+    } as unknown as string,
+    CONNECT_STATUS: {
+      zh: '连接状态',
+      en: 'Connect Statu',
+    } as unknown as string,
+    HAS_CONNECT: {
+      zh: '已连接',
+      en: 'Connected',
+    } as unknown as string,
+    NOT_CONNECT: {
+      zh: '未连接',
+      en: 'Not connected',
+    } as unknown as string,
+    ID_VAL: {
+      zh: 'ID值',
+      en: 'ID value',
+    } as unknown as string,
     CLEAR_CANVAS_CONFIRM: {
       zh: '确定要清空所有程序块吗?',
       en: 'Sure you want to clear all blocks?',
+    } as unknown as string,
+    NOT_SAVE_TIP: {
+      zh: '当前程序未保存，确认离开？?',
+      en: 'Current program has not be saved yet, Sure want to leave?',
     } as unknown as string,
   },
   VARIABLE_DRAWER: {
@@ -185,54 +291,84 @@ const obj = {
     } as unknown as string,
     VARIABLE_MGR: {
       zh: '变量管理',
-      en: '变量管理',
+      en: 'Variable Operation',
     } as unknown as string,
     CREATE_NEW_VARIABLE: {
       zh: '创建变量',
-      en: '创建变量',
+      en: 'Create Variable',
     } as unknown as string,
     CREATE_NEW_LIST: {
       zh: '新建列表',
-      en: '新建列表',
+      en: 'Create List',
     } as unknown as string,
     CREATE_CANCEL: {
       zh: '取消',
-      en: '取消',
+      en: 'cancel',
     } as unknown as string,
     CREATE_CONFIRM: {
       zh: '确认',
-      en: '确认',
+      en: 'ok',
     } as unknown as string,
     RENAME: {
       zh: '重命名',
-      en: '重命名',
+      en: 'rename',
     } as unknown as string,
     DELETE: {
       zh: '删除',
-      en: '删除',
+      en: 'delete',
     } as unknown as string,
     VARIABLE: {
       zh: '变量',
-      en: '变量',
+      en: 'variable',
     } as unknown as string,
 
     VARIABLE_INPUT: {
       zh: '请输入变量名',
-      en: '请输入变量名',
+      en: 'input variable name',
     } as unknown as string,
     LIST: {
       zh: '列表',
-      en: '列表',
+      en: 'list',
     } as unknown as string,
     LIST_INPUT: {
       zh: '请输入列表名',
-      en: '请输入列表名',
+      en: 'input list name',
     } as unknown as string,
   },
   BLOCKLY_STATUS: {
     STATUS_INFO: {
       zh: '状态信息',
-      en: '状态信息',
+      en: 'status info',
+    } as unknown as string,
+    SET_LIGHT: {
+      zh: '设置灯光',
+      en: 'Set Light',
+    } as unknown as string,
+  },
+  GAME_RULE: {
+    UPDATE_GAMEPLAY: {
+      zh: '修改玩法',
+      en: 'Update the gameplay',
+    } as unknown as string,
+    GAME_RULE: {
+      zh: '玩法规则',
+      en: 'Gameplay',
+    } as unknown as string,
+    GAME_TOKEN: {
+      zh: '游戏配件',
+      en: 'Game tokens',
+    } as unknown as string,
+    GAME_TOKEN_TIP: {
+      zh: '此游戏所需配件、道具等',
+      en: 'Tokens, props, etc. required for this game',
+    } as unknown as string,
+    GAME_FLOW: {
+      zh: '玩法流程',
+      en: 'Game Flow',
+    } as unknown as string,
+    GAME_INTRO: {
+      zh: '此游戏玩法说明介绍',
+      en: 'Description of how to play this game',
     } as unknown as string,
   },
 }

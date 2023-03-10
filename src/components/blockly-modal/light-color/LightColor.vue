@@ -1,9 +1,9 @@
 <template>
   <a-modal :visible="popLightVisible"
            :width="1000"
-           ok-text="确定"
-           cancel-text="取消"
-           title="设置灯光"
+           :ok-text="$t(LANG.COMMON.CONFIRM)"
+           :cancel-text="$t(LANG.COMMON.CANCEL)"
+           :title="$t(LANG.BLOCKLY_STATUS.SET_LIGHT)"
            @cancel="handleCancel"
            @ok="handleConfirm">
     <div class="joyo-light">
@@ -70,6 +70,7 @@ import { Colors, ColorEnum } from './type'
 import LightPanel from '@/components/blockly-modal/light-color/LightPanel.vue'
 import RGBController from '@/components/blockly-modal/light-color/RGBController.vue'
 import { eventBus } from '@/lib/blockly/blockly-use-vuex/index'
+import LANG from '@/i18n/type'
 
 export default defineComponent({
   components: {
@@ -154,6 +155,7 @@ export default defineComponent({
 
     return {
       ...toRefs(state),
+      LANG,
       Colors,
       ColorEnum,
 

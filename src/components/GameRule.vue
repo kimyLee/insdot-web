@@ -6,21 +6,21 @@
              class="game-rule-book"
              :width="800"
              :cancel-text="$t(LANG.COMMON.OK_TEXT)"
-             ok-text="修改玩法"
-             title="玩法规则"
+             :ok-text="$t(LANG.GAME_RULE.UPDATE_GAMEPLAY)"
+             :title="$t(LANG.GAME_RULE.GAME_RULE)"
              @ok="handleOk"
              @cancel="handleCancel">
-      <p>游戏配件</p>
+      <p>{{ $t(LANG.GAME_RULE.GAME_TOKEN) }}</p>
       <a-textarea v-model:value="tokenList"
                   :auto-size="{ maxRows: 4}"
-                  placeholder="此游戏所需配件、道具等"
+                  :placeholder="$t(LANG.GAME_RULE.GAME_TOKEN_TIP)"
                   allow-clear />
       <p style="margin-top: 20px;">
-        玩法流程
+        {{ $t(LANG.GAME_RULE.GAME_FLOW) }}
       </p>
       <a-textarea v-model:value="gamePlay"
                   :auto-size="{minRows: 6, maxRows: 14}"
-                  placeholder="此游戏玩法说明介绍"
+                  :placeholder="$t(LANG.GAME_RULE.GAME_INTRO)"
                   allow-clear />
     </a-modal>
   </div>
