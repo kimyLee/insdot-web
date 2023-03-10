@@ -4,34 +4,36 @@
     <!-- step1 版本信息 -->
     <a-modal v-model:visible="versionPopVisible"
              :width="360"
-             ok-text="更新版本"
-             cancel-text="我知道了"
-             title="设备信息"
+
+             :ok-text="$t(LANG.UPDATE_PROCESS.UPDATE_VERSION)"
+             :cancel-text="$t(LANG.COMMON.OK_TEXT)"
+             :title="$t(LANG.UPDATE_PROCESS.DEVICE_INFO)"
              :ok-button-props="{disabled: disabledOK}"
              @cancel="handleCancel"
              @ok="handleUpdateJOYO">
       <div v-show="connectStatus">
-        当前版本号：{{ currentVersion || '--' }}
+        {{ $t(LANG.UPDATE_PROCESS.CURRENT_VERSION) }}{{ currentVersion || '--' }}
       </div>
       <div v-show="!connectStatus">
-        当前版本号：<span style="color:#faad14">设备未连接</span>
+        {{ $t(LANG.UPDATE_PROCESS.CURRENT_VERSION) }}<span style="color:#faad14">{{ $t(LANG.UPDATE_PROCESS.DEVICE_NOT_CONNECT) }}</span>
       </div>
-      <div>最新版本: {{ lastVersion || '--' }}</div>
+      <div>{{ $t(LANG.UPDATE_PROCESS.LATEST_VERSION) }}: {{ lastVersion || '--' }}</div>
       <div v-show="updateStep > 0">
         <a-spin />
         {{ updateStatusMap[updateStep] }}
         <span v-show="updateStep === 2">({{ transferProgress }}%)</span>
-        <span v-show="updateStep === 2">，请勿关闭窗口</span>
+        <span v-show="updateStep === 2">{{ $t(LANG.UPDATE_PROCESS.NOT_CLOSE) }}</span>
       </div>
     </a-modal>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { reactive, ref, toRefs, defineComponent, onMounted, watch, computed } from 'vue'
 // import ContainerDialog from '@/components/dialog/ContainerDialog.vue'
 import { useStore } from 'vuex'
-import { loadingOutlined } from '@ant-design/icons-vue'
+import LANG from '@/i18n/type'
+import { vueI18n } from '@/locale/index'
 
 export default defineComponent({
   components: {
@@ -61,10 +63,13 @@ export default defineComponent({
         'Update Timeout!',
       ],
       updateStatusMap: [
-        '升级完成',
-        '下载固件',
-        '固件下载完成，传输中',
-        '升级完成，请等待设备重启后，重新连接JOYO',
+        (vueI18n.global as any).t(LANG.UPDATE_PROCESS.UPGRADE_FINISH),
+        (vueI18n.global as any).t(LANG.UPDATE_PROCESS.DOWNLOAD_FIRMWARE),
+        (vueI18n.global as any).t(LANG.UPDATE_PROCESS.SEND_FIRMWARE),
+        (vueI18n.global as any).t(LANG.UPDATE_PROCESS.UPGRADE_FINISH_WAIT),
+        // '下载固件',
+        // '固件下载完成，传输中',
+        // '升级完成，请等待设备重启后，重新连接JOYO',
       ],
     })
 
@@ -153,7 +158,9 @@ export default defineComponent({
       // store.dispatch('ble/bleReconnect')
     }
     function handleUpdateJOYO () { // 开始升级
-      store.dispatch('ble/bleUpgradeDevice')
+      if (currentVersion.value) {
+        store.dispatch('ble/bleUpgradeDevice')
+      }
     }
 
     onMounted(() => {
@@ -161,6 +168,7 @@ export default defineComponent({
       //
     })
     return {
+      LANG,
       ...toRefs(state),
       // modelValue,
       // containerDialog,

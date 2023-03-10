@@ -87,22 +87,23 @@
             <a-menu-item key="1"
                          @click="newTabs('https://cubyfun.com/#/')">
               <HomeOutlined />
-              官网
+
+              {{ $t(LANG.HOME_HEADER.HOME) }}
             </a-menu-item>
             <a-menu-item key="1"
                          @click="newTabs('https://docs.cubyfun.com/zh/')">
               <FileSearchOutlined />
-              文档
+              {{ $t(LANG.HOME_HEADER.DOC) }}
             </a-menu-item>
             <a-menu-item key="1"
                          @click="newTabs('https://docs.cubyfun.com/zh/ContactUs.html')">
               <MessageOutlined />
-              联系我们
+              {{ $t(LANG.HOME_HEADER.CONTACT) }}
             </a-menu-item>
           </a-menu>
         </template>
         <a-button class="header-btn">
-          更多
+          {{ $t(LANG.HOME_HEADER.MORE) }}
           <DownOutlined />
         </a-button>
       </a-dropdown>
@@ -132,7 +133,7 @@
                  @click.stop>
               <!-- 重命名 -->
               <HighlightOutlined class="bottom-icon"
-                                 title="重命名"
+                                 :title="$t(LANG.VARIABLE_DRAWER.RENAME)"
                                  @click="renameGamePop(v.name, v.uuid)" />
               <!-- 下载 -->
               <vertical-align-bottom-outlined class="bottom-icon download-icon"
@@ -224,7 +225,7 @@ import { useStore } from 'vuex'
 import { exportFile } from '@/lib/project/common'
 
 import { bleState } from '@/api/joyo-ble/web-ble-server'
-import { locale, LocaleEnum } from '@/locale/index'
+import { locale, LocaleEnum, vueI18n } from '@/locale/index'
 import LANG from '@/i18n/type'
 
 declare global {
@@ -318,7 +319,8 @@ export default defineComponent({
         // 检查名字是否重复
         for (let i = list.length; i--;) {
           if (list[i].name === state.programName) {
-            message.warning('程序名已存在')
+            // message.warning('程序名已存在')
+            message.warning((vueI18n.global as any).t(LANG.HOME_HEADER.HAS_NAME))
             return
           }
         }
@@ -326,7 +328,8 @@ export default defineComponent({
         state.programName = ''
         state.visibleOfCreateProject = false
       } else {
-        message.warning('程序名不能为空')
+        message.warning((vueI18n.global as any).t(LANG.HOME_HEADER.CAN_NOT_EMPTY))
+        // message.warning('程序名不能为空')
       }
     }
     const handleRenameOk = () => {
@@ -335,7 +338,8 @@ export default defineComponent({
         // 检查名字是否重复
         for (let i = list.length; i--;) {
           if (list[i].name === state.programName) {
-            message.warning('程序名已存在')
+            message.warning((vueI18n.global as any).t(LANG.HOME_HEADER.HAS_NAME))
+            // message.warning('程序名已存在')
             return
           }
         }
@@ -348,7 +352,8 @@ export default defineComponent({
         state.programId = ''
         state.visibleOfRenameProject = false
       } else {
-        message.warning('程序名不能为空')
+        message.warning((vueI18n.global as any).t(LANG.HOME_HEADER.CAN_NOT_EMPTY))
+        // message.warning('程序名不能为空')
       }
     }
     const onProjectClick = (v: { uuid: string }) => {
@@ -411,7 +416,8 @@ export default defineComponent({
           document.body.removeChild(eleLink)
         })
       } catch {
-        message.error('导出出错')
+        message.error((vueI18n.global as any).t(LANG.HOME_HEADER.EXPORT_ERROR))
+        // message.error('导出出错')
       }
     }
 
@@ -421,7 +427,8 @@ export default defineComponent({
       if (content) {
         exportFile(name + '.jo', content)
       } else {
-        message.warn('导出失败')
+        message.warn((vueI18n.global as any).t(LANG.HOME_HEADER.EXPORT_FAIL))
+        // message.warn('导出失败')
       }
     }
 
