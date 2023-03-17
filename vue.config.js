@@ -3,8 +3,8 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 
 module.exports = {
   productionSourceMap: false,
-  // publicPath: '/insdot-web/dist/',
-  publicPath: '/',
+  publicPath: '/insdot-web/dist/',
+  // publicPath: '/',
   devServer: {
     https: true,
     disableHostCheck: true,
